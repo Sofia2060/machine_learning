@@ -1,0 +1,43 @@
+# Môi trường ảo
+venv/
+.venv/
+env/
+
+# Python Cache & Checkpoints
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
+
+# File dữ liệu nặng & Model Weights
+data/raw/
+data/processed/
+*.dat
+*.csv
+*.pkl
+*.joblib
+
+# File hệ điều hành
+.DS_Store
+Thumbs.db
+
+# IDE Config (Nên chặn để tránh xung đột cấu hình giữa các máy trong nhóm)
+.vscode/
+.idea/
+
+# File cấu hình bảo mật & môi trường
+.env
+*.env
+
+# File Cơ sở dữ liệu cục bộ (MySQL export / SQLite)
+*.sql
+*.sqlite3
+*.db
+
+# File log và báo cáo tạm
+*.log
+*.html
+
+# Giữ lại cấu trúc thư mục rỗng trên Git (Bỏ qua nội dung nhưng không mất folder)
+!data/raw/.gitkeep
+!data/processed/.gitkeep
+!saved_models/.gitkeep
