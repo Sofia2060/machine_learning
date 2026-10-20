@@ -29,17 +29,31 @@ movie-recommender-system/
 |   |-- 01_data_preprocessing.ipynb
 |   |-- 02_eda.ipynb
 |   |-- 03_feature_engineering.ipynb
-|   |-- 04_model_training.ipynb
-|   `-- 05_evaluation.ipynb
-|-- models/
+|   |-- 04_collaborative_knn.ipynb
+|   |-- 05_matrix_factorization.ipynb
+|   |-- 06_content_hybrid.ipynb
+|   |-- 07_deep_learning.ipynb
+|   `-- 08_evaluation_compare.ipynb
+|-- models/                  # mô hình đã huấn luyện (*.pkl, sinh bởi main.py)
+|-- outputs/                 # metrics/*.csv, figures/*.png (sinh khi chạy)
 |-- src/
+|   |-- config.py            # đường dẫn (tương đối theo thư mục dự án) + seed
+|   |-- experiment.py        # nạp dữ liệu, chia train/test, run_model, save_metrics
+|   |-- recommender.py       # danh mục mô hình, huấn luyện/lưu/nạp, gợi ý
 |   |-- database.py
-|   `-- recommender.py
-|-- ui/
+|   |-- data/preprocess.py   # tiền xử lý (logic notebook 01) + master dataset (notebook 02)
+|   |-- data/features.py     # feature engineering (logic notebook 03)
+|   |-- evaluation/metrics.py
+|   `-- models/              # baseline, knn_cf, mf, content_based, hybrid, neural
+|-- main.py                  # ứng dụng chính
 |-- .gitignore
 |-- requirements.txt
 `-- README.md
 ```
+
+Mọi đường dẫn được tính từ vị trí file `src/config.py`, nên dự án chạy được ở mọi máy và từ mọi thư mục.
+
+**Một nguồn logic dữ liệu duy nhất:** toàn bộ xử lý dữ liệu và tạo đặc trưng nằm trong `src/data/`. Notebooks 01-03, `python main.py prepare` và các mô hình (notebooks 04-08, `main.py`) đều gọi cùng các hàm này và dùng chung một schema cột snake_case (`user_id`, `movie_id`, `rating`, `timestamp`, `datetime`, `title`, `clean_title`, `release_year`, `genres`, ...). Các mô hình đọc dữ liệu sạch từ `data/processed/cleaned_*.csv` (tự tạo từ `data/raw/` nếu chưa có).
 
 Mô tả vai trò các thư mục chính:
 - data/raw: Chứa các tệp dữ liệu gốc từ nguồn MovieLens 1M chưa qua chỉnh sửa.
@@ -100,25 +114,17 @@ Quy trình kỹ thuật của dự án được tổ chức tuần tự qua 5 t�
 - Đầu ra:
   - data/processed/featured_dataset.parquet (1.000.209 dòng x 90 cột đặc trưng, tệp nén Snappy 35,4 MB).
 
-#### 3.4. 04_model_training.ipynb (Huấn luyện các mô hình học máy)
-- Nhiệm vụ:
-  - Phân chia tập dữ liệu thành tập Huấn luyện (Train) và tập Kiểm thử (Test) theo tỷ lệ 80/20 có phân tầng theo người dùng.
-  - Huấn luyện nhóm mô hình mốc so sánh (Baseline): Global Mean, Popularity-based, Item-based Collaborative Filtering.
-  - Huấn luyện nhóm mô hình Phân rã Ma trận: SVD (Funk SVD) và SVD++ có tính đến thông tin tương tác ẩn.
-  - Huấn luyện nhóm mô hình Học máy dạng cây quyết định tăng cường: LightGBM Regressor và XGBoost Regressor trên không gian 90 đặc trưng tổng hợp.
-  - Tinh chỉnh siêu tham số và lưu trữ các tệp mô hình tốt nhất vào thư mục models/.
-- Đầu ra:
-  - Các tệp mô hình đã huấn luyện (.pkl, .joblib) lưu trữ trong thư mục models/.
+#### 3.4. 04 - 07: Huấn luyện các nhóm mô hình
+Mọi notebook dùng chung `src.experiment.load_experiment()`: cùng dữ liệu, cùng phép chia train/test 80/20 theo từng người dùng, cùng seed. Siêu tham số được dò trên tập validation tách từ train theo tiêu chí NDCG@10 (`src.experiment.validate`, RMSE chỉ để tham khảo); kết quả trên test lưu vào `outputs/metrics/<nhóm>.csv`.
+- 04_collaborative_knn.ipynb: UserKNN, ItemKNN (cosine / Pearson, dò k).
+- 05_matrix_factorization.ipynb: PureSVD, BiasedMF (Funk SVD), NMF, Implicit ALS.
+- 06_content_hybrid.ipynb: Content-based (thể loại, thể loại + tiêu đề) và Hybrid có trọng số (MF + ItemKNN + Content).
+- 07_deep_learning.ipynb: AutoRec, NeuMF, BPR-MF (PyTorch, tự dùng GPU nếu có).
+- Mọi mô hình trừ nhóm Baseline (kNN, PureSVD, BiasedMF, NMF, Implicit ALS, Content-based, Hybrid, Deep learning) tính toán bằng PyTorch và tự dùng GPU CUDA nếu có; truyền `device="cpu"` vào hàm khởi tạo để ép chạy CPU.
 
-#### 3.5. 05_evaluation.ipynb (Đánh giá và so sánh hiệu năng)
-- Nhiệm vụ:
-  - Đo lường sai số dự báo điểm đánh giá thông qua các chỉ số: Root Mean Squared Error (RMSE) và Mean Absolute Error (MAE).
-  - Đo lường chất lượng danh sách gợi ý Top-N (Top 10 phim đề xuất) thông qua các chỉ số xếp hạng: Precision@K, Recall@K và Normalized Discounted Cumulative Gain (NDCG@K).
-  - Lập bảng so sánh đối đầu giữa các mô hình để chứng minh tính ưu việt của giải pháp gợi ý lai.
-  - Trực quan hóa kết quả so sánh và sinh danh sách gợi ý phim thực tế cho các nhóm người dùng mẫu.
-- Đầu ra:
-  - Bảng tổng hợp các chỉ số đánh giá thực nghiệm phục vụ báo cáo.
-  - Biểu đồ so sánh hiệu năng giữa các thuật toán.
+#### 3.5. 08_evaluation_compare.ipynb (So sánh toàn bộ mô hình)
+- Gộp `outputs/metrics/{baseline,knn,mf,content_hybrid,deep}.csv`, so sánh RMSE, MAE, Precision@10, Recall@10, NDCG@10, HitRate@10, Coverage@20, Novelty@20, Diversity@20.
+- Bảng `baseline.csv` không có notebook riêng, sinh bằng `python main.py evaluate --family baseline`.
 
 ---
 
@@ -154,5 +160,18 @@ Thực hiện chạy lần lượt các tệp notebook theo trình tự sau:
 1. Mở và chạy notebooks/01_data_preprocessing.ipynb để tiền xử lý và sinh 3 tệp CSV sạch.
 2. Mở và chạy notebooks/02_eda.ipynb để tạo master_dataset.csv và quan sát các biểu đồ phân tích kinh doanh.
 3. Mở và chạy notebooks/03_feature_engineering.ipynb để tạo tệp đặc trưng featured_dataset.parquet.
-4. Mở và chạy notebooks/04_model_training.ipynb để huấn luyện các thuật toán gợi ý.
-5. Mở và chạy notebooks/05_evaluation.ipynb để kiểm tra các chỉ số đánh giá và sinh danh sách khuyến nghị.
+4. Chạy lần lượt notebooks/04 đến 07 để huấn luyện và đánh giá từng nhóm mô hình.
+5. Chạy `python main.py evaluate --family baseline` để tạo bảng baseline, rồi chạy notebooks/08_evaluation_compare.ipynb.
+
+#### Bước 5: Chạy ứng dụng chính (main.py)
+```bash
+python main.py prepare                          # tạo cleaned_*.csv, master_dataset.csv, featured_dataset.parquet (= notebooks 01-03)
+python main.py                                  # menu tương tác
+python main.py info                             # thống kê dữ liệu, danh sách mô hình
+python main.py recommend --user 1 -k 10         # gợi ý Top-10 (mặc định mô hình hybrid)
+python main.py recommend --user 1 --model biased_mf --retrain
+python main.py predict --user 1 --movie 2571    # dự đoán rating
+python main.py search "matrix"                  # tìm MovieID theo tên
+python main.py evaluate --family all            # đánh giá mọi nhóm mô hình -> outputs/metrics/
+```
+Lần đầu chạy, phép chia train/test được cache ở `data/processed/experiment.pkl` và mô hình được lưu ở `models/<tên>.pkl`; các lần sau nạp lại nên nhanh hơn. Khi dữ liệu sạch được tạo lại (chạy lại notebook 01 hoặc `prepare`), cache và mô hình tự được tạo lại; dùng `--retrain` để ép huấn luyện lại.
