@@ -47,3 +47,6 @@ Thumbs.db
 # Kết quả chạy (metrics, hình) và file nén
 outputs/
 *.zip
+
+# Hướng dẫn riêng cho trợ lý AI (không đưa lên repo)
+CLAUDE.md
