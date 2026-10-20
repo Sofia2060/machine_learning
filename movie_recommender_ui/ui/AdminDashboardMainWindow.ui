@@ -1,0 +1,1434 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>MainWindow</class>
+ <widget class="QMainWindow" name="MainWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>1366</width>
+    <height>820</height>
+   </rect>
+  </property>
+  <property name="minimumSize">
+   <size>
+    <width>1240</width>
+    <height>740</height>
+   </size>
+  </property>
+  <property name="windowTitle">
+   <string>CineMatch - Dashboard EDA</string>
+  </property>
+  <property name="windowIcon">
+   <iconset>
+    <normaloff>../images/ic_logo.png</normaloff>
+    ../images/ic_logo.png
+   </iconset>
+  </property>
+  <property name="styleSheet">
+   <string notr="true">QMainWindow { background-color: #F3F5F9; }
+QWidget { font-family: "Segoe UI"; font-size: 10pt; color: #1F2937; }
+QWidget#centralwidget { background-color: #F3F5F9; }
+QLabel { background: transparent; }
+QLabel[role="title"] { font-size: 20pt; font-weight: 700; color: #111827; }
+QLabel[role="subtitle"] { font-size: 10pt; color: #6B7280; }
+QLabel[role="field"] { font-weight: 600; color: #374151; }
+QLabel[role="section"] { font-size: 13pt; font-weight: 700; color: #1F2A44; }
+QLabel[role="step"] { font-size: 11pt; font-weight: 700; color: #2563EB; }
+QLabel[role="muted"] { color: #6B7280; }
+QLabel[role="pageTitle"] { font-size: 15pt; font-weight: 700; color: #111827; }
+QLabel[role="info"] { background-color: #FFFBEB; border: 1px solid #FDE68A; border-radius: 10px; padding: 10px 14px; color: #92400E; }
+QLineEdit, QComboBox, QSpinBox { background-color: #FFFFFF; border: 1px solid #CBD5E1; border-radius: 8px; padding: 7px 10px; min-height: 20px; }
+QLineEdit:focus, QComboBox:focus, QSpinBox:focus { border: 1px solid #2563EB; }
+QLineEdit:disabled, QComboBox:disabled { background-color: #F1F5F9; color: #94A3B8; }
+QLineEdit[readOnly="true"] { background-color: #F8FAFC; color: #64748B; }
+QComboBox::drop-down { border: none; width: 26px; }
+QComboBox QAbstractItemView { background-color: #FFFFFF; border: 1px solid #CBD5E1; selection-background-color: #DBEAFE; selection-color: #111827; outline: 0; }
+QPushButton { background-color: #2563EB; color: #FFFFFF; border: none; border-radius: 8px; padding: 8px 16px; font-weight: 600; }
+QPushButton:hover { background-color: #1D4ED8; }
+QPushButton:pressed { background-color: #1E40AF; }
+QPushButton:disabled { background-color: #BFDBFE; color: #EFF6FF; }
+QPushButton[secondary="true"] { background-color: #FFFFFF; color: #2563EB; border: 1px solid #93C5FD; }
+QPushButton[secondary="true"]:hover { background-color: #EFF6FF; border: 1px solid #2563EB; }
+QPushButton[secondary="true"]:disabled { color: #94A3B8; border: 1px solid #E2E8F0; background-color: #F8FAFC; }
+QPushButton[danger="true"] { background-color: #DC2626; }
+QPushButton[danger="true"]:hover { background-color: #B91C1C; }
+QPushButton[success="true"] { background-color: #16A34A; }
+QPushButton[success="true"]:hover { background-color: #15803D; }
+QPushButton[dangerOutline="true"] { background-color: #FFFFFF; color: #DC2626; border: 1px solid #FCA5A5; }
+QPushButton[dangerOutline="true"]:hover { background-color: #FEF2F2; border: 1px solid #DC2626; }
+QPushButton[link="true"] { background-color: transparent; color: #2563EB; padding: 2px 4px; border: none; font-weight: 600; }
+QPushButton[link="true"]:hover { color: #1E40AF; text-decoration: underline; }
+QCheckBox, QRadioButton { spacing: 8px; background: transparent; }
+QCheckBox::indicator, QRadioButton::indicator { width: 16px; height: 16px; }
+QCheckBox::indicator { border: 1px solid #94A3B8; border-radius: 4px; background-color: #FFFFFF; }
+QCheckBox::indicator:checked { border: 1px solid #2563EB; background-color: #2563EB; image: url(../images/ic_tick.png); }
+QRadioButton::indicator { border: 1px solid #94A3B8; border-radius: 8px; background-color: #FFFFFF; }
+QRadioButton::indicator:checked { border: 1px solid #2563EB; background-color: qradialgradient(cx:0.5, cy:0.5, radius:0.5, fx:0.5, fy:0.5, stop:0 #2563EB, stop:0.55 #2563EB, stop:0.65 #FFFFFF, stop:1 #FFFFFF); }
+QSpinBox { padding-right: 24px; }
+QSpinBox::up-button, QSpinBox::down-button { subcontrol-origin: border; width: 22px; border: none; background: transparent; }
+QSpinBox::up-button { subcontrol-position: top right; }
+QSpinBox::down-button { subcontrol-position: bottom right; }
+QSpinBox::up-arrow { image: url(../images/ic_up.png); width: 14px; height: 14px; }
+QSpinBox::down-arrow { image: url(../images/ic_down.png); width: 14px; height: 14px; }
+QFrame[card="true"] { background-color: #FFFFFF; border: 1px solid #E5E7EB; border-radius: 12px; }
+QGroupBox { background-color: #FFFFFF; border: 1px solid #E5E7EB; border-radius: 12px; margin-top: 24px; padding: 16px 12px 12px 12px; font-size: 11pt; font-weight: 700; color: #1F2A44; }
+QGroupBox::title { subcontrol-origin: margin; subcontrol-position: top left; left: 12px; padding: 0px 6px; }
+QTableWidget { background-color: #FFFFFF; border: 1px solid #E5E7EB; border-radius: 10px; gridline-color: #F1F5F9; alternate-background-color: #F8FAFC; selection-background-color: #DBEAFE; selection-color: #111827; }
+QHeaderView::section { background-color: #EEF2FF; color: #1F2A44; font-weight: 700; padding: 7px 6px; border: none; border-right: 1px solid #E0E7FF; border-bottom: 1px solid #E0E7FF; }
+QTabWidget::pane { border: none; background: transparent; }
+QTabBar::tab { background: transparent; color: #64748B; padding: 10px 22px; font-weight: 700; border: none; border-bottom: 3px solid transparent; margin-right: 6px; }
+QTabBar::tab:selected { color: #2563EB; border-bottom: 3px solid #2563EB; }
+QTabBar::tab:hover { color: #1D4ED8; }
+QScrollArea { border: none; background: transparent; }
+QWidget#scrollAreaHomeContents { background: transparent; }
+QStatusBar { background-color: #FFFFFF; color: #64748B; border-top: 1px solid #E5E7EB; }
+QListWidget { background-color: #FFFFFF; border: 1px solid #E5E7EB; border-radius: 10px; padding: 6px; outline: 0; }
+QListWidget::item { padding: 8px 8px; border-radius: 6px; }
+QListWidget::item:selected { background-color: #DBEAFE; color: #1E3A8A; }
+QListWidget::item:hover { background-color: #F1F5F9; }
+QFrame#frameHeader { background-color: #FFFFFF; border-bottom: 1px solid #E5E7EB; }
+QFrame#frameSidebar { background-color: #1F2A44; }
+QFrame#frameForm { background-color: #FFFFFF; }
+QFrame#frameBanner { border-image: url(../images/ic_banner.png) 0 0 0 0 stretch stretch; }
+QLabel[banner="title"] { color: #FFFFFF; font-size: 28pt; font-weight: 800; }
+QLabel[banner="text"] { color: #E2E8F0; font-size: 11pt; }
+QLabel[banner="foot"] { color: #94A3B8; font-size: 9pt; }
+QLabel#labelSidebarTitle { color: #FFFFFF; font-size: 14pt; font-weight: 800; }
+QLabel#labelSidebarSub { color: #94A3B8; font-size: 9pt; }
+QPushButton[nav="true"] { background-color: transparent; color: #CBD5E1; text-align: left; padding: 11px 14px; border-radius: 8px; font-weight: 600; }
+QPushButton[nav="true"]:hover { background-color: #2C3A5C; color: #FFFFFF; }
+QPushButton[active="true"] { background-color: #2563EB; color: #FFFFFF; }
+QLabel[kpi="value"] { font-size: 19pt; font-weight: 800; color: #111827; }
+QLabel[kpi="caption"] { font-size: 9pt; font-weight: 600; color: #6B7280; }
+QFrame#framePredict { background-color: #FFFBEB; border: 1px solid #FDE68A; border-radius: 12px; }
+QLabel#labelPredictValue { font-size: 26pt; font-weight: 800; color: #B45309; }
+QLabel#labelPredictCaption { font-weight: 700; color: #92400E; }</string>
+  </property>
+  <widget class="QWidget" name="centralwidget">
+   <layout class="QHBoxLayout" name="horizontalLayout">
+    <property name="spacing">
+     <number>0</number>
+    </property>
+    <property name="leftMargin">
+     <number>0</number>
+    </property>
+    <property name="topMargin">
+     <number>0</number>
+    </property>
+    <property name="rightMargin">
+     <number>0</number>
+    </property>
+    <property name="bottomMargin">
+     <number>0</number>
+    </property>
+    <item>
+     <widget class="QFrame" name="frameSidebar">
+      <property name="minimumSize">
+       <size>
+        <width>240</width>
+        <height>0</height>
+       </size>
+      </property>
+      <property name="maximumSize">
+       <size>
+        <width>240</width>
+        <height>16777215</height>
+       </size>
+      </property>
+      <layout class="QVBoxLayout" name="verticalLayoutSidebar">
+       <property name="spacing">
+        <number>6</number>
+       </property>
+       <property name="leftMargin">
+        <number>16</number>
+       </property>
+       <property name="topMargin">
+        <number>22</number>
+       </property>
+       <property name="rightMargin">
+        <number>16</number>
+       </property>
+       <property name="bottomMargin">
+        <number>20</number>
+       </property>
+       <item>
+        <layout class="QHBoxLayout" name="horizontalLayoutBrand">
+         <property name="spacing">
+          <number>10</number>
+         </property>
+         <property name="leftMargin">
+          <number>0</number>
+         </property>
+         <property name="topMargin">
+          <number>0</number>
+         </property>
+         <property name="rightMargin">
+          <number>0</number>
+         </property>
+         <property name="bottomMargin">
+          <number>0</number>
+         </property>
+         <item>
+          <widget class="QLabel" name="labelSidebarLogo">
+           <property name="minimumSize">
+            <size>
+             <width>42</width>
+             <height>42</height>
+            </size>
+           </property>
+           <property name="maximumSize">
+            <size>
+             <width>42</width>
+             <height>42</height>
+            </size>
+           </property>
+           <property name="text">
+            <string/>
+           </property>
+           <property name="pixmap">
+            <pixmap>../images/ic_logo.png</pixmap>
+           </property>
+           <property name="scaledContents">
+            <bool>true</bool>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <layout class="QVBoxLayout" name="verticalLayoutBrand">
+           <property name="spacing">
+            <number>0</number>
+           </property>
+           <property name="leftMargin">
+            <number>0</number>
+           </property>
+           <property name="topMargin">
+            <number>0</number>
+           </property>
+           <property name="rightMargin">
+            <number>0</number>
+           </property>
+           <property name="bottomMargin">
+            <number>0</number>
+           </property>
+           <item>
+            <widget class="QLabel" name="labelSidebarTitle">
+             <property name="text">
+              <string>CineMatch</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QLabel" name="labelSidebarSub">
+             <property name="text">
+              <string>Phân hệ quản trị</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </item>
+        </layout>
+       </item>
+       <item>
+        <spacer name="verticalSpacer">
+         <property name="orientation">
+          <enum>Qt::Vertical</enum>
+         </property>
+         <property name="sizeType">
+          <enum>QSizePolicy::Fixed</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>20</width>
+           <height>26</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+       <item>
+        <widget class="QLabel" name="labelMenu">
+         <property name="text">
+          <string>MENU</string>
+         </property>
+         <property name="styleSheet">
+          <string notr="true">color: #64748B; font-size: 8pt; font-weight: 700;</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="pushButtonNavDashboard">
+         <property name="text">
+          <string>Dashboard EDA</string>
+         </property>
+         <property name="cursor">
+          <cursorShape>PointingHandCursor</cursorShape>
+         </property>
+         <property name="icon">
+          <iconset>
+           <normaloff>../images/ic_dashboard.png</normaloff>
+           ../images/ic_dashboard.png
+          </iconset>
+         </property>
+         <property name="iconSize">
+          <size>
+           <width>20</width>
+           <height>20</height>
+          </size>
+         </property>
+         <property name="nav" stdset="0">
+          <bool>true</bool>
+         </property>
+         <property name="active" stdset="0">
+          <bool>true</bool>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="pushButtonNavModel">
+         <property name="text">
+          <string>Thử nghiệm mô hình ML</string>
+         </property>
+         <property name="cursor">
+          <cursorShape>PointingHandCursor</cursorShape>
+         </property>
+         <property name="icon">
+          <iconset>
+           <normaloff>../images/ic_model.png</normaloff>
+           ../images/ic_model.png
+          </iconset>
+         </property>
+         <property name="iconSize">
+          <size>
+           <width>20</width>
+           <height>20</height>
+          </size>
+         </property>
+         <property name="nav" stdset="0">
+          <bool>true</bool>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="pushButtonNavData">
+         <property name="text">
+          <string>Quản lý CSDL</string>
+         </property>
+         <property name="cursor">
+          <cursorShape>PointingHandCursor</cursorShape>
+         </property>
+         <property name="icon">
+          <iconset>
+           <normaloff>../images/ic_database.png</normaloff>
+           ../images/ic_database.png
+          </iconset>
+         </property>
+         <property name="iconSize">
+          <size>
+           <width>20</width>
+           <height>20</height>
+          </size>
+         </property>
+         <property name="nav" stdset="0">
+          <bool>true</bool>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <spacer name="verticalSpacer_2">
+         <property name="orientation">
+          <enum>Qt::Vertical</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>20</width>
+           <height>20</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+       <item>
+        <widget class="QPushButton" name="pushButtonLogout">
+         <property name="text">
+          <string>Đăng xuất</string>
+         </property>
+         <property name="cursor">
+          <cursorShape>PointingHandCursor</cursorShape>
+         </property>
+         <property name="icon">
+          <iconset>
+           <normaloff>../images/ic_logout.png</normaloff>
+           ../images/ic_logout.png
+          </iconset>
+         </property>
+         <property name="iconSize">
+          <size>
+           <width>20</width>
+           <height>20</height>
+          </size>
+         </property>
+         <property name="nav" stdset="0">
+          <bool>true</bool>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+    </item>
+    <item>
+     <widget class="QFrame" name="frameMain">
+      <layout class="QVBoxLayout" name="verticalLayoutMain">
+       <property name="spacing">
+        <number>0</number>
+       </property>
+       <property name="leftMargin">
+        <number>0</number>
+       </property>
+       <property name="topMargin">
+        <number>0</number>
+       </property>
+       <property name="rightMargin">
+        <number>0</number>
+       </property>
+       <property name="bottomMargin">
+        <number>0</number>
+       </property>
+       <item>
+        <widget class="QFrame" name="frameHeader">
+         <property name="minimumSize">
+          <size>
+           <width>0</width>
+           <height>72</height>
+          </size>
+         </property>
+         <property name="maximumSize">
+          <size>
+           <width>16777215</width>
+           <height>72</height>
+          </size>
+         </property>
+         <layout class="QHBoxLayout" name="horizontalLayoutHeader">
+          <property name="spacing">
+           <number>10</number>
+          </property>
+          <property name="leftMargin">
+           <number>28</number>
+          </property>
+          <property name="topMargin">
+           <number>12</number>
+          </property>
+          <property name="rightMargin">
+           <number>28</number>
+          </property>
+          <property name="bottomMargin">
+           <number>12</number>
+          </property>
+          <item>
+           <layout class="QVBoxLayout" name="verticalLayoutPageTitle">
+            <property name="spacing">
+             <number>2</number>
+            </property>
+            <property name="leftMargin">
+             <number>0</number>
+            </property>
+            <property name="topMargin">
+             <number>0</number>
+            </property>
+            <property name="rightMargin">
+             <number>0</number>
+            </property>
+            <property name="bottomMargin">
+             <number>0</number>
+            </property>
+            <item>
+             <widget class="QLabel" name="labelPageTitle">
+              <property name="text">
+               <string>Dashboard phân tích dữ liệu (EDA)</string>
+              </property>
+              <property name="role" stdset="0">
+               <string notr="true">pageTitle</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLabel" name="labelPageSub">
+              <property name="text">
+               <string>Tổng quan hành vi đánh giá phim của người dùng MovieLens</string>
+              </property>
+              <property name="role" stdset="0">
+               <string notr="true">muted</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+          <item>
+           <spacer name="horizontalSpacer">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>20</width>
+              <height>20</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+          <item>
+           <widget class="QLabel" name="labelAvatar">
+            <property name="minimumSize">
+             <size>
+              <width>32</width>
+              <height>32</height>
+             </size>
+            </property>
+            <property name="maximumSize">
+             <size>
+              <width>32</width>
+              <height>32</height>
+             </size>
+            </property>
+            <property name="text">
+             <string/>
+            </property>
+            <property name="pixmap">
+             <pixmap>../images/ic_avatar_dark.png</pixmap>
+            </property>
+            <property name="scaledContents">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <layout class="QVBoxLayout" name="verticalLayoutAdmin">
+            <property name="spacing">
+             <number>0</number>
+            </property>
+            <property name="leftMargin">
+             <number>0</number>
+            </property>
+            <property name="topMargin">
+             <number>0</number>
+            </property>
+            <property name="rightMargin">
+             <number>0</number>
+            </property>
+            <property name="bottomMargin">
+             <number>0</number>
+            </property>
+            <item>
+             <widget class="QLabel" name="labelAdminName">
+              <property name="text">
+               <string>admin</string>
+              </property>
+              <property name="styleSheet">
+               <string notr="true">font-weight: 700;</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLabel" name="labelAdminRole">
+              <property name="text">
+               <string>Quản trị viên</string>
+              </property>
+              <property name="role" stdset="0">
+               <string notr="true">muted</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item>
+        <widget class="QWidget" name="widgetContent">
+         <layout class="QVBoxLayout" name="verticalLayoutContent" stretch="0,1">
+          <property name="spacing">
+           <number>16</number>
+          </property>
+          <property name="leftMargin">
+           <number>24</number>
+          </property>
+          <property name="topMargin">
+           <number>24</number>
+          </property>
+          <property name="rightMargin">
+           <number>24</number>
+          </property>
+          <property name="bottomMargin">
+           <number>24</number>
+          </property>
+          <item>
+           <layout class="QHBoxLayout" name="horizontalLayoutKpi">
+            <property name="spacing">
+             <number>16</number>
+            </property>
+            <property name="leftMargin">
+             <number>0</number>
+            </property>
+            <property name="topMargin">
+             <number>0</number>
+            </property>
+            <property name="rightMargin">
+             <number>0</number>
+            </property>
+            <property name="bottomMargin">
+             <number>0</number>
+            </property>
+            <item>
+             <widget class="QFrame" name="frameKpiUsers">
+              <property name="card" stdset="0">
+               <bool>true</bool>
+              </property>
+              <property name="minimumSize">
+               <size>
+                <width>0</width>
+                <height>92</height>
+               </size>
+              </property>
+              <layout class="QHBoxLayout" name="horizontalLayoutKpiUsers">
+               <property name="spacing">
+                <number>14</number>
+               </property>
+               <property name="leftMargin">
+                <number>16</number>
+               </property>
+               <property name="topMargin">
+                <number>12</number>
+               </property>
+               <property name="rightMargin">
+                <number>16</number>
+               </property>
+               <property name="bottomMargin">
+                <number>12</number>
+               </property>
+               <item>
+                <widget class="QLabel" name="labelKpiUsersIcon">
+                 <property name="minimumSize">
+                  <size>
+                   <width>52</width>
+                   <height>52</height>
+                  </size>
+                 </property>
+                 <property name="maximumSize">
+                  <size>
+                   <width>52</width>
+                   <height>52</height>
+                  </size>
+                 </property>
+                 <property name="text">
+                  <string/>
+                 </property>
+                 <property name="pixmap">
+                  <pixmap>../images/ic_kpi_users.png</pixmap>
+                 </property>
+                 <property name="scaledContents">
+                  <bool>true</bool>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <layout class="QVBoxLayout" name="verticalLayoutKpiUsers">
+                 <property name="spacing">
+                  <number>0</number>
+                 </property>
+                 <property name="leftMargin">
+                  <number>0</number>
+                 </property>
+                 <property name="topMargin">
+                  <number>0</number>
+                 </property>
+                 <property name="rightMargin">
+                  <number>0</number>
+                 </property>
+                 <property name="bottomMargin">
+                  <number>0</number>
+                 </property>
+                 <item>
+                  <widget class="QLabel" name="labelKpiUsers">
+                   <property name="text">
+                    <string>—</string>
+                   </property>
+                   <property name="kpi" stdset="0">
+                    <string notr="true">value</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item>
+                  <widget class="QLabel" name="labelKpiUsersCaption">
+                   <property name="text">
+                    <string>NGƯỜI DÙNG</string>
+                   </property>
+                   <property name="kpi" stdset="0">
+                    <string notr="true">caption</string>
+                   </property>
+                  </widget>
+                 </item>
+                </layout>
+               </item>
+               <item>
+                <spacer name="horizontalSpacer_2">
+                 <property name="orientation">
+                  <enum>Qt::Horizontal</enum>
+                 </property>
+                 <property name="sizeHint" stdset="0">
+                  <size>
+                   <width>20</width>
+                   <height>20</height>
+                  </size>
+                 </property>
+                </spacer>
+               </item>
+              </layout>
+             </widget>
+            </item>
+            <item>
+             <widget class="QFrame" name="frameKpiMovies">
+              <property name="card" stdset="0">
+               <bool>true</bool>
+              </property>
+              <property name="minimumSize">
+               <size>
+                <width>0</width>
+                <height>92</height>
+               </size>
+              </property>
+              <layout class="QHBoxLayout" name="horizontalLayoutKpiMovies">
+               <property name="spacing">
+                <number>14</number>
+               </property>
+               <property name="leftMargin">
+                <number>16</number>
+               </property>
+               <property name="topMargin">
+                <number>12</number>
+               </property>
+               <property name="rightMargin">
+                <number>16</number>
+               </property>
+               <property name="bottomMargin">
+                <number>12</number>
+               </property>
+               <item>
+                <widget class="QLabel" name="labelKpiMoviesIcon">
+                 <property name="minimumSize">
+                  <size>
+                   <width>52</width>
+                   <height>52</height>
+                  </size>
+                 </property>
+                 <property name="maximumSize">
+                  <size>
+                   <width>52</width>
+                   <height>52</height>
+                  </size>
+                 </property>
+                 <property name="text">
+                  <string/>
+                 </property>
+                 <property name="pixmap">
+                  <pixmap>../images/ic_kpi_movies.png</pixmap>
+                 </property>
+                 <property name="scaledContents">
+                  <bool>true</bool>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <layout class="QVBoxLayout" name="verticalLayoutKpiMovies">
+                 <property name="spacing">
+                  <number>0</number>
+                 </property>
+                 <property name="leftMargin">
+                  <number>0</number>
+                 </property>
+                 <property name="topMargin">
+                  <number>0</number>
+                 </property>
+                 <property name="rightMargin">
+                  <number>0</number>
+                 </property>
+                 <property name="bottomMargin">
+                  <number>0</number>
+                 </property>
+                 <item>
+                  <widget class="QLabel" name="labelKpiMovies">
+                   <property name="text">
+                    <string>—</string>
+                   </property>
+                   <property name="kpi" stdset="0">
+                    <string notr="true">value</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item>
+                  <widget class="QLabel" name="labelKpiMoviesCaption">
+                   <property name="text">
+                    <string>PHIM</string>
+                   </property>
+                   <property name="kpi" stdset="0">
+                    <string notr="true">caption</string>
+                   </property>
+                  </widget>
+                 </item>
+                </layout>
+               </item>
+               <item>
+                <spacer name="horizontalSpacer_3">
+                 <property name="orientation">
+                  <enum>Qt::Horizontal</enum>
+                 </property>
+                 <property name="sizeHint" stdset="0">
+                  <size>
+                   <width>20</width>
+                   <height>20</height>
+                  </size>
+                 </property>
+                </spacer>
+               </item>
+              </layout>
+             </widget>
+            </item>
+            <item>
+             <widget class="QFrame" name="frameKpiRatings">
+              <property name="card" stdset="0">
+               <bool>true</bool>
+              </property>
+              <property name="minimumSize">
+               <size>
+                <width>0</width>
+                <height>92</height>
+               </size>
+              </property>
+              <layout class="QHBoxLayout" name="horizontalLayoutKpiRatings">
+               <property name="spacing">
+                <number>14</number>
+               </property>
+               <property name="leftMargin">
+                <number>16</number>
+               </property>
+               <property name="topMargin">
+                <number>12</number>
+               </property>
+               <property name="rightMargin">
+                <number>16</number>
+               </property>
+               <property name="bottomMargin">
+                <number>12</number>
+               </property>
+               <item>
+                <widget class="QLabel" name="labelKpiRatingsIcon">
+                 <property name="minimumSize">
+                  <size>
+                   <width>52</width>
+                   <height>52</height>
+                  </size>
+                 </property>
+                 <property name="maximumSize">
+                  <size>
+                   <width>52</width>
+                   <height>52</height>
+                  </size>
+                 </property>
+                 <property name="text">
+                  <string/>
+                 </property>
+                 <property name="pixmap">
+                  <pixmap>../images/ic_kpi_ratings.png</pixmap>
+                 </property>
+                 <property name="scaledContents">
+                  <bool>true</bool>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <layout class="QVBoxLayout" name="verticalLayoutKpiRatings">
+                 <property name="spacing">
+                  <number>0</number>
+                 </property>
+                 <property name="leftMargin">
+                  <number>0</number>
+                 </property>
+                 <property name="topMargin">
+                  <number>0</number>
+                 </property>
+                 <property name="rightMargin">
+                  <number>0</number>
+                 </property>
+                 <property name="bottomMargin">
+                  <number>0</number>
+                 </property>
+                 <item>
+                  <widget class="QLabel" name="labelKpiRatings">
+                   <property name="text">
+                    <string>—</string>
+                   </property>
+                   <property name="kpi" stdset="0">
+                    <string notr="true">value</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item>
+                  <widget class="QLabel" name="labelKpiRatingsCaption">
+                   <property name="text">
+                    <string>LƯỢT ĐÁNH GIÁ</string>
+                   </property>
+                   <property name="kpi" stdset="0">
+                    <string notr="true">caption</string>
+                   </property>
+                  </widget>
+                 </item>
+                </layout>
+               </item>
+               <item>
+                <spacer name="horizontalSpacer_4">
+                 <property name="orientation">
+                  <enum>Qt::Horizontal</enum>
+                 </property>
+                 <property name="sizeHint" stdset="0">
+                  <size>
+                   <width>20</width>
+                   <height>20</height>
+                  </size>
+                 </property>
+                </spacer>
+               </item>
+              </layout>
+             </widget>
+            </item>
+            <item>
+             <widget class="QFrame" name="frameKpiAvg">
+              <property name="card" stdset="0">
+               <bool>true</bool>
+              </property>
+              <property name="minimumSize">
+               <size>
+                <width>0</width>
+                <height>92</height>
+               </size>
+              </property>
+              <layout class="QHBoxLayout" name="horizontalLayoutKpiAvg">
+               <property name="spacing">
+                <number>14</number>
+               </property>
+               <property name="leftMargin">
+                <number>16</number>
+               </property>
+               <property name="topMargin">
+                <number>12</number>
+               </property>
+               <property name="rightMargin">
+                <number>16</number>
+               </property>
+               <property name="bottomMargin">
+                <number>12</number>
+               </property>
+               <item>
+                <widget class="QLabel" name="labelKpiAvgIcon">
+                 <property name="minimumSize">
+                  <size>
+                   <width>52</width>
+                   <height>52</height>
+                  </size>
+                 </property>
+                 <property name="maximumSize">
+                  <size>
+                   <width>52</width>
+                   <height>52</height>
+                  </size>
+                 </property>
+                 <property name="text">
+                  <string/>
+                 </property>
+                 <property name="pixmap">
+                  <pixmap>../images/ic_kpi_avg.png</pixmap>
+                 </property>
+                 <property name="scaledContents">
+                  <bool>true</bool>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <layout class="QVBoxLayout" name="verticalLayoutKpiAvg">
+                 <property name="spacing">
+                  <number>0</number>
+                 </property>
+                 <property name="leftMargin">
+                  <number>0</number>
+                 </property>
+                 <property name="topMargin">
+                  <number>0</number>
+                 </property>
+                 <property name="rightMargin">
+                  <number>0</number>
+                 </property>
+                 <property name="bottomMargin">
+                  <number>0</number>
+                 </property>
+                 <item>
+                  <widget class="QLabel" name="labelKpiAvg">
+                   <property name="text">
+                    <string>—</string>
+                   </property>
+                   <property name="kpi" stdset="0">
+                    <string notr="true">value</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item>
+                  <widget class="QLabel" name="labelKpiAvgCaption">
+                   <property name="text">
+                    <string>ĐIỂM TRUNG BÌNH</string>
+                   </property>
+                   <property name="kpi" stdset="0">
+                    <string notr="true">caption</string>
+                   </property>
+                  </widget>
+                 </item>
+                </layout>
+               </item>
+               <item>
+                <spacer name="horizontalSpacer_5">
+                 <property name="orientation">
+                  <enum>Qt::Horizontal</enum>
+                 </property>
+                 <property name="sizeHint" stdset="0">
+                  <size>
+                   <width>20</width>
+                   <height>20</height>
+                  </size>
+                 </property>
+                </spacer>
+               </item>
+              </layout>
+             </widget>
+            </item>
+            <item>
+             <widget class="QFrame" name="frameKpiSparsity">
+              <property name="card" stdset="0">
+               <bool>true</bool>
+              </property>
+              <property name="minimumSize">
+               <size>
+                <width>0</width>
+                <height>92</height>
+               </size>
+              </property>
+              <layout class="QHBoxLayout" name="horizontalLayoutKpiSparsity">
+               <property name="spacing">
+                <number>14</number>
+               </property>
+               <property name="leftMargin">
+                <number>16</number>
+               </property>
+               <property name="topMargin">
+                <number>12</number>
+               </property>
+               <property name="rightMargin">
+                <number>16</number>
+               </property>
+               <property name="bottomMargin">
+                <number>12</number>
+               </property>
+               <item>
+                <widget class="QLabel" name="labelKpiSparsityIcon">
+                 <property name="minimumSize">
+                  <size>
+                   <width>52</width>
+                   <height>52</height>
+                  </size>
+                 </property>
+                 <property name="maximumSize">
+                  <size>
+                   <width>52</width>
+                   <height>52</height>
+                  </size>
+                 </property>
+                 <property name="text">
+                  <string/>
+                 </property>
+                 <property name="pixmap">
+                  <pixmap>../images/ic_kpi_sparsity.png</pixmap>
+                 </property>
+                 <property name="scaledContents">
+                  <bool>true</bool>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <layout class="QVBoxLayout" name="verticalLayoutKpiSparsity">
+                 <property name="spacing">
+                  <number>0</number>
+                 </property>
+                 <property name="leftMargin">
+                  <number>0</number>
+                 </property>
+                 <property name="topMargin">
+                  <number>0</number>
+                 </property>
+                 <property name="rightMargin">
+                  <number>0</number>
+                 </property>
+                 <property name="bottomMargin">
+                  <number>0</number>
+                 </property>
+                 <item>
+                  <widget class="QLabel" name="labelKpiSparsity">
+                   <property name="text">
+                    <string>—</string>
+                   </property>
+                   <property name="kpi" stdset="0">
+                    <string notr="true">value</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item>
+                  <widget class="QLabel" name="labelKpiSparsityCaption">
+                   <property name="text">
+                    <string>ĐỘ THƯA MA TRẬN</string>
+                   </property>
+                   <property name="kpi" stdset="0">
+                    <string notr="true">caption</string>
+                   </property>
+                  </widget>
+                 </item>
+                </layout>
+               </item>
+               <item>
+                <spacer name="horizontalSpacer_6">
+                 <property name="orientation">
+                  <enum>Qt::Horizontal</enum>
+                 </property>
+                 <property name="sizeHint" stdset="0">
+                  <size>
+                   <width>20</width>
+                   <height>20</height>
+                  </size>
+                 </property>
+                </spacer>
+               </item>
+              </layout>
+             </widget>
+            </item>
+           </layout>
+          </item>
+          <item>
+           <layout class="QHBoxLayout" name="horizontalLayoutBody">
+            <property name="spacing">
+             <number>16</number>
+            </property>
+            <property name="leftMargin">
+             <number>0</number>
+            </property>
+            <property name="topMargin">
+             <number>0</number>
+            </property>
+            <property name="rightMargin">
+             <number>0</number>
+            </property>
+            <property name="bottomMargin">
+             <number>0</number>
+            </property>
+            <item>
+             <widget class="QFrame" name="frameChartList">
+              <property name="card" stdset="0">
+               <bool>true</bool>
+              </property>
+              <property name="minimumSize">
+               <size>
+                <width>290</width>
+                <height>0</height>
+               </size>
+              </property>
+              <property name="maximumSize">
+               <size>
+                <width>310</width>
+                <height>16777215</height>
+               </size>
+              </property>
+              <layout class="QVBoxLayout" name="verticalLayoutChartList">
+               <property name="spacing">
+                <number>8</number>
+               </property>
+               <property name="leftMargin">
+                <number>16</number>
+               </property>
+               <property name="topMargin">
+                <number>16</number>
+               </property>
+               <property name="rightMargin">
+                <number>16</number>
+               </property>
+               <property name="bottomMargin">
+                <number>16</number>
+               </property>
+               <item>
+                <widget class="QLabel" name="labelChooseChart">
+                 <property name="text">
+                  <string>Chọn biểu đồ</string>
+                 </property>
+                 <property name="role" stdset="0">
+                  <string notr="true">section</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QListWidget" name="listWidgetCharts">
+                 <property name="cursor">
+                  <cursorShape>PointingHandCursor</cursorShape>
+                 </property>
+                 <item>
+                  <property name="text">
+                   <string>Phân bố điểm đánh giá (1–5 sao)</string>
+                  </property>
+                 </item>
+                 <item>
+                  <property name="text">
+                   <string>Lượt đánh giá theo nhóm tuổi</string>
+                  </property>
+                 </item>
+                 <item>
+                  <property name="text">
+                   <string>Lượt đánh giá theo giới tính</string>
+                  </property>
+                 </item>
+                 <item>
+                  <property name="text">
+                   <string>Lượt đánh giá theo nghề nghiệp</string>
+                  </property>
+                 </item>
+                 <item>
+                  <property name="text">
+                   <string>Top thể loại được yêu thích</string>
+                  </property>
+                 </item>
+                 <item>
+                  <property name="text">
+                   <string>Top 10 phim nhiều lượt đánh giá nhất</string>
+                  </property>
+                 </item>
+                 <item>
+                  <property name="text">
+                   <string>Top 10 phim có điểm cao nhất</string>
+                  </property>
+                 </item>
+                 <item>
+                  <property name="text">
+                   <string>Số lượt đánh giá theo thời gian</string>
+                  </property>
+                 </item>
+                </widget>
+               </item>
+               <item>
+                <widget class="QLabel" name="labelFilter">
+                 <property name="text">
+                  <string>Bộ lọc người dùng</string>
+                 </property>
+                 <property name="role" stdset="0">
+                  <string notr="true">section</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QLabel" name="label_3">
+                 <property name="text">
+                  <string>Giới tính</string>
+                 </property>
+                 <property name="role" stdset="0">
+                  <string notr="true">field</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QComboBox" name="comboBoxGender">
+                 <item>
+                  <property name="text">
+                   <string>Tất cả</string>
+                  </property>
+                 </item>
+                 <item>
+                  <property name="text">
+                   <string>Nam</string>
+                  </property>
+                 </item>
+                 <item>
+                  <property name="text">
+                   <string>Nữ</string>
+                  </property>
+                 </item>
+                </widget>
+               </item>
+               <item>
+                <widget class="QLabel" name="label_4">
+                 <property name="text">
+                  <string>Nhóm tuổi</string>
+                 </property>
+                 <property name="role" stdset="0">
+                  <string notr="true">field</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QComboBox" name="comboBoxAge">
+                 <item>
+                  <property name="text">
+                   <string>Tất cả</string>
+                  </property>
+                 </item>
+                 <item>
+                  <property name="text">
+                   <string>Dưới 18</string>
+                  </property>
+                 </item>
+                 <item>
+                  <property name="text">
+                   <string>18-24</string>
+                  </property>
+                 </item>
+                 <item>
+                  <property name="text">
+                   <string>25-34</string>
+                  </property>
+                 </item>
+                 <item>
+                  <property name="text">
+                   <string>35-44</string>
+                  </property>
+                 </item>
+                 <item>
+                  <property name="text">
+                   <string>45-49</string>
+                  </property>
+                 </item>
+                 <item>
+                  <property name="text">
+                   <string>50-55</string>
+                  </property>
+                 </item>
+                 <item>
+                  <property name="text">
+                   <string>56+</string>
+                  </property>
+                 </item>
+                </widget>
+               </item>
+               <item>
+                <spacer name="verticalSpacer_3">
+                 <property name="orientation">
+                  <enum>Qt::Vertical</enum>
+                 </property>
+                 <property name="sizeType">
+                  <enum>QSizePolicy::Fixed</enum>
+                 </property>
+                 <property name="sizeHint" stdset="0">
+                  <size>
+                   <width>20</width>
+                   <height>6</height>
+                  </size>
+                 </property>
+                </spacer>
+               </item>
+               <item>
+                <widget class="QPushButton" name="pushButtonApplyFilter">
+                 <property name="text">
+                  <string>Áp dụng bộ lọc</string>
+                 </property>
+                 <property name="cursor">
+                  <cursorShape>PointingHandCursor</cursorShape>
+                 </property>
+                 <property name="icon">
+                  <iconset>
+                   <normaloff>../images/ic_check.png</normaloff>
+                   ../images/ic_check.png
+                  </iconset>
+                 </property>
+                 <property name="iconSize">
+                  <size>
+                   <width>20</width>
+                   <height>20</height>
+                  </size>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </widget>
+            </item>
+            <item>
+             <widget class="QFrame" name="framePlot">
+              <property name="card" stdset="0">
+               <bool>true</bool>
+              </property>
+              <layout class="QVBoxLayout" name="verticalLayoutPlotFrame">
+               <property name="spacing">
+                <number>6</number>
+               </property>
+               <property name="leftMargin">
+                <number>16</number>
+               </property>
+               <property name="topMargin">
+                <number>16</number>
+               </property>
+               <property name="rightMargin">
+                <number>16</number>
+               </property>
+               <property name="bottomMargin">
+                <number>16</number>
+               </property>
+               <item>
+                <widget class="QLabel" name="labelChartTitle">
+                 <property name="text">
+                  <string>Phân bố điểm đánh giá</string>
+                 </property>
+                 <property name="role" stdset="0">
+                  <string notr="true">section</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QLabel" name="labelChartInsight">
+                 <property name="text">
+                  <string/>
+                 </property>
+                 <property name="role" stdset="0">
+                  <string notr="true">muted</string>
+                 </property>
+                 <property name="wordWrap">
+                  <bool>true</bool>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <layout class="QVBoxLayout" name="verticalLayoutPlot">
+                 <property name="leftMargin">
+                  <number>0</number>
+                 </property>
+                 <property name="topMargin">
+                  <number>0</number>
+                 </property>
+                 <property name="rightMargin">
+                  <number>0</number>
+                 </property>
+                 <property name="bottomMargin">
+                  <number>0</number>
+                 </property>
+                </layout>
+               </item>
+              </layout>
+             </widget>
+            </item>
+           </layout>
+          </item>
+         </layout>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+    </item>
+   </layout>
+  </widget>
+  <widget class="QStatusBar" name="statusbar"/>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>
