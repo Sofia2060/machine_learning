@@ -16,7 +16,7 @@ data/processed/
 *.pkl
 *.joblib
 *.npz
-models/*_meta.json
+models/main_model/*_meta.json
 
 # File hệ điều hành
 .DS_Store

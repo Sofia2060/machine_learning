@@ -3,7 +3,7 @@
 Module này chỉ cần numpy (không import torch hay src.models), để phần mềm đóng gói gọn nhẹ.
 
     from src.inference import NeuMFRecommender
-    rec = NeuMFRecommender("models/neumf.npz")               # nạp một lần khi mở phần mềm
+    rec = NeuMFRecommender("models/main_model/neumf.npz")    # nạp một lần khi mở phần mềm
     seen = [1193, 661, 914]                                  # movie_id user đã chấm, lấy từ MySQL
     rec.recommend(user_id=1, k=10, seen=seen)                # -> [(movie_id, điểm), ...] giảm dần
 

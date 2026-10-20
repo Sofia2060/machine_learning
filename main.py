@@ -10,7 +10,7 @@ Cách dùng (chạy từ bất kỳ thư mục nào, mọi đường dẫn tính
     python main.py search "matrix"                   # tìm MovieID theo tên phim
     python main.py evaluate --family baseline        # đánh giá một nhóm mô hình -> outputs/metrics/<family>.csv
     python main.py evaluate --family all
-    python main.py export                            # xuất NeuMF cho phần mềm -> models/neumf.npz + neumf_meta.json
+    python main.py export                            # xuất NeuMF cho phần mềm -> models/main_model/neumf.npz + neumf_meta.json
 
 Mô hình đã huấn luyện được lưu ở models/<tên>.pkl và nạp lại ở lần chạy sau.
 """
@@ -22,7 +22,7 @@ import pandas as pd
 from src import recommender as rs
 from src.data.features import build_full_feature_pipeline, save_featured
 from src.data.preprocess import build_master_dataset, preprocess_raw, save_cleaned, save_master
-from src.config import MODELS_DIR
+from src.config import MAIN_MODEL_DIR
 from src.experiment import load_experiment, run_model, save_metrics
 
 pd.set_option("display.width", 200)
@@ -199,7 +199,7 @@ def build_parser():
     x = sub.add_parser("export", help="xuất NeuMF thành .npz + _meta.json cho phần mềm (src.inference)")
     x.add_argument("--data", default="all", choices=["all", "train"],
                    help="all = học trên toàn bộ rating (mặc định), train = chỉ tập train như khi đánh giá")
-    x.add_argument("--out", default=str(MODELS_DIR / "neumf.npz"), help="đường dẫn file .npz")
+    x.add_argument("--out", default=str(MAIN_MODEL_DIR / "neumf.npz"), help="đường dẫn file .npz")
     return p
 
 

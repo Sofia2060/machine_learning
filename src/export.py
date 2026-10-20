@@ -15,7 +15,7 @@ FORMAT_VERSION = 1
 
 
 def meta_path(path: Path) -> Path:
-    """models/neumf.npz -> models/neumf_meta.json"""
+    """models/main_model/neumf.npz -> models/main_model/neumf_meta.json"""
     return path.with_name(path.stem + "_meta.json")
 
 

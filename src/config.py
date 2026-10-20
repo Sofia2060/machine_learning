@@ -7,6 +7,7 @@ DATA_DIR = ROOT / "data"
 RAW_DIR = DATA_DIR / "raw"                            # movies.dat, ratings.dat, users.dat
 PROCESSED_DIR = DATA_DIR / "processed"                # dữ liệu đã làm sạch + cache
 MODELS_DIR = ROOT / "models"                          # mô hình đã huấn luyện (.pkl)
+MAIN_MODEL_DIR = MODELS_DIR / "main_model"            # mô hình chính xuất cho phần mềm (neumf.npz + _meta.json)
 RESULTS_DIR = ROOT / "outputs"                        # metrics/*.csv, figures/*.png
 
 # Đầu ra dữ liệu dùng chung cho mọi notebook / script (do src.data.preprocess và src.data.features tạo)
