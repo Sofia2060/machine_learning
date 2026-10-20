@@ -98,10 +98,10 @@ def validate(model, val: pd.DataFrame, k: int = 10) -> dict:
     """Chỉ số của một mô hình đã fit trên sub-train, đo trên tập validation, dùng để dò siêu tham số.
 
     ValNDCG@k là tiêu chí chọn (cùng quy ước Top-N với tập test: loại phim đã chấm trong sub-train,
-    phim liên quan = rating >= RELEVANT_RATING). ValRMSE chỉ để tham khảo (NaN nếu mô hình không dự đoán rating).
+    phim liên quan = rating >= RELEVANT_RATING).
     """
     m = evaluate_model(model, val, k=k, k_beyond=k)
-    return {f"ValNDCG@{k}": m[f"NDCG@{k}"], "ValRMSE": m["RMSE"]}
+    return {f"ValNDCG@{k}": m[f"NDCG@{k}"]}
 
 
 def run_model(model, exp: Experiment, k: int = 10, k_beyond: int = 20) -> dict:

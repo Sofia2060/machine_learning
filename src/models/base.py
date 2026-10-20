@@ -14,7 +14,7 @@ RATING_MIN, RATING_MAX = 1.0, 5.0
 
 class BaseRecommender:
     name = "base"
-    # False nếu điểm trả về không ở thang 1-5 (popularity đếm, BPR, ALS...): khi đó bỏ qua RMSE/MAE.
+    # False nếu điểm trả về không ở thang 1-5 (popularity đếm, BPR, ALS...): predict() không kẹp về [1, 5].
     predicts_rating = True
 
     # fit

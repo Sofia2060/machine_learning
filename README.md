@@ -115,7 +115,7 @@ Quy trình kỹ thuật của dự án được tổ chức tuần tự qua 5 t�
   - data/processed/featured_dataset.parquet (1.000.209 dòng x 90 cột đặc trưng, tệp nén Snappy 35,4 MB).
 
 #### 3.4. 04 - 07: Huấn luyện các nhóm mô hình
-Mọi notebook dùng chung `src.experiment.load_experiment()`: cùng dữ liệu, cùng phép chia train/test 80/20 theo từng người dùng, cùng seed. Siêu tham số được dò trên tập validation tách từ train theo tiêu chí NDCG@10 (`src.experiment.validate`, RMSE chỉ để tham khảo); kết quả trên test lưu vào `outputs/metrics/<nhóm>.csv`.
+Mọi notebook dùng chung `src.experiment.load_experiment()`: cùng dữ liệu, cùng phép chia train/test 80/20 theo từng người dùng, cùng seed. Siêu tham số được dò trên tập validation tách từ train theo tiêu chí NDCG@10 (`src.experiment.validate`); kết quả trên test lưu vào `outputs/metrics/<nhóm>.csv`.
 - 04_collaborative_knn.ipynb: UserKNN, ItemKNN (cosine / Pearson, dò k).
 - 05_matrix_factorization.ipynb: PureSVD, BiasedMF (Funk SVD), NMF, Implicit ALS.
 - 06_content_hybrid.ipynb: Content-based (thể loại, thể loại + tiêu đề) và Hybrid có trọng số (MF + ItemKNN + Content).
@@ -123,7 +123,7 @@ Mọi notebook dùng chung `src.experiment.load_experiment()`: cùng dữ liệu
 - Mọi mô hình trừ nhóm Baseline (kNN, PureSVD, BiasedMF, NMF, Implicit ALS, Content-based, Hybrid, Deep learning) tính toán bằng PyTorch và tự dùng GPU CUDA nếu có; truyền `device="cpu"` vào hàm khởi tạo để ép chạy CPU.
 
 #### 3.5. 08_evaluation_compare.ipynb (So sánh toàn bộ mô hình)
-- Gộp `outputs/metrics/{baseline,knn,mf,content_hybrid,deep}.csv`, so sánh RMSE, MAE, Precision@10, Recall@10, NDCG@10, HitRate@10, Coverage@20, Novelty@20, Diversity@20.
+- Gộp `outputs/metrics/{baseline,knn,mf,content_hybrid,deep}.csv`, so sánh Precision@10, Recall@10, NDCG@10, HitRate@10, Coverage@20, Novelty@20, Diversity@20.
 - Bảng `baseline.csv` không có notebook riêng, sinh bằng `python main.py evaluate --family baseline`.
 
 ---

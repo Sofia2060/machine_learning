@@ -1,4 +1,4 @@
-"""Chỉ số đánh giá: sai số dự đoán rating (RMSE, MAE) và chất lượng danh sách Top-N.
+"""Chỉ số đánh giá chất lượng danh sách gợi ý Top-N (bài toán xếp hạng).
 
 Quy ước Top-N:
   - Danh sách gợi ý của mỗi user loại bỏ các phim user đã chấm trong train.
@@ -10,16 +10,6 @@ import numpy as np
 import pandas as pd
 
 from src.config import RELEVANT_RATING
-
-
-def rmse(y_true, y_pred) -> float:
-    d = np.asarray(y_true, dtype=np.float64) - np.asarray(y_pred, dtype=np.float64)
-    return float(np.sqrt(np.mean(d ** 2)))
-
-
-def mae(y_true, y_pred) -> float:
-    d = np.asarray(y_true, dtype=np.float64) - np.asarray(y_pred, dtype=np.float64)
-    return float(np.mean(np.abs(d)))
 
 
 def top_k_items(scores: np.ndarray, seen, k: int) -> np.ndarray:
@@ -75,12 +65,6 @@ def evaluate_model(model, test: pd.DataFrame, k: int = 10, k_beyond: int = 20,
                    item_features: np.ndarray | None = None) -> dict:
     """Mọi chỉ số cho một mô hình đã fit. item_features (n_items x d) theo thứ tự item2idx, dùng cho Diversity."""
     out = {}
-    if model.predicts_rating:
-        pred = model.predict(test)
-        out["RMSE"], out["MAE"] = rmse(test["rating"], pred), mae(test["rating"], pred)
-    else:
-        out["RMSE"] = out["MAE"] = np.nan
-
     users = np.sort(test["user_id"].unique())
     uidx = np.array([model.user2idx[u] for u in users])
     top = top_k_items(model.score_matrix()[uidx], model.R[uidx], max(k, k_beyond))

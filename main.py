@@ -99,7 +99,7 @@ def cmd_evaluate(exp, args):
             row = run_model(model, exp)
             row["Family"] = rs.family_label(family, model)
             rows.append(row)
-            print(f"  {row['Model']:<32} RMSE={row['RMSE']:.4f}  NDCG@10={row['NDCG@10']:.4f}  "
+            print(f"  {row['Model']:<32} NDCG@10={row['NDCG@10']:.4f}  HitRate@10={row['HitRate@10']:.4f}  "
                   f"({row['FitTime_s']:.1f}s)")
             del model
         path = save_metrics(pd.DataFrame(rows), family)
