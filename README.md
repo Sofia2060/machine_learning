@@ -34,12 +34,14 @@ movie-recommender-system/
 |   |-- 06_content_based.ipynb
 |   |-- 07_deep_learning.ipynb
 |   `-- 08_evaluation_compare.ipynb
-|-- models/                  # mô hình đã huấn luyện (*.pkl, sinh bởi main.py)
+|-- models/                  # mô hình đã huấn luyện (*.pkl) và mô hình xuất cho phần mềm (neumf.npz + neumf_meta.json)
 |-- outputs/                 # metrics/*.csv, figures/*.png (sinh khi chạy)
 |-- src/
 |   |-- config.py            # đường dẫn (tương đối theo thư mục dự án) + seed
 |   |-- experiment.py        # nạp dữ liệu, chia train/test, run_model, save_metrics
 |   |-- recommender.py       # danh mục mô hình, huấn luyện/lưu/nạp, gợi ý
+|   |-- export.py            # xuất NeuMF thành .npz + _meta.json (cần torch)
+|   |-- inference.py         # gợi ý cho phần mềm từ file .npz (chỉ cần numpy)
 |   |-- database.py
 |   |-- data/preprocess.py   # tiền xử lý (logic notebook 01) + master dataset (notebook 02)
 |   |-- data/features.py     # feature engineering (logic notebook 03)
@@ -174,5 +176,30 @@ python main.py recommend --user 1 --model biased_mf --retrain
 python main.py predict --user 1 --movie 2571    # dự đoán rating
 python main.py search "matrix"                  # tìm MovieID theo tên
 python main.py evaluate --family all            # đánh giá mọi nhóm mô hình -> outputs/metrics/
+python main.py export                          # xuất NeuMF cho phần mềm -> models/neumf.npz + neumf_meta.json
 ```
 Lần đầu chạy, phép chia train/test được cache ở `data/processed/experiment.pkl` và mô hình được lưu ở `models/<tên>.pkl`; các lần sau nạp lại nên nhanh hơn. Khi dữ liệu sạch được tạo lại (chạy lại notebook 01 hoặc `prepare`), cache và mô hình tự được tạo lại; dùng `--retrain` để ép huấn luyện lại.
+
+#### Bước 6: Nhúng mô hình vào phần mềm (PyQt6 + MySQL)
+Mô hình chính của phần mềm là **NeuMF** (NDCG@10 cao nhất, xem notebook 08). Phần mềm **không cần torch**: mô hình được xuất thành file numpy và tính điểm bằng numpy.
+
+1. Xuất mô hình (trên máy dev có torch, có GPU càng nhanh, khoảng 1 phút):
+   ```bash
+   python main.py export                 # học trên toàn bộ rating -> models/neumf.npz (~9 MB) + models/neumf_meta.json
+   python main.py export --data train    # chỉ học trên tập train (đúng mô hình đã đánh giá trong notebooks)
+   ```
+2. Trong phần mềm, nạp mô hình **một lần** khi khởi động rồi gọi `recommend` (mỗi lần khoảng 4 ms trên CPU):
+   ```python
+   from src.inference import NeuMFRecommender
+
+   rec = NeuMFRecommender("models/neumf.npz")
+   cur.execute("SELECT movie_id FROM ratings WHERE user_id = %s", (uid,))   # cur: cursor MySQL của phần mềm
+   seen = [row[0] for row in cur.fetchall()]
+   top = rec.recommend(uid, k=10, seen=seen)     # [(movie_id, điểm), ...] giảm dần, đã bỏ phim user đã chấm
+   rec.is_personalized(uid)                      # False -> user mới, đang gợi ý theo độ phổ biến
+   ```
+   - Danh sách phim đã chấm lấy **trực tiếp từ MySQL** nên phim user vừa chấm trên giao diện sẽ không bị gợi ý lại.
+   - User đăng ký sau lần xuất gần nhất chưa có trong mô hình: phần mềm tự gợi ý theo độ phổ biến. Phim thêm vào CSDL sau lần xuất cũng chưa được gợi ý. Xuất lại mô hình định kỳ để cập nhật.
+   - Điểm NeuMF là điểm xếp hạng (logit), không phải số sao 1–5.
+   - Truy vấn MySQL nên chạy trong `QThread` để giao diện không bị đứng; `recommend` đủ nhanh để gọi ở luồng chính.
+3. Thư viện cho phần mềm: `numpy` (cho `src.inference`), `PyQt6` và thư viện kết nối MySQL (ví dụ `mysql-connector-python` hoặc `PyMySQL`). Không cần `torch`, `scipy`, `scikit-learn`. Khi phát hành, đóng gói phần mềm (ví dụ bằng PyInstaller) kèm `models/neumf.npz` và `models/neumf_meta.json`, rồi nén cả thư mục thành zip. Khi đóng gói, nên tính đường dẫn tới `neumf.npz` theo thư mục của file chạy (ví dụ `Path(sys.executable).parent` hoặc `sys._MEIPASS` với PyInstaller) thay vì đường dẫn tương đối, và nhớ kèm cả file `_meta.json`.

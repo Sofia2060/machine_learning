@@ -15,6 +15,8 @@ data/processed/
 *.csv
 *.pkl
 *.joblib
+*.npz
+models/*_meta.json
 
 # File hệ điều hành
 .DS_Store
