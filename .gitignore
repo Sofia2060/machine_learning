@@ -40,4 +40,8 @@ Thumbs.db
 # Giữ lại cấu trúc thư mục rỗng trên Git (Bỏ qua nội dung nhưng không mất folder)
 !data/raw/.gitkeep
 !data/processed/.gitkeep
-!saved_models/.gitkeep
+!models/.gitkeep
+
+# Kết quả chạy (metrics, hình) và file nén
+outputs/
+*.zip
