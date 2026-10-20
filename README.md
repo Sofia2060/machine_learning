@@ -29,17 +29,34 @@ movie-recommender-system/
 |   |-- 01_data_preprocessing.ipynb
 |   |-- 02_eda.ipynb
 |   |-- 03_feature_engineering.ipynb
-|   |-- 04_model_training.ipynb
-|   `-- 05_evaluation.ipynb
-|-- models/
+|   |-- 04_collaborative_knn.ipynb
+|   |-- 05_matrix_factorization.ipynb
+|   |-- 06_content_based.ipynb
+|   |-- 07_deep_learning.ipynb
+|   `-- 08_evaluation_compare.ipynb
+|-- models/                  # mô hình đã huấn luyện (*.pkl, dùng cho main.py và notebooks)
+|   `-- main_model/          # mô hình chính xuất cho phần mềm (neumf.npz + neumf_meta.json)
+|-- outputs/                 # metrics/*.csv, figures/*.png (sinh khi chạy)
 |-- src/
+|   |-- config.py            # đường dẫn (tương đối theo thư mục dự án) + seed
+|   |-- experiment.py        # nạp dữ liệu, chia train/test, run_model, save_metrics
+|   |-- recommender.py       # danh mục mô hình, huấn luyện/lưu/nạp, gợi ý
+|   |-- export.py            # xuất NeuMF thành .npz + _meta.json (cần torch)
+|   |-- inference.py         # gợi ý cho phần mềm từ file .npz (chỉ cần numpy)
 |   |-- database.py
-|   `-- recommender.py
-|-- ui/
+|   |-- data/preprocess.py   # tiền xử lý (logic notebook 01) + master dataset (notebook 02)
+|   |-- data/features.py     # feature engineering (logic notebook 03)
+|   |-- evaluation/metrics.py
+|   `-- models/              # baseline, knn_cf, mf, content_based, neural
+|-- main.py                  # ứng dụng chính
 |-- .gitignore
 |-- requirements.txt
 `-- README.md
 ```
+
+Mọi đường dẫn được tính từ vị trí file `src/config.py`, nên dự án chạy được ở mọi máy và từ mọi thư mục.
+
+**Một nguồn logic dữ liệu duy nhất:** toàn bộ xử lý dữ liệu và tạo đặc trưng nằm trong `src/data/`. Notebooks 01-03, `python main.py prepare` và các mô hình (notebooks 04-08, `main.py`) đều gọi cùng các hàm này và dùng chung một schema cột snake_case (`user_id`, `movie_id`, `rating`, `timestamp`, `datetime`, `title`, `clean_title`, `release_year`, `genres`, ...). Các mô hình đọc dữ liệu sạch từ `data/processed/cleaned_*.csv` (tự tạo từ `data/raw/` nếu chưa có).
 
 Mô tả vai trò các thư mục chính:
 - data/raw: Chứa các tệp dữ liệu gốc từ nguồn MovieLens 1M chưa qua chỉnh sửa.
@@ -100,25 +117,18 @@ Quy trình kỹ thuật của dự án được tổ chức tuần tự qua 5 t�
 - Đầu ra:
   - data/processed/featured_dataset.parquet (1.000.209 dòng x 90 cột đặc trưng, tệp nén Snappy 35,4 MB).
 
-#### 3.4. 04_model_training.ipynb (Huấn luyện các mô hình học máy)
-- Nhiệm vụ:
-  - Phân chia tập dữ liệu thành tập Huấn luyện (Train) và tập Kiểm thử (Test) theo tỷ lệ 80/20 có phân tầng theo người dùng.
-  - Huấn luyện nhóm mô hình mốc so sánh (Baseline): Global Mean, Popularity-based, Item-based Collaborative Filtering.
-  - Huấn luyện nhóm mô hình Phân rã Ma trận: SVD (Funk SVD) và SVD++ có tính đến thông tin tương tác ẩn.
-  - Huấn luyện nhóm mô hình Học máy dạng cây quyết định tăng cường: LightGBM Regressor và XGBoost Regressor trên không gian 90 đặc trưng tổng hợp.
-  - Tinh chỉnh siêu tham số và lưu trữ các tệp mô hình tốt nhất vào thư mục models/.
-- Đầu ra:
-  - Các tệp mô hình đã huấn luyện (.pkl, .joblib) lưu trữ trong thư mục models/.
+#### 3.4. 04 - 07: Huấn luyện các nhóm mô hình
+Dự án so sánh 7 mô hình: Popularity(count), Content-based, ItemKNN, BiasedMF, ImplicitALS, NeuMF, BPR-MF. Mọi notebook dùng chung `src.experiment.load_experiment()`: cùng dữ liệu, cùng phép chia train/test 80/20 theo từng người dùng, cùng seed. Siêu tham số được dò trên tập validation tách từ train theo tiêu chí NDCG@10 (`src.experiment.validate`); kết quả trên test lưu vào `outputs/metrics/<nhóm>.csv`.
+- 04_collaborative_knn.ipynb: ItemKNN (cosine / Pearson, dò k).
+- 05_matrix_factorization.ipynb: BiasedMF (Funk SVD), Implicit ALS.
+- 06_content_based.ipynb: Content-based (thể loại + TF-IDF tiêu đề + thập niên).
+- 07_deep_learning.ipynb: NeuMF, BPR-MF (PyTorch, tự dùng GPU nếu có).
+- Mọi mô hình trừ Popularity (ItemKNN, BiasedMF, Implicit ALS, Content-based, NeuMF, BPR-MF) tính toán bằng PyTorch và tự dùng GPU CUDA nếu có; truyền `device="cpu"` vào hàm khởi tạo để ép chạy CPU.
 
-#### 3.5. 05_evaluation.ipynb (Đánh giá và so sánh hiệu năng)
-- Nhiệm vụ:
-  - Đo lường sai số dự báo điểm đánh giá thông qua các chỉ số: Root Mean Squared Error (RMSE) và Mean Absolute Error (MAE).
-  - Đo lường chất lượng danh sách gợi ý Top-N (Top 10 phim đề xuất) thông qua các chỉ số xếp hạng: Precision@K, Recall@K và Normalized Discounted Cumulative Gain (NDCG@K).
-  - Lập bảng so sánh đối đầu giữa các mô hình để chứng minh tính ưu việt của giải pháp gợi ý lai.
-  - Trực quan hóa kết quả so sánh và sinh danh sách gợi ý phim thực tế cho các nhóm người dùng mẫu.
-- Đầu ra:
-  - Bảng tổng hợp các chỉ số đánh giá thực nghiệm phục vụ báo cáo.
-  - Biểu đồ so sánh hiệu năng giữa các thuật toán.
+#### 3.5. 08_evaluation_compare.ipynb (So sánh toàn bộ mô hình)
+- Gộp `outputs/metrics/{baseline,content,knn,mf,deep}.csv`, so sánh Precision@10, Recall@10, NDCG@10, HitRate@10, Coverage@20, Novelty@20, Diversity@20.
+- Bảng `baseline.csv` (Popularity(count)) không có notebook riêng, sinh bằng `python main.py evaluate --family baseline`.
+- Phân tích cold-start: Recall@20 theo mức độ phổ biến của phim cho cả 7 mô hình.
 
 ---
 
@@ -154,5 +164,43 @@ Thực hiện chạy lần lượt các tệp notebook theo trình tự sau:
 1. Mở và chạy notebooks/01_data_preprocessing.ipynb để tiền xử lý và sinh 3 tệp CSV sạch.
 2. Mở và chạy notebooks/02_eda.ipynb để tạo master_dataset.csv và quan sát các biểu đồ phân tích kinh doanh.
 3. Mở và chạy notebooks/03_feature_engineering.ipynb để tạo tệp đặc trưng featured_dataset.parquet.
-4. Mở và chạy notebooks/04_model_training.ipynb để huấn luyện các thuật toán gợi ý.
-5. Mở và chạy notebooks/05_evaluation.ipynb để kiểm tra các chỉ số đánh giá và sinh danh sách khuyến nghị.
+4. Chạy lần lượt notebooks/04 đến 07 để huấn luyện và đánh giá từng nhóm mô hình.
+5. Chạy `python main.py evaluate --family baseline` để tạo bảng baseline, rồi chạy notebooks/08_evaluation_compare.ipynb.
+
+#### Bước 5: Chạy ứng dụng chính (main.py)
+```bash
+python main.py prepare                          # tạo cleaned_*.csv, master_dataset.csv, featured_dataset.parquet (= notebooks 01-03)
+python main.py                                  # menu tương tác
+python main.py info                             # thống kê dữ liệu, danh sách mô hình
+python main.py recommend --user 1 -k 10         # gợi ý Top-10 (mặc định mô hình neumf)
+python main.py recommend --user 1 --model biased_mf --retrain
+python main.py predict --user 1 --movie 2571    # dự đoán rating
+python main.py search "matrix"                  # tìm MovieID theo tên
+python main.py evaluate --family all            # đánh giá mọi nhóm mô hình -> outputs/metrics/
+python main.py export                          # xuất NeuMF cho phần mềm -> models/main_model/neumf.npz + neumf_meta.json
+```
+Lần đầu chạy, phép chia train/test được cache ở `data/processed/experiment.pkl` và mô hình được lưu ở `models/<tên>.pkl`; các lần sau nạp lại nên nhanh hơn. Khi dữ liệu sạch được tạo lại (chạy lại notebook 01 hoặc `prepare`), cache và mô hình tự được tạo lại; dùng `--retrain` để ép huấn luyện lại.
+
+#### Bước 6: Nhúng mô hình vào phần mềm (PyQt6 + MySQL)
+Mô hình chính của phần mềm là **NeuMF** (NDCG@10 cao nhất, xem notebook 08). Phần mềm **không cần torch**: mô hình được xuất thành file numpy và tính điểm bằng numpy.
+
+1. Xuất mô hình (trên máy dev có torch, có GPU càng nhanh, khoảng 1 phút):
+   ```bash
+   python main.py export                 # học trên toàn bộ rating -> models/main_model/neumf.npz (~9 MB) + neumf_meta.json
+   python main.py export --data train    # chỉ học trên tập train (đúng mô hình đã đánh giá trong notebooks)
+   ```
+2. Trong phần mềm, nạp mô hình **một lần** khi khởi động rồi gọi `recommend` (mỗi lần khoảng 4 ms trên CPU):
+   ```python
+   from src.inference import NeuMFRecommender
+
+   rec = NeuMFRecommender("models/main_model/neumf.npz")
+   cur.execute("SELECT movie_id FROM ratings WHERE user_id = %s", (uid,))   # cur: cursor MySQL của phần mềm
+   seen = [row[0] for row in cur.fetchall()]
+   top = rec.recommend(uid, k=10, seen=seen)     # [(movie_id, điểm), ...] giảm dần, đã bỏ phim user đã chấm
+   rec.is_personalized(uid)                      # False -> user mới, đang gợi ý theo độ phổ biến
+   ```
+   - Danh sách phim đã chấm lấy **trực tiếp từ MySQL** nên phim user vừa chấm trên giao diện sẽ không bị gợi ý lại.
+   - User đăng ký sau lần xuất gần nhất chưa có trong mô hình: phần mềm tự gợi ý theo độ phổ biến. Phim thêm vào CSDL sau lần xuất cũng chưa được gợi ý. Xuất lại mô hình định kỳ để cập nhật.
+   - Điểm NeuMF là điểm xếp hạng (logit), không phải số sao 1–5.
+   - Truy vấn MySQL nên chạy trong `QThread` để giao diện không bị đứng; `recommend` đủ nhanh để gọi ở luồng chính.
+3. Thư viện cho phần mềm: `numpy` (cho `src.inference`), `PyQt6` và thư viện kết nối MySQL (ví dụ `mysql-connector-python` hoặc `PyMySQL`). Không cần `torch`, `scipy`, `scikit-learn`. Khi phát hành, đóng gói phần mềm (ví dụ bằng PyInstaller) kèm thư mục `models/main_model/` (`neumf.npz` và `neumf_meta.json`), rồi nén cả thư mục thành zip. Khi đóng gói, nên tính đường dẫn tới `neumf.npz` theo thư mục của file chạy (ví dụ `Path(sys.executable).parent` hoặc `sys._MEIPASS` với PyInstaller) thay vì đường dẫn tương đối, và nhớ kèm cả file `_meta.json`.

@@ -15,6 +15,8 @@ data/processed/
 *.csv
 *.pkl
 *.joblib
+*.npz
+models/main_model/*_meta.json
 
 # File hệ điều hành
 .DS_Store
@@ -40,4 +42,11 @@ Thumbs.db
 # Giữ lại cấu trúc thư mục rỗng trên Git (Bỏ qua nội dung nhưng không mất folder)
 !data/raw/.gitkeep
 !data/processed/.gitkeep
-!saved_models/.gitkeep
+!models/.gitkeep
+
+# Kết quả chạy (metrics, hình) và file nén
+outputs/
+*.zip
+
+# Hướng dẫn riêng cho trợ lý AI (không đưa lên repo)
+CLAUDE.md
