@@ -6,48 +6,33 @@ import pandas as pd
 from src.config import MODELS_DIR
 from src.experiment import Experiment
 from src.models.base import BaseRecommender
-from src.models.baseline import BiasBaseline, GlobalMean, ItemMean, Popularity, UserMean
+from src.models.baseline import Popularity
 from src.models.content_based import ContentBased
-from src.models.hybrid import WeightedHybrid
-from src.models.knn_cf import ItemKNN, UserKNN
-from src.models.mf import NMF, BiasedMF, ImplicitALS, PureSVD
-from src.models.neural import AutoRec, BPRMF, NeuMF
+from src.models.knn_cf import ItemKNN
+from src.models.mf import BiasedMF, ImplicitALS
+from src.models.neural import BPRMF, NeuMF
 
 # Siêu tham số lấy theo kết quả dò trên validation trong notebooks 04-07 (tiêu chí chọn: NDCG@10, src.experiment.SELECT_METRIC).
 MODELS = {
-    "global_mean": GlobalMean,
-    "user_mean": UserMean,
-    "item_mean": ItemMean,
-    "bias": BiasBaseline,
-    "popularity": lambda: Popularity("weighted"),
-    "popularity_count": lambda: Popularity("count"),
-    "user_knn": lambda: UserKNN(k=5, similarity="pearson"),
+    "popularity": Popularity,
+    "content": ContentBased,
     "item_knn": lambda: ItemKNN(k=5, similarity="pearson"),
-    "pure_svd": lambda: PureSVD(n_factors=30),
     "biased_mf": lambda: BiasedMF(n_factors=200, epochs=15),
-    "nmf": lambda: NMF(n_factors=80, n_iter=60),
     "implicit_als": lambda: ImplicitALS(n_factors=32, n_iter=10, alpha=20),
-    "content_genres": lambda: ContentBased("genres"),
-    "content": lambda: ContentBased("genres+title"),
-    # thành phần và trọng số hybrid giống notebook 06 (trọng số = kết quả dò lưới trên validation)
-    "hybrid": lambda: WeightedHybrid(
-        [BiasedMF(n_factors=50, epochs=15), ItemKNN(k=50, similarity="pearson"), ContentBased("genres+title")],
-        [0.3, 0.1, 0.6], label="Hybrid(MF+ItemKNN+Content)"),
-    "autorec": lambda: AutoRec(hidden=300, epochs=25),
     "neumf": lambda: NeuMF(n_factors=128, epochs=6),
     "bpr_mf": lambda: BPRMF(n_factors=32, epochs=20),
 }
 
 # Nhóm mô hình (= tên file outputs/metrics/<nhóm>.csv mà notebook 08 đọc) -> (nhãn Family, danh sách mô hình)
 FAMILIES = {
-    "baseline": ("Baseline", ["global_mean", "user_mean", "item_mean", "bias", "popularity", "popularity_count"]),
-    "knn": ("Collaborative (kNN)", ["user_knn", "item_knn"]),
-    "mf": ("Matrix Factorization", ["pure_svd", "biased_mf", "nmf", "implicit_als"]),
-    "content_hybrid": ("Content-based", ["content_genres", "content", "hybrid"]),
-    "deep": ("Deep learning", ["autorec", "neumf", "bpr_mf"]),
+    "baseline": ("Baseline", ["popularity"]),
+    "content": ("Content-based", ["content"]),
+    "knn": ("Collaborative (kNN)", ["item_knn"]),
+    "mf": ("Matrix Factorization", ["biased_mf", "implicit_als"]),
+    "deep": ("Deep learning", ["neumf", "bpr_mf"]),
 }
 
-DEFAULT_MODEL = "hybrid"
+DEFAULT_MODEL = "neumf"
 
 
 def create_model(key: str):
@@ -64,7 +49,7 @@ class FrozenModel(BaseRecommender):
     """Bản "đóng băng" của một mô hình đã fit: chỉ giữ ma trận điểm và chỉ mục, đủ cho predict/recommend.
 
     Lưu bản này thay vì cả mô hình để file .pkl nhỏ và nạp nhanh (mô hình gốc còn giữ nhiều ma trận
-    trung gian lớn, Hybrid còn giữ cả bảng train).
+    trung gian lớn).
     """
 
     def __init__(self, model: BaseRecommender, config: tuple):
@@ -131,9 +116,3 @@ def search_movies(exp: Experiment, query: str, n: int = 10) -> pd.DataFrame:
     hit = exp.movies[exp.movies["title"].str.contains(query, case=False, regex=False)]
     return hit.head(n).reset_index(drop=True)
 
-
-def family_label(family: str, model) -> str:
-    """Nhãn Family trong bảng metrics (notebook 06 tách riêng Hybrid khỏi Content-based)."""
-    if family == "content_hybrid" and isinstance(model, WeightedHybrid):
-        return "Hybrid"
-    return FAMILIES[family][0]

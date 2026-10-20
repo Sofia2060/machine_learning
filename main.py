@@ -4,7 +4,7 @@ Cách dùng (chạy từ bất kỳ thư mục nào, mọi đường dẫn tính
     python main.py                                   # chế độ tương tác (menu)
     python main.py prepare                           # tạo dữ liệu sạch, master, đặc trưng (= notebooks 01-03)
     python main.py info                              # thống kê dữ liệu và danh sách mô hình
-    python main.py recommend --user 1 -k 10          # gợi ý Top-10 cho user 1 (mô hình mặc định: hybrid)
+    python main.py recommend --user 1 -k 10          # gợi ý Top-10 cho user 1 (mô hình mặc định: neumf)
     python main.py recommend --user 1 --model biased_mf --retrain
     python main.py predict --user 1 --movie 1193     # dự đoán rating
     python main.py search "matrix"                   # tìm MovieID theo tên phim
@@ -97,7 +97,7 @@ def cmd_evaluate(exp, args):
         for key in rs.FAMILIES[family][1]:
             model = rs.create_model(key)
             row = run_model(model, exp)
-            row["Family"] = rs.family_label(family, model)
+            row["Family"] = rs.FAMILIES[family][0]
             rows.append(row)
             print(f"  {row['Model']:<32} NDCG@10={row['NDCG@10']:.4f}  HitRate@10={row['HitRate@10']:.4f}  "
                   f"({row['FitTime_s']:.1f}s)")

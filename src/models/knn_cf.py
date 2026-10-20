@@ -1,8 +1,8 @@
-"""Collaborative Filtering dựa trên láng giềng (memory-based): User-based và Item-based kNN.
+"""Collaborative Filtering dựa trên láng giềng (memory-based): Item-based kNN.
 
 Dự đoán theo dạng "kNN with baseline":
     r_ui = b_ui + sum_j sim(i,j) * (r_uj - b_uj) / sum_j |sim(i,j)|
-với b = mu + b_u + b_i, lấy tổng trên k láng giềng giống nhất đã được user chấm.
+với b = mu + b_u + b_i, lấy tổng trên k phim láng giềng giống nhất đã được user chấm.
 Phép tính độ tương đồng và tổng có trọng số chạy bằng PyTorch (GPU CUDA nếu có, tham số `device`).
 """
 import numpy as np
@@ -41,45 +41,22 @@ def _similarity(X: sparse.csr_matrix, center: bool, shrink: float, k: int,
     return sparse.csr_matrix(S.cpu().numpy())
 
 
-class _KNNBase(BaseRecommender):
+class ItemKNN(BaseRecommender):
     def __init__(self, k: int = 40, similarity: str = "cosine", shrink: float = 10.0, device: str = "auto"):
         assert similarity in ("cosine", "pearson")
         self.k, self.similarity, self.shrink = k, similarity, shrink
         self.device = get_device(device)
+        self.name = f"ItemKNN(k={k},{similarity})"
 
     def _fit(self):
         mu, bu, bi = fit_biases(self.u, self.i, self.r, self.n_users, self.n_items)
         self.base = (mu + bu[:, None] + bi[None, :]).astype(np.float32)
         resid = self.r - self.base[self.u, self.i]  # phần dư so với baseline, chỉ ở ô đã chấm
         self.E = sparse.csr_matrix((resid, (self.u, self.i)), shape=(self.n_users, self.n_items))
-        self._build_similarity()
-
-    def _aggregate(self, num: torch.Tensor, den: torch.Tensor) -> np.ndarray:
-        adj = torch.where(den > 0, num / den, torch.zeros_like(num))
-        return self.base + adj.cpu().numpy()
-
-
-class UserKNN(_KNNBase):
-    def __init__(self, k=40, similarity="cosine", shrink=10.0, device="auto"):
-        super().__init__(k, similarity, shrink, device)
-        self.name = f"UserKNN(k={k},{similarity})"
-
-    def _build_similarity(self):
-        self.S = _similarity(self.R, self.similarity == "pearson", self.shrink, self.k, self.device)
-
-    def _score_matrix(self):
-        S, E, B = (to_dense(m, self.device) for m in (self.S, self.E, self.B))
-        return self._aggregate(S @ E, S.abs() @ B)
-
-
-class ItemKNN(_KNNBase):
-    def __init__(self, k=40, similarity="cosine", shrink=10.0, device="auto"):
-        super().__init__(k, similarity, shrink, device)
-        self.name = f"ItemKNN(k={k},{similarity})"
-
-    def _build_similarity(self):
         self.S = _similarity(self.R.T.tocsr(), self.similarity == "pearson", self.shrink, self.k, self.device)
 
     def _score_matrix(self):
         S, E, B = (to_dense(m, self.device) for m in (self.S, self.E, self.B))
-        return self._aggregate(E @ S.T, B @ S.abs().T)
+        num, den = E @ S.T, B @ S.abs().T
+        adj = torch.where(den > 0, num / den, torch.zeros_like(num))
+        return self.base + adj.cpu().numpy()

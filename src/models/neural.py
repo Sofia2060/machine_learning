@@ -1,4 +1,4 @@
-"""Mô hình học sâu (PyTorch): AutoRec (dự đoán rating), NeuMF/NCF và BPR-MF (xếp hạng Top-N, implicit).
+"""Mô hình xếp hạng Top-N học từ phản hồi implicit (PyTorch): NeuMF/NCF và BPR-MF.
 
 Tất cả nhận tham số `device` ("auto" = dùng GPU CUDA nếu có, ngược lại CPU).
 """
@@ -9,53 +9,6 @@ from torch import nn
 from src.config import SEED
 from src.models.base import BaseRecommender
 from src.models.device import get_device
-
-
-class AutoRec(BaseRecommender):
-    """I-AutoRec (Sedhain 2015): mỗi phim là một vector rating của các user; autoencoder 1 lớp ẩn.
-
-    Loss chỉ tính trên ô đã chấm (mặt nạ). Đầu vào được trừ trung bình toàn cục.
-    """
-
-    def __init__(self, hidden: int = 200, epochs: int = 30, lr: float = 1e-3, weight_decay: float = 1e-3,
-                 batch_size: int = 256, seed: int = SEED, verbose: bool = False, device: str = "auto"):
-        self.hidden, self.epochs, self.lr, self.wd = hidden, epochs, lr, weight_decay
-        self.batch_size, self.seed, self.verbose = batch_size, seed, verbose
-        self.device = get_device(device)
-        self.name = f"AutoRec(h={hidden})"
-        self.history = []
-
-    def _fit(self):
-        torch.manual_seed(self.seed)
-        dev = self.device
-        X = torch.from_numpy(self.R.T.toarray()).to(dev)    # (n_items, n_users)
-        M = (X > 0).float()
-        Xc = (X - self.global_mean) * M
-        net = nn.Sequential(nn.Linear(self.n_users, self.hidden), nn.Sigmoid(),
-                            nn.Linear(self.hidden, self.n_users)).to(dev)
-        opt = torch.optim.Adam(net.parameters(), lr=self.lr, weight_decay=self.wd)
-        n = X.shape[0]
-        self.history = []
-        for ep in range(self.epochs):
-            perm = torch.randperm(n, device=dev)
-            total = torch.zeros((), device=dev)
-            for s in range(0, n, self.batch_size):
-                b = perm[s:s + self.batch_size]
-                out = net(Xc[b])
-                loss = (((out - Xc[b]) * M[b]) ** 2).sum() / M[b].sum()
-                opt.zero_grad()
-                loss.backward()
-                opt.step()
-                total += loss.detach() * len(b)
-            self.history.append(total.item() / n)
-            if self.verbose:
-                print(f"epoch {ep + 1:2d}  masked-MSE {total.item() / n:.4f}")
-        self.net, self._Xc = net, Xc
-
-    def _score_matrix(self):
-        with torch.no_grad():
-            out = self.net(self._Xc).cpu().numpy()          # (n_items, n_users)
-        return out.T + self.global_mean
 
 
 def _positives(model: BaseRecommender, min_rating: float):

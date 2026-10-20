@@ -1,50 +1,13 @@
-"""Matrix Factorization: PureSVD (SVD cắt cụt trên phần dư), BiasedMF/FunkSVD (SGD), NMF (có mặt nạ), Implicit ALS.
+"""Matrix Factorization: BiasedMF/FunkSVD (mini-batch Adam) và Implicit ALS.
 
 Mọi mô hình huấn luyện bằng PyTorch, nhận tham số `device` ("auto" = GPU CUDA nếu có, ngược lại CPU).
 """
 import numpy as np
 import torch
-from scipy import sparse
 
 from src.config import SEED
 from src.models.base import BaseRecommender
-from src.models.baseline import fit_biases
 from src.models.device import get_device, to_dense
-
-
-class PureSVD(BaseRecommender):
-    """SVD cắt cụt trên ma trận phần dư r - (mu + bu + bi); ô chưa chấm coi là 0.
-
-    Top-f vector suy biến lấy từ phân rã trị riêng của ma trận Gram (cạnh nhỏ hơn) bằng PyTorch trên device:
-    E ~ E V V^T với V = f vector riêng lớn nhất của E^T E (tương đương U_f S_f V_f^T của SVD).
-    """
-
-    def __init__(self, n_factors: int = 30, device: str = "auto"):
-        self.n_factors = n_factors
-        self.device = get_device(device)
-        self.name = f"PureSVD(f={n_factors})"
-
-    def _fit(self):
-        mu, bu, bi = fit_biases(self.u, self.i, self.r, self.n_users, self.n_items)
-        self.base = (mu + bu[:, None] + bi[None, :]).astype(np.float32)
-        resid = self.r - self.base[self.u, self.i]
-        E = sparse.csr_matrix((resid, (self.u, self.i)), shape=(self.n_users, self.n_items))
-        E = to_dense(E, self.device)
-        f = self.n_factors
-        if not 0 < f < min(self.n_users, self.n_items):
-            raise ValueError(f"n_factors phải trong khoảng 1..{min(self.n_users, self.n_items) - 1}")
-        if self.n_items <= self.n_users:
-            V = torch.linalg.eigh(E.T @ E).eigenvectors[:, -f:]       # (n_items, f)
-            US, Vt = E @ V, V.T
-        else:
-            U = torch.linalg.eigh(E @ E.T).eigenvectors[:, -f:]       # (n_users, f)
-            SVt = U.T @ E
-            s = SVt.norm(dim=1).clamp_min(1e-12)                      # trị suy biến
-            US, Vt = U * s, SVt / s[:, None]                          # Vt trực chuẩn như SVD
-        self.US, self.Vt = US.cpu().numpy(), Vt.cpu().numpy()
-
-    def _score_matrix(self):
-        return self.base + self.US @ self.Vt
 
 
 class BiasedMF(BaseRecommender):
@@ -95,37 +58,6 @@ class BiasedMF(BaseRecommender):
 
     def _score_matrix(self):
         return self.global_mean + self.bu[:, None] + self.bi[None, :] + self.P @ self.Q.T
-
-
-class NMF(BaseRecommender):
-    """Non-negative MF với mặt nạ (chỉ tối thiểu hóa sai số trên ô đã chấm), cập nhật nhân (Lee & Seung), PyTorch."""
-
-    def __init__(self, n_factors: int = 20, n_iter: int = 80, reg: float = 0.1, seed: int = SEED,
-                 device: str = "auto"):
-        self.n_factors, self.n_iter, self.reg, self.seed = n_factors, n_iter, reg, seed
-        self.device = get_device(device)
-        self.name = f"NMF(f={n_factors})"
-
-    def _fit(self):
-        rng = np.random.default_rng(self.seed)
-        k = self.n_factors
-        scale = np.sqrt(self.global_mean / k)
-        W0 = (rng.random((self.n_users, k), dtype=np.float32) + 0.5) * scale
-        H0 = (rng.random((k, self.n_items), dtype=np.float32) + 0.5) * scale
-        dev = self.device
-        R = to_dense(self.R, dev)
-        M = (R > 0).float()
-        W, H = to_dense(W0, dev), to_dense(H0, dev)
-        eps = 1e-9
-        for _ in range(self.n_iter):
-            WH = W @ H
-            W *= (R @ H.T) / ((M * WH) @ H.T + self.reg * W + eps)
-            WH = W @ H
-            H *= (W.T @ R) / (W.T @ (M * WH) + self.reg * H + eps)
-        self.W, self.H = W.cpu().numpy(), H.cpu().numpy()
-
-    def _score_matrix(self):
-        return self.W @ self.H
 
 
 class ImplicitALS(BaseRecommender):

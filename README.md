@@ -31,7 +31,7 @@ movie-recommender-system/
 |   |-- 03_feature_engineering.ipynb
 |   |-- 04_collaborative_knn.ipynb
 |   |-- 05_matrix_factorization.ipynb
-|   |-- 06_content_hybrid.ipynb
+|   |-- 06_content_based.ipynb
 |   |-- 07_deep_learning.ipynb
 |   `-- 08_evaluation_compare.ipynb
 |-- models/                  # mô hình đã huấn luyện (*.pkl, sinh bởi main.py)
@@ -44,7 +44,7 @@ movie-recommender-system/
 |   |-- data/preprocess.py   # tiền xử lý (logic notebook 01) + master dataset (notebook 02)
 |   |-- data/features.py     # feature engineering (logic notebook 03)
 |   |-- evaluation/metrics.py
-|   `-- models/              # baseline, knn_cf, mf, content_based, hybrid, neural
+|   `-- models/              # baseline, knn_cf, mf, content_based, neural
 |-- main.py                  # ứng dụng chính
 |-- .gitignore
 |-- requirements.txt
@@ -115,16 +115,17 @@ Quy trình kỹ thuật của dự án được tổ chức tuần tự qua 5 t�
   - data/processed/featured_dataset.parquet (1.000.209 dòng x 90 cột đặc trưng, tệp nén Snappy 35,4 MB).
 
 #### 3.4. 04 - 07: Huấn luyện các nhóm mô hình
-Mọi notebook dùng chung `src.experiment.load_experiment()`: cùng dữ liệu, cùng phép chia train/test 80/20 theo từng người dùng, cùng seed. Siêu tham số được dò trên tập validation tách từ train theo tiêu chí NDCG@10 (`src.experiment.validate`); kết quả trên test lưu vào `outputs/metrics/<nhóm>.csv`.
-- 04_collaborative_knn.ipynb: UserKNN, ItemKNN (cosine / Pearson, dò k).
-- 05_matrix_factorization.ipynb: PureSVD, BiasedMF (Funk SVD), NMF, Implicit ALS.
-- 06_content_hybrid.ipynb: Content-based (thể loại, thể loại + tiêu đề) và Hybrid có trọng số (MF + ItemKNN + Content).
-- 07_deep_learning.ipynb: AutoRec, NeuMF, BPR-MF (PyTorch, tự dùng GPU nếu có).
-- Mọi mô hình trừ nhóm Baseline (kNN, PureSVD, BiasedMF, NMF, Implicit ALS, Content-based, Hybrid, Deep learning) tính toán bằng PyTorch và tự dùng GPU CUDA nếu có; truyền `device="cpu"` vào hàm khởi tạo để ép chạy CPU.
+Dự án so sánh 7 mô hình: Popularity(count), Content-based, ItemKNN, BiasedMF, ImplicitALS, NeuMF, BPR-MF. Mọi notebook dùng chung `src.experiment.load_experiment()`: cùng dữ liệu, cùng phép chia train/test 80/20 theo từng người dùng, cùng seed. Siêu tham số được dò trên tập validation tách từ train theo tiêu chí NDCG@10 (`src.experiment.validate`); kết quả trên test lưu vào `outputs/metrics/<nhóm>.csv`.
+- 04_collaborative_knn.ipynb: ItemKNN (cosine / Pearson, dò k).
+- 05_matrix_factorization.ipynb: BiasedMF (Funk SVD), Implicit ALS.
+- 06_content_based.ipynb: Content-based (thể loại + TF-IDF tiêu đề + thập niên).
+- 07_deep_learning.ipynb: NeuMF, BPR-MF (PyTorch, tự dùng GPU nếu có).
+- Mọi mô hình trừ Popularity (ItemKNN, BiasedMF, Implicit ALS, Content-based, NeuMF, BPR-MF) tính toán bằng PyTorch và tự dùng GPU CUDA nếu có; truyền `device="cpu"` vào hàm khởi tạo để ép chạy CPU.
 
 #### 3.5. 08_evaluation_compare.ipynb (So sánh toàn bộ mô hình)
-- Gộp `outputs/metrics/{baseline,knn,mf,content_hybrid,deep}.csv`, so sánh Precision@10, Recall@10, NDCG@10, HitRate@10, Coverage@20, Novelty@20, Diversity@20.
-- Bảng `baseline.csv` không có notebook riêng, sinh bằng `python main.py evaluate --family baseline`.
+- Gộp `outputs/metrics/{baseline,content,knn,mf,deep}.csv`, so sánh Precision@10, Recall@10, NDCG@10, HitRate@10, Coverage@20, Novelty@20, Diversity@20.
+- Bảng `baseline.csv` (Popularity(count)) không có notebook riêng, sinh bằng `python main.py evaluate --family baseline`.
+- Phân tích cold-start: Recall@20 theo mức độ phổ biến của phim cho cả 7 mô hình.
 
 ---
 
@@ -168,7 +169,7 @@ Thực hiện chạy lần lượt các tệp notebook theo trình tự sau:
 python main.py prepare                          # tạo cleaned_*.csv, master_dataset.csv, featured_dataset.parquet (= notebooks 01-03)
 python main.py                                  # menu tương tác
 python main.py info                             # thống kê dữ liệu, danh sách mô hình
-python main.py recommend --user 1 -k 10         # gợi ý Top-10 (mặc định mô hình hybrid)
+python main.py recommend --user 1 -k 10         # gợi ý Top-10 (mặc định mô hình neumf)
 python main.py recommend --user 1 --model biased_mf --retrain
 python main.py predict --user 1 --movie 2571    # dự đoán rating
 python main.py search "matrix"                  # tìm MovieID theo tên
