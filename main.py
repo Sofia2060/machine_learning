@@ -10,6 +10,7 @@ Cách dùng (chạy từ bất kỳ thư mục nào, mọi đường dẫn tính
     python main.py search "matrix"                   # tìm MovieID theo tên phim
     python main.py evaluate --family baseline        # đánh giá một nhóm mô hình -> outputs/metrics/<family>.csv
     python main.py evaluate --family all
+    python main.py export                            # xuất NeuMF cho phần mềm -> models/neumf.npz + neumf_meta.json
 
 Mô hình đã huấn luyện được lưu ở models/<tên>.pkl và nạp lại ở lần chạy sau.
 """
@@ -21,6 +22,7 @@ import pandas as pd
 from src import recommender as rs
 from src.data.features import build_full_feature_pipeline, save_featured
 from src.data.preprocess import build_master_dataset, preprocess_raw, save_cleaned, save_master
+from src.config import MODELS_DIR
 from src.experiment import load_experiment, run_model, save_metrics
 
 pd.set_option("display.width", 200)
@@ -106,6 +108,21 @@ def cmd_evaluate(exp, args):
         print(f"[{family}] đã lưu {path}")
 
 
+def cmd_export(exp, args):
+    """Huấn luyện NeuMF (cấu hình trong src.recommender) rồi xuất trọng số cho phần mềm (src.inference).
+
+    --data all  : học trên toàn bộ rating (train + test) – bản dùng cho phần mềm.
+    --data train: chỉ học trên train – đúng mô hình đã đánh giá trên test trong notebooks.
+    """
+    from src.export import export_neumf          # cần torch; chỉ nạp khi xuất
+    data = pd.concat([exp.train, exp.test], ignore_index=True) if args.data == "all" else exp.train
+    model = rs.create_model("neumf")
+    print(f"Đang huấn luyện {model.name} trên {len(data):,} rating ({args.data}) ...")
+    model.fit(data, exp.user2idx, exp.item2idx, exp.movies)
+    for path in export_neumf(model, args.out, {"trained_on": args.data}):
+        print(f"Đã lưu {path}")
+
+
 def interactive(exp):
     model_key = rs.DEFAULT_MODEL
     model = None
@@ -178,6 +195,11 @@ def build_parser():
 
     e = sub.add_parser("evaluate", help="huấn luyện + đánh giá trên test, lưu outputs/metrics/<family>.csv")
     e.add_argument("--family", default="all", choices=["all", *rs.FAMILIES])
+
+    x = sub.add_parser("export", help="xuất NeuMF thành .npz + _meta.json cho phần mềm (src.inference)")
+    x.add_argument("--data", default="all", choices=["all", "train"],
+                   help="all = học trên toàn bộ rating (mặc định), train = chỉ tập train như khi đánh giá")
+    x.add_argument("--out", default=str(MODELS_DIR / "neumf.npz"), help="đường dẫn file .npz")
     return p
 
 
@@ -192,7 +214,7 @@ def main(argv=None):
         return 0
     exp = load_experiment()
     commands = {"info": cmd_info, "recommend": cmd_recommend, "predict": cmd_predict,
-                "search": cmd_search, "evaluate": cmd_evaluate}
+                "search": cmd_search, "evaluate": cmd_evaluate, "export": cmd_export}
     if args.command is None:
         interactive(exp)
         return 0
