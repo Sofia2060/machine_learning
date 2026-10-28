@@ -200,7 +200,14 @@ Mô hình chính của phần mềm là **NeuMF** (NDCG@10 cao nhất, xem noteb
    rec.is_personalized(uid)                      # False -> user mới, đang gợi ý theo độ phổ biến
    ```
    - Danh sách phim đã chấm lấy **trực tiếp từ MySQL** nên phim user vừa chấm trên giao diện sẽ không bị gợi ý lại.
-   - User đăng ký sau lần xuất gần nhất chưa có trong mô hình: phần mềm tự gợi ý theo độ phổ biến. Phim thêm vào CSDL sau lần xuất cũng chưa được gợi ý. Xuất lại mô hình định kỳ để cập nhật.
+   - User đăng ký sau lần xuất gần nhất chưa có trong mô hình: `recommend` gợi ý theo độ phổ biến. Khi user này đã chấm phim, dùng **fold-in** để có gợi ý cá nhân hóa ngay, không cần huấn luyện lại:
+     ```python
+     cur.execute("SELECT movie_id, rating FROM ratings WHERE user_id = %s", (uid,))
+     ratings = cur.fetchall()                       # [(movie_id, số sao), ...] – đúng 2 cột
+     top = rec.recommend_from_ratings(ratings, k=10) if not rec.is_personalized(uid) else rec.recommend(uid, 10, [m for m, _ in ratings])
+     ```
+     Fold-in giữ nguyên trọng số đã học, chỉ học vector của user từ các phim họ chấm >= 4 sao (khoảng 0.3 s, nên gọi trong `QThread`). User chưa có phim nào >= 4 sao vẫn nhận gợi ý theo độ phổ biến.
+   - Phim thêm vào CSDL sau lần xuất chưa được gợi ý. Xuất lại mô hình định kỳ để cập nhật cả user mới lẫn phim mới.
    - Điểm NeuMF là điểm xếp hạng (logit), không phải số sao 1–5.
    - Truy vấn MySQL nên chạy trong `QThread` để giao diện không bị đứng; `recommend` đủ nhanh để gọi ở luồng chính.
 3. Thư viện cho phần mềm: `numpy` (cho `src.inference`), `PyQt6` và thư viện kết nối MySQL (ví dụ `mysql-connector-python` hoặc `PyMySQL`). Không cần `torch`, `scipy`, `scikit-learn`. Khi phát hành, đóng gói phần mềm (ví dụ bằng PyInstaller) kèm thư mục `models/main_model/` (`neumf.npz` và `neumf_meta.json`), rồi nén cả thư mục thành zip. Khi đóng gói, nên tính đường dẫn tới `neumf.npz` theo thư mục của file chạy (ví dụ `Path(sys.executable).parent` hoặc `sys._MEIPASS` với PyInstaller) thay vì đường dẫn tương đối, và nhớ kèm cả file `_meta.json`.
