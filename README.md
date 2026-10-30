@@ -184,12 +184,14 @@ Lần đầu chạy, phép chia train/test được cache ở `data/processed/ex
 #### Bước 6: Nhúng mô hình vào phần mềm (PyQt6 + MySQL)
 Mô hình chính của phần mềm là **NeuMF** (NDCG@10 cao nhất, xem notebook 08). Phần mềm **không cần torch**: mô hình được xuất thành file numpy và tính điểm bằng numpy.
 
-1. Xuất mô hình (trên máy dev có torch, có GPU càng nhanh, khoảng 1 phút):
+Mô hình đã xuất sẵn nằm trong repo (`models/main_model/neumf.npz` + `neumf_meta.json`, học trên toàn bộ 1 triệu rating), nên người làm giao diện chỉ cần clone repo và cài `pip install -r requirements-app.txt` (numpy, PyQt6, mysql-connector-python; Python >= 3.10).
+
+1. Xuất lại mô hình khi cần (trên máy dev có torch, có GPU càng nhanh, khoảng 1 phút), rồi commit file mới:
    ```bash
    python main.py export                 # học trên toàn bộ rating -> models/main_model/neumf.npz (~9 MB) + neumf_meta.json
    python main.py export --data train    # chỉ học trên tập train (đúng mô hình đã đánh giá trong notebooks)
    ```
-2. Trong phần mềm, nạp mô hình **một lần** khi khởi động rồi gọi `recommend` (mỗi lần khoảng 4 ms trên CPU):
+2. Trong phần mềm, nạp mô hình **một lần** khi khởi động (khoảng 0.3 s) rồi gọi `recommend` (mỗi lần khoảng 10 ms trên CPU):
    ```python
    from src.inference import NeuMFRecommender
 
@@ -204,10 +206,14 @@ Mô hình chính của phần mềm là **NeuMF** (NDCG@10 cao nhất, xem noteb
      ```python
      cur.execute("SELECT movie_id, rating FROM ratings WHERE user_id = %s", (uid,))
      ratings = cur.fetchall()                       # [(movie_id, số sao), ...] – đúng 2 cột
-     top = rec.recommend_from_ratings(ratings, k=10) if not rec.is_personalized(uid) else rec.recommend(uid, 10, [m for m, _ in ratings])
+     if rec.is_personalized(uid):
+         top = rec.recommend(uid, 10, seen=[m for m, _ in ratings])
+     else:
+         top = rec.recommend_from_ratings(ratings, k=10)
      ```
      Fold-in giữ nguyên trọng số đã học, chỉ học vector của user từ các phim họ chấm >= 4 sao (khoảng 0.3 s, nên gọi trong `QThread`). User chưa có phim nào >= 4 sao vẫn nhận gợi ý theo độ phổ biến.
+   - **ID trong MySQL phải khớp với mô hình** (sai thì không báo lỗi mà gợi ý sai): `movie_id` phải đúng MovieID của MovieLens; mô hình đã có user 1–6040 nên user đăng ký mới phải có id **từ 6041 trở đi** (ví dụ `ALTER TABLE users AUTO_INCREMENT = 6041`), hoặc import 6040 user MovieLens vào CSDL. Nếu user mới lấy id 1, phần mềm sẽ đưa ra gợi ý của user 1 trong MovieLens.
    - Phim thêm vào CSDL sau lần xuất chưa được gợi ý. Xuất lại mô hình định kỳ để cập nhật cả user mới lẫn phim mới.
    - Điểm NeuMF là điểm xếp hạng (logit), không phải số sao 1–5.
    - Truy vấn MySQL nên chạy trong `QThread` để giao diện không bị đứng; `recommend` đủ nhanh để gọi ở luồng chính.
-3. Thư viện cho phần mềm: `numpy` (cho `src.inference`), `PyQt6` và thư viện kết nối MySQL (ví dụ `mysql-connector-python` hoặc `PyMySQL`). Không cần `torch`, `scipy`, `scikit-learn`. Khi phát hành, đóng gói phần mềm (ví dụ bằng PyInstaller) kèm thư mục `models/main_model/` (`neumf.npz` và `neumf_meta.json`), rồi nén cả thư mục thành zip. Khi đóng gói, nên tính đường dẫn tới `neumf.npz` theo thư mục của file chạy (ví dụ `Path(sys.executable).parent` hoặc `sys._MEIPASS` với PyInstaller) thay vì đường dẫn tương đối, và nhớ kèm cả file `_meta.json`.
+3. Thư viện cho phần mềm: `requirements-app.txt` (`numpy` cho `src.inference`, `PyQt6`, `mysql-connector-python`). Không cần `torch`, `scipy`, `scikit-learn`. Khi phát hành, đóng gói phần mềm (ví dụ bằng PyInstaller) kèm thư mục `models/main_model/` (`neumf.npz` và `neumf_meta.json`), rồi nén cả thư mục thành zip. Khi đóng gói, nên tính đường dẫn tới `neumf.npz` theo thư mục của file chạy (ví dụ `Path(sys.executable).parent` hoặc `sys._MEIPASS` với PyInstaller) thay vì đường dẫn tương đối, và nhớ kèm cả file `_meta.json`.
