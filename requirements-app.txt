@@ -1,0 +1,6 @@
+# Thư viện cho phần mềm (PyQt6 + MySQL) dùng mô hình đã xuất: src/inference.py chỉ cần numpy.
+# Cần Python >= 3.10. Cài: pip install -r requirements-app.txt
+# (requirements.txt là môi trường đầy đủ để huấn luyện/notebooks, có torch.)
+numpy>=1.24
+PyQt6>=6.5
+mysql-connector-python>=8.0

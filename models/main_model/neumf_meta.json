@@ -1,0 +1,18 @@
+{
+  "format_version": 1,
+  "model": "NeuMF(f=128)",
+  "n_factors": 128,
+  "mlp_layers": [
+    64,
+    32,
+    16
+  ],
+  "n_mlp": 3,
+  "epochs": 6,
+  "seed": 42,
+  "n_users": 6040,
+  "n_items": 3706,
+  "n_ratings": 1000209,
+  "created_at": "2026-10-20 21:21:50",
+  "trained_on": "all"
+}

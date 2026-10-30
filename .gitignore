@@ -16,7 +16,8 @@ data/processed/
 *.pkl
 *.joblib
 *.npz
-models/main_model/*_meta.json
+# Mô hình chính của phần mềm (~9 MB) được commit để cả nhóm dùng ngay sau khi clone
+!models/main_model/neumf.npz
 
 # File hệ điều hành
 .DS_Store
