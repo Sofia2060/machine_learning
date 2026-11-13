@@ -4,3 +4,8 @@
 numpy>=1.24
 PyQt6>=6.5
 mysql-connector-python>=8.0
+pandas>=2.0
+matplotlib>=3.8
+# Nạp dữ liệu vào MySQL bằng src/database.py
+sqlalchemy>=2.0
+pymysql>=1.1

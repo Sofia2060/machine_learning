@@ -48,6 +48,21 @@ movie-recommender-system/
 |   |-- data/features.py     # feature engineering (logic notebook 03)
 |   |-- evaluation/metrics.py
 |   `-- models/              # baseline, knn_cf, mf, content_based, neural
+|-- mysql/
+|   `-- mrs_schema.sql       # tạo CSDL movie_recommender_system (8 bảng)
+|-- ui/                      # phần mềm CineMatch: 9 màn hình + hộp thoại chi tiết phim (.ui, .py do pyuic6 sinh, Ex.py)
+|-- images/                  # icon, banner cho giao diện (.ui tham chiếu ../images/)
+|-- app/                     # phần xử lý của phần mềm
+|   |-- config/              # config.example.json (sao chép thành config.json, sửa mật khẩu MySQL)
+|   |-- connectors/          # kết nối MySQL
+|   |-- models/              # lớp thực thể Customer, Employee, Movie, Rating
+|   |-- dal/                 # truy vấn dữ liệu (customerDAO, movieDAO, ratingDAO, ...)
+|   |-- services/            # đăng nhập, khóa tạm, OTP
+|   |-- ml/                  # nạp NeuMF, Top-N, độ tương thích, kích hoạt/huấn luyện lại mô hình
+|   |-- utils/               # cấu hình, bảo mật, bảng, biểu đồ, poster, bổ sung CSDL
+|   `-- setup_database.py    # bổ sung cột/bảng phần mềm cần + đăng ký mô hình
+|-- test/                    # file chạy thử từng màn hình
+|-- run_app.py               # mở phần mềm
 |-- main.py                  # ứng dụng chính
 |-- .gitignore
 |-- requirements.txt
@@ -64,7 +79,10 @@ Mô tả vai trò các thư mục chính:
 - notebooks: Chứa toàn bộ các sổ tay Jupyter Notebook thực hiện theo quy trình phân tích và huấn luyện mô hình.
 - models: Lưu trữ các tệp mô hình đã huấn luyện phục vụ cho việc suy luận dự báo.
 - src: Chứa mã nguồn Python mô-đun hóa kết nối cơ sở dữ liệu MySQL và bộ máy gợi ý.
-- ui: Chứa mã nguồn giao diện tương tác người dùng và bảng điều khiển quản trị.
+- mysql: Script tạo cơ sở dữ liệu MySQL.
+- ui, images: Giao diện phần mềm (Qt Designer) và hình ảnh.
+- app: Phần xử lý của phần mềm (kết nối CSDL, truy vấn, nghiệp vụ, mô hình).
+- test: File chạy thử từng màn hình.
 
 ---
 
@@ -217,3 +235,18 @@ Mô hình đã xuất sẵn nằm trong repo (`models/main_model/neumf.npz` + `n
    - Điểm NeuMF là điểm xếp hạng (logit), không phải số sao 1–5.
    - Truy vấn MySQL nên chạy trong `QThread` để giao diện không bị đứng; `recommend` đủ nhanh để gọi ở luồng chính.
 3. Thư viện cho phần mềm: `requirements-app.txt` (`numpy` cho `src.inference`, `PyQt6`, `mysql-connector-python`). Không cần `torch`, `scipy`, `scikit-learn`. Khi phát hành, đóng gói phần mềm (ví dụ bằng PyInstaller) kèm thư mục `models/main_model/` (`neumf.npz` và `neumf_meta.json`), rồi nén cả thư mục thành zip. Khi đóng gói, nên tính đường dẫn tới `neumf.npz` theo thư mục của file chạy (ví dụ `Path(sys.executable).parent` hoặc `sys._MEIPASS` với PyInstaller) thay vì đường dẫn tương đối, và nhớ kèm cả file `_meta.json`.
+
+#### Bước 7: Chạy phần mềm CineMatch (PyQt6 + MySQL)
+Chạy các lệnh ở thư mục gốc dự án:
+```bash
+pip install -r requirements-app.txt
+mysql -u root -p < mysql/mrs_schema.sql                   # 1. tạo CSDL movie_recommender_system
+python src/database.py                                    # 2. nạp dữ liệu (cần data/processed/cleaned_*.csv từ notebook 01)
+copy app\config\config.example.json app\config\config.json   # 3. sửa mục "database" (mật khẩu MySQL); macOS/Linux dùng cp
+python run_app.py                                         # 4. mở phần mềm
+```
+- `src/database.py` đọc mật khẩu MySQL từ biến môi trường `DB_PASS` (hoặc sửa trực tiếp trong file).
+- Lần đầu mở, phần mềm tự bổ sung các cột/bảng hỗ trợ (khóa tạm đăng nhập, đánh giá không hợp lệ, điểm trung bình tính sẵn, OTP, nhật ký quản trị, phiên bản mô hình) và đăng ký mô hình `models/main_model/neumf.npz`. Không sửa hay xóa dữ liệu của 8 bảng gốc. Có thể chạy riêng bước này: `python app/setup_database.py`.
+- Tài khoản: `admin` / `123456` (quản trị), `user_1` … `user_6040` / `123456` (khách hàng), hoặc tự đăng ký. Mật khẩu SHA-256 của dữ liệu mẫu được băm lại bằng PBKDF2 có salt ở lần đăng nhập đúng đầu tiên.
+- Chạy thử từng màn hình: các file trong `test/` (vd `python test/test_user.py`, `python test/test_admin_dashboard.py`).
+- Sửa giao diện: mở file `.ui` trong `ui/` bằng Qt Designer, rồi chạy `pyuic6 XxxMainWindow.ui -o XxxMainWindow.py` trong thư mục `ui`.

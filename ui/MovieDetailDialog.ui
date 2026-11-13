@@ -1,0 +1,591 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>Dialog</class>
+ <widget class="QDialog" name="Dialog">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>760</width>
+    <height>560</height>
+   </rect>
+  </property>
+  <property name="minimumSize">
+   <size>
+    <width>760</width>
+    <height>520</height>
+   </size>
+  </property>
+  <property name="windowTitle">
+   <string>CineMatch - Chi tiết phim</string>
+  </property>
+  <property name="windowIcon">
+   <iconset>
+    <normaloff>../images/ic_logo.png</normaloff>
+    ../images/ic_logo.png
+   </iconset>
+  </property>
+  <property name="styleSheet">
+   <string notr="true">QMainWindow { background-color: #F3F5F9; }
+QWidget { font-family: "Segoe UI"; font-size: 10pt; color: #1F2937; }
+QWidget#centralwidget { background-color: #F3F5F9; }
+QLabel { background: transparent; }
+QLabel[role="title"] { font-size: 20pt; font-weight: 700; color: #111827; }
+QLabel[role="subtitle"] { font-size: 10pt; color: #6B7280; }
+QLabel[role="field"] { font-weight: 600; color: #374151; }
+QLabel[role="section"] { font-size: 13pt; font-weight: 700; color: #1F2A44; }
+QLabel[role="step"] { font-size: 11pt; font-weight: 700; color: #2563EB; }
+QLabel[role="muted"] { color: #6B7280; }
+QLabel[role="pageTitle"] { font-size: 15pt; font-weight: 700; color: #111827; }
+QLabel[role="info"] { background-color: #FFFBEB; border: 1px solid #FDE68A; border-radius: 10px; padding: 10px 14px; color: #92400E; }
+QLineEdit, QComboBox, QSpinBox, QDateEdit { background-color: #FFFFFF; border: 1px solid #CBD5E1; border-radius: 8px; padding: 7px 10px; min-height: 20px; }
+QLineEdit:focus, QComboBox:focus, QSpinBox:focus, QDateEdit:focus { border: 1px solid #2563EB; }
+QLineEdit:disabled, QComboBox:disabled, QDateEdit:disabled, QSpinBox:disabled { background-color: #F1F5F9; color: #94A3B8; }
+QLineEdit[readOnly="true"] { background-color: #F8FAFC; color: #64748B; }
+QComboBox::drop-down { border: none; width: 26px; }
+QComboBox::down-arrow, QDateEdit::down-arrow { image: url(../images/ic_down.png); width: 14px; height: 14px; }
+QDateEdit::drop-down { border: none; width: 26px; }
+QComboBox QAbstractItemView { background-color: #FFFFFF; border: 1px solid #CBD5E1; selection-background-color: #DBEAFE; selection-color: #111827; outline: 0; }
+QPushButton { background-color: #2563EB; color: #FFFFFF; border: none; border-radius: 8px; padding: 8px 16px; font-weight: 600; }
+QPushButton:hover { background-color: #1D4ED8; }
+QPushButton:pressed { background-color: #1E40AF; }
+QPushButton:disabled { background-color: #BFDBFE; color: #EFF6FF; }
+QPushButton[secondary="true"] { background-color: #FFFFFF; color: #2563EB; border: 1px solid #93C5FD; }
+QPushButton[secondary="true"]:hover { background-color: #EFF6FF; border: 1px solid #2563EB; }
+QPushButton[secondary="true"]:disabled { color: #94A3B8; border: 1px solid #E2E8F0; background-color: #F8FAFC; }
+QPushButton[danger="true"] { background-color: #DC2626; }
+QPushButton[danger="true"]:hover { background-color: #B91C1C; }
+QPushButton[success="true"] { background-color: #16A34A; }
+QPushButton[success="true"]:hover { background-color: #15803D; }
+QPushButton[dangerOutline="true"] { background-color: #FFFFFF; color: #DC2626; border: 1px solid #FCA5A5; }
+QPushButton[dangerOutline="true"]:hover { background-color: #FEF2F2; border: 1px solid #DC2626; }
+QPushButton[link="true"] { background-color: transparent; color: #2563EB; padding: 2px 4px; border: none; font-weight: 600; }
+QPushButton[link="true"]:hover { color: #1E40AF; text-decoration: underline; }
+QCheckBox, QRadioButton { spacing: 8px; background: transparent; }
+QCheckBox::indicator, QRadioButton::indicator { width: 16px; height: 16px; }
+QCheckBox::indicator { border: 1px solid #94A3B8; border-radius: 4px; background-color: #FFFFFF; }
+QCheckBox::indicator:checked { border: 1px solid #2563EB; background-color: #2563EB; image: url(../images/ic_tick.png); }
+QRadioButton::indicator { border: 1px solid #94A3B8; border-radius: 8px; background-color: #FFFFFF; }
+QRadioButton::indicator:checked { border: 1px solid #2563EB; background-color: qradialgradient(cx:0.5, cy:0.5, radius:0.5, fx:0.5, fy:0.5, stop:0 #2563EB, stop:0.55 #2563EB, stop:0.65 #FFFFFF, stop:1 #FFFFFF); }
+QSpinBox { padding-right: 24px; }
+QSpinBox::up-button, QSpinBox::down-button { subcontrol-origin: border; width: 22px; border: none; background: transparent; }
+QSpinBox::up-button { subcontrol-position: top right; }
+QSpinBox::down-button { subcontrol-position: bottom right; }
+QSpinBox::up-arrow { image: url(../images/ic_up.png); width: 14px; height: 14px; }
+QSpinBox::down-arrow { image: url(../images/ic_down.png); width: 14px; height: 14px; }
+QFrame[card="true"] { background-color: #FFFFFF; border: 1px solid #E5E7EB; border-radius: 12px; }
+QGroupBox { background-color: #FFFFFF; border: 1px solid #E5E7EB; border-radius: 12px; margin-top: 24px; padding: 16px 12px 12px 12px; font-size: 11pt; font-weight: 700; color: #1F2A44; }
+QGroupBox::title { subcontrol-origin: margin; subcontrol-position: top left; left: 12px; padding: 0px 6px; }
+QTableWidget { background-color: #FFFFFF; border: 1px solid #E5E7EB; border-radius: 10px; gridline-color: #F1F5F9; alternate-background-color: #F8FAFC; selection-background-color: #DBEAFE; selection-color: #111827; }
+QHeaderView::section { background-color: #EEF2FF; color: #1F2A44; font-weight: 700; padding: 7px 6px; border: none; border-right: 1px solid #E0E7FF; border-bottom: 1px solid #E0E7FF; }
+QTabWidget::pane { border: none; background: transparent; }
+QTabBar::tab { background: transparent; color: #64748B; padding: 10px 22px; font-weight: 700; border: none; border-bottom: 3px solid transparent; margin-right: 6px; }
+QTabBar::tab:selected { color: #2563EB; border-bottom: 3px solid #2563EB; }
+QTabBar::tab:hover { color: #1D4ED8; }
+QScrollArea { border: none; background: transparent; }
+QWidget#scrollAreaHomeContents, QWidget#scrollAreaOverviewContents, QWidget#scrollAreaCustomersContents, QWidget#scrollAreaMoviesContents, QWidget#scrollAreaStatsContents { background: transparent; }
+QStatusBar { background-color: #FFFFFF; color: #64748B; border-top: 1px solid #E5E7EB; }
+QListWidget { background-color: #FFFFFF; border: 1px solid #E5E7EB; border-radius: 10px; padding: 6px; outline: 0; }
+QListWidget::item { padding: 8px 8px; border-radius: 6px; }
+QListWidget::item:selected { background-color: #DBEAFE; color: #1E3A8A; }
+QListWidget::item:hover { background-color: #F1F5F9; }
+QFrame#frameHeader { background-color: #FFFFFF; border-bottom: 1px solid #E5E7EB; }
+QFrame#frameSidebar { background-color: #1F2A44; }
+QFrame#frameForm { background-color: #FFFFFF; }
+QFrame#frameBanner { border-image: url(../images/ic_banner.png) 0 0 0 0 stretch stretch; }
+QLabel[banner="title"] { color: #FFFFFF; font-size: 28pt; font-weight: 800; }
+QLabel[banner="text"] { color: #E2E8F0; font-size: 11pt; }
+QLabel[banner="foot"] { color: #94A3B8; font-size: 9pt; }
+QLabel#labelSidebarTitle { color: #FFFFFF; font-size: 14pt; font-weight: 800; }
+QLabel#labelSidebarSub { color: #94A3B8; font-size: 9pt; }
+QPushButton[nav="true"] { background-color: transparent; color: #CBD5E1; text-align: left; padding: 11px 14px; border-radius: 8px; font-weight: 600; }
+QPushButton[nav="true"]:hover { background-color: #2C3A5C; color: #FFFFFF; }
+QPushButton[active="true"] { background-color: #2563EB; color: #FFFFFF; }
+QLabel[kpi="value"] { font-size: 19pt; font-weight: 800; color: #111827; }
+QLabel[kpi="caption"] { font-size: 9pt; font-weight: 600; color: #6B7280; }
+QFrame#framePredict { background-color: #FFFBEB; border: 1px solid #FDE68A; border-radius: 12px; }
+QLabel#labelPredictValue { font-size: 26pt; font-weight: 800; color: #B45309; }
+QLabel#labelPredictCaption { font-weight: 700; color: #92400E; }
+QPushButton[chip="true"] { background-color: #FFFFFF; color: #334155; border: 1px solid #CBD5E1; border-radius: 18px; padding: 9px 16px; font-weight: 600; }
+QPushButton[chip="true"]:hover { border: 1px solid #2563EB; color: #1D4ED8; background-color: #FFFFFF; }
+QPushButton[chip="true"]:checked { background-color: #2563EB; color: #FFFFFF; border: 1px solid #2563EB; }
+QLabel[role="hint"] { color: #94A3B8; font-size: 9pt; }
+QLabel[role="countdown"] { font-weight: 700; color: #B45309; }
+QLabel[role="cardTitle"] { font-size: 11.5pt; font-weight: 700; color: #111827; }
+QLabel[role="insight"] { color: #475569; }
+QLabel[role="badge"] { background-color: #EEF2FF; color: #3730A3; border-radius: 10px; padding: 4px 10px; font-weight: 700; font-size: 9pt; }
+QFrame#frameFilterBar { background-color: #FFFFFF; border: 1px solid #E5E7EB; border-radius: 12px; }
+QFrame#frameHighlights { background-color: #F8FAFF; border: 1px solid #C7D2FE; border-radius: 12px; }
+QProgressBar { border: 1px solid #CBD5E1; border-radius: 8px; background-color: #FFFFFF; text-align: center; height: 18px; }
+QProgressBar::chunk { background-color: #2563EB; border-radius: 7px; }
+QFrame[movieCard="true"] { background-color: #FFFFFF; border: 1px solid #E5E7EB; border-radius: 12px; }
+QFrame[movieCard="true"]:hover { border: 1px solid #60A5FA; background-color: #F8FBFF; }
+QLabel[role="match"] { background-color: #DCFCE7; color: #166534; border-radius: 9px; padding: 2px 8px; font-weight: 700; font-size: 9pt; }
+QLabel[role="cardScore"] { color: #B45309; font-weight: 700; font-size: 9.5pt; }
+QFrame#frameHistoryFilter { background-color: #FFFFFF; border: 1px solid #E5E7EB; border-radius: 12px; }
+QWidget#pageBrowse, QWidget#pageResults, QWidget#scrollAreaResultsContents, QWidget#widgetRecommendSection { background: transparent; }
+QDialog { background-color: #F3F5F9; }
+QProgressBar#progressBarMatch { border: none; border-radius: 5px; background-color: #FDE68A; }
+QProgressBar#progressBarMatch::chunk { border-radius: 5px; background-color: #16A34A; }
+</string>
+  </property>
+  <property name="modal">
+   <bool>true</bool>
+  </property>
+  <layout class="QVBoxLayout" name="verticalLayoutDialog">
+   <property name="spacing">
+    <number>14</number>
+   </property>
+   <property name="leftMargin">
+    <number>22</number>
+   </property>
+   <property name="topMargin">
+    <number>20</number>
+   </property>
+   <property name="rightMargin">
+    <number>22</number>
+   </property>
+   <property name="bottomMargin">
+    <number>18</number>
+   </property>
+   <item>
+    <layout class="QHBoxLayout" name="horizontalLayoutDetailTop" stretch="0,1">
+     <property name="spacing">
+      <number>20</number>
+     </property>
+     <property name="leftMargin">
+      <number>0</number>
+     </property>
+     <property name="topMargin">
+      <number>0</number>
+     </property>
+     <property name="rightMargin">
+      <number>0</number>
+     </property>
+     <property name="bottomMargin">
+      <number>0</number>
+     </property>
+     <item>
+      <widget class="QLabel" name="labelPoster">
+       <property name="minimumSize">
+        <size>
+         <width>176</width>
+         <height>260</height>
+        </size>
+       </property>
+       <property name="maximumSize">
+        <size>
+         <width>176</width>
+         <height>260</height>
+        </size>
+       </property>
+       <property name="text">
+        <string/>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <layout class="QVBoxLayout" name="verticalLayoutDetailInfo">
+       <property name="spacing">
+        <number>8</number>
+       </property>
+       <property name="leftMargin">
+        <number>0</number>
+       </property>
+       <property name="topMargin">
+        <number>0</number>
+       </property>
+       <property name="rightMargin">
+        <number>0</number>
+       </property>
+       <property name="bottomMargin">
+        <number>0</number>
+       </property>
+       <item>
+        <widget class="QLabel" name="labelDetailTitle">
+         <property name="text">
+          <string>Tên phim</string>
+         </property>
+         <property name="wordWrap">
+          <bool>true</bool>
+         </property>
+         <property name="styleSheet">
+          <string notr="true">font-size: 15pt; font-weight: 800; color: #111827;</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLabel" name="labelDetailMeta">
+         <property name="text">
+          <string/>
+         </property>
+         <property name="role" stdset="0">
+          <string notr="true">muted</string>
+         </property>
+         <property name="wordWrap">
+          <bool>true</bool>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLabel" name="labelDetailStats">
+         <property name="text">
+          <string/>
+         </property>
+         <property name="wordWrap">
+          <bool>true</bool>
+         </property>
+         <property name="textFormat">
+          <enum>Qt::RichText</enum>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QFrame" name="framePredict">
+         <layout class="QVBoxLayout" name="verticalLayoutPredict">
+          <property name="spacing">
+           <number>4</number>
+          </property>
+          <property name="leftMargin">
+           <number>16</number>
+          </property>
+          <property name="topMargin">
+           <number>12</number>
+          </property>
+          <property name="rightMargin">
+           <number>16</number>
+          </property>
+          <property name="bottomMargin">
+           <number>12</number>
+          </property>
+          <item>
+           <widget class="QLabel" name="labelPredictCaption">
+            <property name="text">
+             <string>Độ tương thích dự báo</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <layout class="QHBoxLayout" name="horizontalLayoutPredictValue" stretch="0,1">
+            <property name="spacing">
+             <number>12</number>
+            </property>
+            <property name="leftMargin">
+             <number>0</number>
+            </property>
+            <property name="topMargin">
+             <number>0</number>
+            </property>
+            <property name="rightMargin">
+             <number>0</number>
+            </property>
+            <property name="bottomMargin">
+             <number>0</number>
+            </property>
+            <item>
+             <widget class="QLabel" name="labelPredictValue">
+              <property name="text">
+               <string>—</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QProgressBar" name="progressBarMatch">
+              <property name="maximum">
+               <number>100</number>
+              </property>
+              <property name="value">
+               <number>0</number>
+              </property>
+              <property name="textVisible">
+               <bool>false</bool>
+              </property>
+              <property name="minimumSize">
+               <size>
+                <width>0</width>
+                <height>10</height>
+               </size>
+              </property>
+              <property name="maximumSize">
+               <size>
+                <width>16777215</width>
+                <height>10</height>
+               </size>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+          <item>
+           <widget class="QLabel" name="labelPredictNote">
+            <property name="text">
+             <string/>
+            </property>
+            <property name="role" stdset="0">
+             <string notr="true">muted</string>
+            </property>
+            <property name="wordWrap">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item>
+        <spacer name="verticalSpacer">
+         <property name="orientation">
+          <enum>Qt::Vertical</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>20</width>
+           <height>20</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+      </layout>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <widget class="QFrame" name="frameRate">
+     <property name="card" stdset="0">
+      <bool>true</bool>
+     </property>
+     <layout class="QVBoxLayout" name="verticalLayoutRate">
+      <property name="spacing">
+       <number>8</number>
+      </property>
+      <property name="leftMargin">
+       <number>18</number>
+      </property>
+      <property name="topMargin">
+       <number>14</number>
+      </property>
+      <property name="rightMargin">
+       <number>18</number>
+      </property>
+      <property name="bottomMargin">
+       <number>14</number>
+      </property>
+      <item>
+       <widget class="QLabel" name="labelYourRating">
+        <property name="text">
+         <string>Đánh giá của bạn</string>
+        </property>
+        <property name="role" stdset="0">
+         <string notr="true">cardTitle</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <layout class="QGridLayout" name="gridLayoutRate" columnstretch="0,1">
+        <property name="spacing">
+         <number>8</number>
+        </property>
+        <property name="leftMargin">
+         <number>0</number>
+        </property>
+        <property name="topMargin">
+         <number>0</number>
+        </property>
+        <property name="rightMargin">
+         <number>0</number>
+        </property>
+        <property name="bottomMargin">
+         <number>0</number>
+        </property>
+        <property name="horizontalSpacing">
+         <number>14</number>
+        </property>
+        <item row="0" column="0">
+         <widget class="QLabel" name="labelRateStars">
+          <property name="text">
+           <string>Số sao</string>
+          </property>
+          <property name="role" stdset="0">
+           <string notr="true">field</string>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="1">
+         <widget class="QComboBox" name="comboBoxRating">
+          <item>
+           <property name="text">
+            <string>★★★★★  5 - Tuyệt vời</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>★★★★☆  4 - Hay</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>★★★☆☆  3 - Bình thường</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>★★☆☆☆  2 - Chưa hay</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>★☆☆☆☆  1 - Tệ</string>
+           </property>
+          </item>
+         </widget>
+        </item>
+        <item row="1" column="0">
+         <widget class="QLabel" name="labelRateComment">
+          <property name="text">
+           <string>Bình luận</string>
+          </property>
+          <property name="role" stdset="0">
+           <string notr="true">field</string>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="1">
+         <widget class="QLineEdit" name="lineEditComment">
+          <property name="placeholderText">
+           <string>Cảm nhận của bạn về phim (không bắt buộc, tối đa 500 ký tự)</string>
+          </property>
+          <property name="maxLength">
+           <number>500</number>
+          </property>
+          <property name="clearButtonEnabled">
+           <bool>true</bool>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+      <item>
+       <widget class="QLabel" name="labelMyRating">
+        <property name="text">
+         <string/>
+        </property>
+        <property name="role" stdset="0">
+         <string notr="true">muted</string>
+        </property>
+        <property name="wordWrap">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item>
+    <layout class="QHBoxLayout" name="horizontalLayoutDialogButtons">
+     <property name="spacing">
+      <number>10</number>
+     </property>
+     <property name="leftMargin">
+      <number>0</number>
+     </property>
+     <property name="topMargin">
+      <number>0</number>
+     </property>
+     <property name="rightMargin">
+      <number>0</number>
+     </property>
+     <property name="bottomMargin">
+      <number>0</number>
+     </property>
+     <item>
+      <widget class="QPushButton" name="pushButtonDeleteRating">
+       <property name="text">
+        <string>Xóa đánh giá</string>
+       </property>
+       <property name="cursor">
+        <cursorShape>PointingHandCursor</cursorShape>
+       </property>
+       <property name="icon">
+        <iconset>
+         <normaloff>../images/ic_delete.png</normaloff>
+         ../images/ic_delete.png
+        </iconset>
+       </property>
+       <property name="iconSize">
+        <size>
+         <width>16</width>
+         <height>16</height>
+        </size>
+       </property>
+       <property name="dangerOutline" stdset="0">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <spacer name="horizontalSpacer">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>20</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+     <item>
+      <widget class="QPushButton" name="pushButtonClose">
+       <property name="text">
+        <string>Đóng</string>
+       </property>
+       <property name="cursor">
+        <cursorShape>PointingHandCursor</cursorShape>
+       </property>
+       <property name="secondary" stdset="0">
+        <bool>true</bool>
+       </property>
+       <property name="minimumSize">
+        <size>
+         <width>96</width>
+         <height>0</height>
+        </size>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="pushButtonRate">
+       <property name="text">
+        <string>Gửi đánh giá</string>
+       </property>
+       <property name="cursor">
+        <cursorShape>PointingHandCursor</cursorShape>
+       </property>
+       <property name="icon">
+        <iconset>
+         <normaloff>../images/ic_rate.png</normaloff>
+         ../images/ic_rate.png
+        </iconset>
+       </property>
+       <property name="iconSize">
+        <size>
+         <width>18</width>
+         <height>18</height>
+        </size>
+       </property>
+       <property name="minimumSize">
+        <size>
+         <width>150</width>
+         <height>0</height>
+        </size>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+  </layout>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>
