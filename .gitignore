@@ -51,3 +51,7 @@ outputs/
 
 # Hướng dẫn riêng cho trợ lý AI (không đưa lên repo)
 CLAUDE.md
+
+# Phần mềm: cấu hình máy cá nhân (mật khẩu MySQL) và poster tải về
+app/config/config.json
+posters/

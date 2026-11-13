@@ -1,0 +1,38 @@
+{
+    "_ghi_chu": "Đường dẫn tương đối tính từ thư mục gốc dự án. Sao chép file này thành config.json (cùng thư mục) rồi sửa mật khẩu MySQL của máy bạn. CSDL do mysql/mrs_schema.sql + src/database.py tạo.",
+    "database": {
+        "server": "localhost",
+        "port": 3306,
+        "database": "movie_recommender_system",
+        "username": "root",
+        "password": "@Obama123"
+    },
+    "recommendation": {
+        "top_n_default": 10,
+        "top_n_options": [
+            5,
+            10
+        ],
+        "featured_min_ratings": 5,
+        "model_path": "models/main_model/neumf.npz"
+    },
+    "security": {
+        "password_iterations": 20000,
+        "max_login_fail": 5,
+        "login_lock_minutes": 15,
+        "idle_logout_minutes": 30,
+        "otp_expire_minutes": 5,
+        "otp_max_wrong": 5
+    },
+    "email": {
+        "sender_email": "",
+        "app_password": ""
+    },
+    "tmdb": {
+        "api_key": ""
+    },
+    "paths": {
+        "dataset_dir": "data/raw",
+        "poster_dir": "posters"
+    }
+}

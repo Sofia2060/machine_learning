@@ -1,0 +1,2149 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<ui version="4.0">
+ <class>MainWindow</class>
+ <widget class="QMainWindow" name="MainWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>1366</width>
+    <height>768</height>
+   </rect>
+  </property>
+  <property name="minimumSize">
+   <size>
+    <width>1100</width>
+    <height>640</height>
+   </size>
+  </property>
+  <property name="windowTitle">
+   <string>CineMatch - Tổng quan kinh doanh</string>
+  </property>
+  <property name="windowIcon">
+   <iconset>
+    <normaloff>../images/ic_logo.png</normaloff>
+    ../images/ic_logo.png
+   </iconset>
+  </property>
+  <property name="styleSheet">
+   <string notr="true">QMainWindow { background-color: #F3F5F9; }
+QWidget { font-family: "Segoe UI"; font-size: 10pt; color: #1F2937; }
+QWidget#centralwidget { background-color: #F3F5F9; }
+QLabel { background: transparent; }
+QLabel[role="title"] { font-size: 20pt; font-weight: 700; color: #111827; }
+QLabel[role="subtitle"] { font-size: 10pt; color: #6B7280; }
+QLabel[role="field"] { font-weight: 600; color: #374151; }
+QLabel[role="section"] { font-size: 13pt; font-weight: 700; color: #1F2A44; }
+QLabel[role="step"] { font-size: 11pt; font-weight: 700; color: #2563EB; }
+QLabel[role="muted"] { color: #6B7280; }
+QLabel[role="pageTitle"] { font-size: 15pt; font-weight: 700; color: #111827; }
+QLabel[role="info"] { background-color: #FFFBEB; border: 1px solid #FDE68A; border-radius: 10px; padding: 10px 14px; color: #92400E; }
+QLineEdit, QComboBox, QSpinBox, QDateEdit { background-color: #FFFFFF; border: 1px solid #CBD5E1; border-radius: 8px; padding: 7px 10px; min-height: 20px; }
+QLineEdit:focus, QComboBox:focus, QSpinBox:focus, QDateEdit:focus { border: 1px solid #2563EB; }
+QLineEdit:disabled, QComboBox:disabled, QDateEdit:disabled, QSpinBox:disabled { background-color: #F1F5F9; color: #94A3B8; }
+QLineEdit[readOnly="true"] { background-color: #F8FAFC; color: #64748B; }
+QComboBox::drop-down { border: none; width: 26px; }
+QComboBox::down-arrow, QDateEdit::down-arrow { image: url(../images/ic_down.png); width: 14px; height: 14px; }
+QDateEdit::drop-down { border: none; width: 26px; }
+QComboBox QAbstractItemView { background-color: #FFFFFF; border: 1px solid #CBD5E1; selection-background-color: #DBEAFE; selection-color: #111827; outline: 0; }
+QPushButton { background-color: #2563EB; color: #FFFFFF; border: none; border-radius: 8px; padding: 8px 16px; font-weight: 600; }
+QPushButton:hover { background-color: #1D4ED8; }
+QPushButton:pressed { background-color: #1E40AF; }
+QPushButton:disabled { background-color: #BFDBFE; color: #EFF6FF; }
+QPushButton[secondary="true"] { background-color: #FFFFFF; color: #2563EB; border: 1px solid #93C5FD; }
+QPushButton[secondary="true"]:hover { background-color: #EFF6FF; border: 1px solid #2563EB; }
+QPushButton[secondary="true"]:disabled { color: #94A3B8; border: 1px solid #E2E8F0; background-color: #F8FAFC; }
+QPushButton[danger="true"] { background-color: #DC2626; }
+QPushButton[danger="true"]:hover { background-color: #B91C1C; }
+QPushButton[success="true"] { background-color: #16A34A; }
+QPushButton[success="true"]:hover { background-color: #15803D; }
+QPushButton[dangerOutline="true"] { background-color: #FFFFFF; color: #DC2626; border: 1px solid #FCA5A5; }
+QPushButton[dangerOutline="true"]:hover { background-color: #FEF2F2; border: 1px solid #DC2626; }
+QPushButton[link="true"] { background-color: transparent; color: #2563EB; padding: 2px 4px; border: none; font-weight: 600; }
+QPushButton[link="true"]:hover { color: #1E40AF; text-decoration: underline; }
+QCheckBox, QRadioButton { spacing: 8px; background: transparent; }
+QCheckBox::indicator, QRadioButton::indicator { width: 16px; height: 16px; }
+QCheckBox::indicator { border: 1px solid #94A3B8; border-radius: 4px; background-color: #FFFFFF; }
+QCheckBox::indicator:checked { border: 1px solid #2563EB; background-color: #2563EB; image: url(../images/ic_tick.png); }
+QRadioButton::indicator { border: 1px solid #94A3B8; border-radius: 8px; background-color: #FFFFFF; }
+QRadioButton::indicator:checked { border: 1px solid #2563EB; background-color: qradialgradient(cx:0.5, cy:0.5, radius:0.5, fx:0.5, fy:0.5, stop:0 #2563EB, stop:0.55 #2563EB, stop:0.65 #FFFFFF, stop:1 #FFFFFF); }
+QSpinBox { padding-right: 24px; }
+QSpinBox::up-button, QSpinBox::down-button { subcontrol-origin: border; width: 22px; border: none; background: transparent; }
+QSpinBox::up-button { subcontrol-position: top right; }
+QSpinBox::down-button { subcontrol-position: bottom right; }
+QSpinBox::up-arrow { image: url(../images/ic_up.png); width: 14px; height: 14px; }
+QSpinBox::down-arrow { image: url(../images/ic_down.png); width: 14px; height: 14px; }
+QFrame[card="true"] { background-color: #FFFFFF; border: 1px solid #E5E7EB; border-radius: 12px; }
+QGroupBox { background-color: #FFFFFF; border: 1px solid #E5E7EB; border-radius: 12px; margin-top: 24px; padding: 16px 12px 12px 12px; font-size: 11pt; font-weight: 700; color: #1F2A44; }
+QGroupBox::title { subcontrol-origin: margin; subcontrol-position: top left; left: 12px; padding: 0px 6px; }
+QTableWidget { background-color: #FFFFFF; border: 1px solid #E5E7EB; border-radius: 10px; gridline-color: #F1F5F9; alternate-background-color: #F8FAFC; selection-background-color: #DBEAFE; selection-color: #111827; }
+QHeaderView::section { background-color: #EEF2FF; color: #1F2A44; font-weight: 700; padding: 7px 6px; border: none; border-right: 1px solid #E0E7FF; border-bottom: 1px solid #E0E7FF; }
+QTabWidget::pane { border: none; background: transparent; }
+QTabBar::tab { background: transparent; color: #64748B; padding: 10px 22px; font-weight: 700; border: none; border-bottom: 3px solid transparent; margin-right: 6px; }
+QTabBar::tab:selected { color: #2563EB; border-bottom: 3px solid #2563EB; }
+QTabBar::tab:hover { color: #1D4ED8; }
+QScrollArea { border: none; background: transparent; }
+QWidget#scrollAreaHomeContents, QWidget#scrollAreaOverviewContents, QWidget#scrollAreaCustomersContents, QWidget#scrollAreaMoviesContents, QWidget#scrollAreaStatsContents { background: transparent; }
+QStatusBar { background-color: #FFFFFF; color: #64748B; border-top: 1px solid #E5E7EB; }
+QListWidget { background-color: #FFFFFF; border: 1px solid #E5E7EB; border-radius: 10px; padding: 6px; outline: 0; }
+QListWidget::item { padding: 8px 8px; border-radius: 6px; }
+QListWidget::item:selected { background-color: #DBEAFE; color: #1E3A8A; }
+QListWidget::item:hover { background-color: #F1F5F9; }
+QFrame#frameHeader { background-color: #FFFFFF; border-bottom: 1px solid #E5E7EB; }
+QFrame#frameSidebar { background-color: #1F2A44; }
+QFrame#frameForm { background-color: #FFFFFF; }
+QFrame#frameBanner { border-image: url(../images/ic_banner.png) 0 0 0 0 stretch stretch; }
+QLabel[banner="title"] { color: #FFFFFF; font-size: 28pt; font-weight: 800; }
+QLabel[banner="text"] { color: #E2E8F0; font-size: 11pt; }
+QLabel[banner="foot"] { color: #94A3B8; font-size: 9pt; }
+QLabel#labelSidebarTitle { color: #FFFFFF; font-size: 14pt; font-weight: 800; }
+QLabel#labelSidebarSub { color: #94A3B8; font-size: 9pt; }
+QPushButton[nav="true"] { background-color: transparent; color: #CBD5E1; text-align: left; padding: 11px 14px; border-radius: 8px; font-weight: 600; }
+QPushButton[nav="true"]:hover { background-color: #2C3A5C; color: #FFFFFF; }
+QPushButton[active="true"] { background-color: #2563EB; color: #FFFFFF; }
+QLabel[kpi="value"] { font-size: 19pt; font-weight: 800; color: #111827; }
+QLabel[kpi="caption"] { font-size: 9pt; font-weight: 600; color: #6B7280; }
+QFrame#framePredict { background-color: #FFFBEB; border: 1px solid #FDE68A; border-radius: 12px; }
+QLabel#labelPredictValue { font-size: 26pt; font-weight: 800; color: #B45309; }
+QLabel#labelPredictCaption { font-weight: 700; color: #92400E; }
+QPushButton[chip="true"] { background-color: #FFFFFF; color: #334155; border: 1px solid #CBD5E1; border-radius: 18px; padding: 9px 16px; font-weight: 600; }
+QPushButton[chip="true"]:hover { border: 1px solid #2563EB; color: #1D4ED8; background-color: #FFFFFF; }
+QPushButton[chip="true"]:checked { background-color: #2563EB; color: #FFFFFF; border: 1px solid #2563EB; }
+QLabel[role="hint"] { color: #94A3B8; font-size: 9pt; }
+QLabel[role="countdown"] { font-weight: 700; color: #B45309; }
+QLabel[role="cardTitle"] { font-size: 11.5pt; font-weight: 700; color: #111827; }
+QLabel[role="insight"] { color: #475569; }
+QLabel[role="badge"] { background-color: #EEF2FF; color: #3730A3; border-radius: 10px; padding: 4px 10px; font-weight: 700; font-size: 9pt; }
+QFrame#frameFilterBar { background-color: #FFFFFF; border: 1px solid #E5E7EB; border-radius: 12px; }
+QFrame#frameHighlights { background-color: #F8FAFF; border: 1px solid #C7D2FE; border-radius: 12px; }
+QProgressBar { border: 1px solid #CBD5E1; border-radius: 8px; background-color: #FFFFFF; text-align: center; height: 18px; }
+QProgressBar::chunk { background-color: #2563EB; border-radius: 7px; }
+QFrame[movieCard="true"] { background-color: #FFFFFF; border: 1px solid #E5E7EB; border-radius: 12px; }
+QFrame[movieCard="true"]:hover { border: 1px solid #60A5FA; background-color: #F8FBFF; }
+QLabel[role="match"] { background-color: #DCFCE7; color: #166534; border-radius: 9px; padding: 2px 8px; font-weight: 700; font-size: 9pt; }
+QLabel[role="cardScore"] { color: #B45309; font-weight: 700; font-size: 9.5pt; }
+QFrame#frameHistoryFilter { background-color: #FFFFFF; border: 1px solid #E5E7EB; border-radius: 12px; }
+QWidget#pageBrowse, QWidget#pageResults, QWidget#scrollAreaResultsContents, QWidget#widgetRecommendSection { background: transparent; }
+QDialog { background-color: #F3F5F9; }
+QProgressBar#progressBarMatch { border: none; border-radius: 5px; background-color: #FDE68A; }
+QProgressBar#progressBarMatch::chunk { border-radius: 5px; background-color: #16A34A; }
+</string>
+  </property>
+  <widget class="QWidget" name="centralwidget">
+   <layout class="QHBoxLayout" name="horizontalLayout">
+    <property name="spacing">
+     <number>0</number>
+    </property>
+    <property name="leftMargin">
+     <number>0</number>
+    </property>
+    <property name="topMargin">
+     <number>0</number>
+    </property>
+    <property name="rightMargin">
+     <number>0</number>
+    </property>
+    <property name="bottomMargin">
+     <number>0</number>
+    </property>
+    <item>
+     <widget class="QFrame" name="frameSidebar">
+      <property name="minimumSize">
+       <size>
+        <width>232</width>
+        <height>0</height>
+       </size>
+      </property>
+      <property name="maximumSize">
+       <size>
+        <width>232</width>
+        <height>16777215</height>
+       </size>
+      </property>
+      <layout class="QVBoxLayout" name="verticalLayoutSidebar">
+       <property name="spacing">
+        <number>6</number>
+       </property>
+       <property name="leftMargin">
+        <number>16</number>
+       </property>
+       <property name="topMargin">
+        <number>22</number>
+       </property>
+       <property name="rightMargin">
+        <number>16</number>
+       </property>
+       <property name="bottomMargin">
+        <number>20</number>
+       </property>
+       <item>
+        <layout class="QHBoxLayout" name="horizontalLayoutBrand">
+         <property name="spacing">
+          <number>10</number>
+         </property>
+         <property name="leftMargin">
+          <number>0</number>
+         </property>
+         <property name="topMargin">
+          <number>0</number>
+         </property>
+         <property name="rightMargin">
+          <number>0</number>
+         </property>
+         <property name="bottomMargin">
+          <number>0</number>
+         </property>
+         <item>
+          <widget class="QLabel" name="labelSidebarLogo">
+           <property name="minimumSize">
+            <size>
+             <width>42</width>
+             <height>42</height>
+            </size>
+           </property>
+           <property name="maximumSize">
+            <size>
+             <width>42</width>
+             <height>42</height>
+            </size>
+           </property>
+           <property name="text">
+            <string />
+           </property>
+           <property name="pixmap">
+            <pixmap>../images/ic_logo.png</pixmap>
+           </property>
+           <property name="scaledContents">
+            <bool>true</bool>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <layout class="QVBoxLayout" name="verticalLayoutBrand">
+           <property name="spacing">
+            <number>0</number>
+           </property>
+           <property name="leftMargin">
+            <number>0</number>
+           </property>
+           <property name="topMargin">
+            <number>0</number>
+           </property>
+           <property name="rightMargin">
+            <number>0</number>
+           </property>
+           <property name="bottomMargin">
+            <number>0</number>
+           </property>
+           <item>
+            <widget class="QLabel" name="labelSidebarTitle">
+             <property name="text">
+              <string>CineMatch</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QLabel" name="labelSidebarSub">
+             <property name="text">
+              <string>Phân hệ quản trị</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </item>
+        </layout>
+       </item>
+       <item>
+        <spacer name="verticalSpacer">
+         <property name="orientation">
+          <enum>Qt::Vertical</enum>
+         </property>
+         <property name="sizeType">
+          <enum>QSizePolicy::Fixed</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>20</width>
+           <height>26</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+       <item>
+        <widget class="QLabel" name="labelMenu">
+         <property name="text">
+          <string>BÁO CÁO</string>
+         </property>
+         <property name="styleSheet">
+          <string notr="true">color: #64748B; font-size: 8pt; font-weight: 700;</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="pushButtonNavDashboard">
+         <property name="text">
+          <string>Tổng quan kinh doanh</string>
+         </property>
+         <property name="cursor">
+          <cursorShape>PointingHandCursor</cursorShape>
+         </property>
+         <property name="icon">
+          <iconset>
+           <normaloff>../images/ic_dashboard.png</normaloff>
+           ../images/ic_dashboard.png
+          </iconset>
+         </property>
+         <property name="iconSize">
+          <size>
+           <width>20</width>
+           <height>20</height>
+          </size>
+         </property>
+         <property name="nav" stdset="0">
+          <bool>true</bool>
+         </property>
+         <property name="active" stdset="0">
+          <bool>true</bool>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="pushButtonNavRecommend">
+         <property name="text">
+          <string>Hiệu quả gợi ý</string>
+         </property>
+         <property name="cursor">
+          <cursorShape>PointingHandCursor</cursorShape>
+         </property>
+         <property name="icon">
+          <iconset>
+           <normaloff>../images/ic_topn_nav.png</normaloff>
+           ../images/ic_topn_nav.png
+          </iconset>
+         </property>
+         <property name="iconSize">
+          <size>
+           <width>20</width>
+           <height>20</height>
+          </size>
+         </property>
+         <property name="nav" stdset="0">
+          <bool>true</bool>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <spacer name="verticalSpacer_2">
+         <property name="orientation">
+          <enum>Qt::Vertical</enum>
+         </property>
+         <property name="sizeType">
+          <enum>QSizePolicy::Fixed</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>20</width>
+           <height>14</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+       <item>
+        <widget class="QLabel" name="labelMenu2">
+         <property name="text">
+          <string>QUẢN TRỊ</string>
+         </property>
+         <property name="styleSheet">
+          <string notr="true">color: #64748B; font-size: 8pt; font-weight: 700;</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="pushButtonNavData">
+         <property name="text">
+          <string>Quản lý dữ liệu</string>
+         </property>
+         <property name="cursor">
+          <cursorShape>PointingHandCursor</cursorShape>
+         </property>
+         <property name="icon">
+          <iconset>
+           <normaloff>../images/ic_database.png</normaloff>
+           ../images/ic_database.png
+          </iconset>
+         </property>
+         <property name="iconSize">
+          <size>
+           <width>20</width>
+           <height>20</height>
+          </size>
+         </property>
+         <property name="nav" stdset="0">
+          <bool>true</bool>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <spacer name="verticalSpacer_3">
+         <property name="orientation">
+          <enum>Qt::Vertical</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>20</width>
+           <height>20</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+       <item>
+        <widget class="QPushButton" name="pushButtonLogout">
+         <property name="text">
+          <string>Đăng xuất</string>
+         </property>
+         <property name="cursor">
+          <cursorShape>PointingHandCursor</cursorShape>
+         </property>
+         <property name="icon">
+          <iconset>
+           <normaloff>../images/ic_logout.png</normaloff>
+           ../images/ic_logout.png
+          </iconset>
+         </property>
+         <property name="iconSize">
+          <size>
+           <width>20</width>
+           <height>20</height>
+          </size>
+         </property>
+         <property name="nav" stdset="0">
+          <bool>true</bool>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+    </item>
+    <item>
+     <widget class="QFrame" name="frameMain">
+      <layout class="QVBoxLayout" name="verticalLayoutMain">
+       <property name="spacing">
+        <number>0</number>
+       </property>
+       <property name="leftMargin">
+        <number>0</number>
+       </property>
+       <property name="topMargin">
+        <number>0</number>
+       </property>
+       <property name="rightMargin">
+        <number>0</number>
+       </property>
+       <property name="bottomMargin">
+        <number>0</number>
+       </property>
+       <item>
+        <widget class="QFrame" name="frameHeader">
+         <property name="minimumSize">
+          <size>
+           <width>0</width>
+           <height>72</height>
+          </size>
+         </property>
+         <property name="maximumSize">
+          <size>
+           <width>16777215</width>
+           <height>72</height>
+          </size>
+         </property>
+         <layout class="QHBoxLayout" name="horizontalLayoutHeader">
+          <property name="spacing">
+           <number>10</number>
+          </property>
+          <property name="leftMargin">
+           <number>28</number>
+          </property>
+          <property name="topMargin">
+           <number>12</number>
+          </property>
+          <property name="rightMargin">
+           <number>28</number>
+          </property>
+          <property name="bottomMargin">
+           <number>12</number>
+          </property>
+          <item>
+           <layout class="QVBoxLayout" name="verticalLayoutPageTitle">
+            <property name="spacing">
+             <number>2</number>
+            </property>
+            <property name="leftMargin">
+             <number>0</number>
+            </property>
+            <property name="topMargin">
+             <number>0</number>
+            </property>
+            <property name="rightMargin">
+             <number>0</number>
+            </property>
+            <property name="bottomMargin">
+             <number>0</number>
+            </property>
+            <item>
+             <widget class="QLabel" name="labelPageTitle">
+              <property name="text">
+               <string>Tổng quan kinh doanh</string>
+              </property>
+              <property name="role" stdset="0">
+               <string notr="true">pageTitle</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLabel" name="labelPageSub">
+              <property name="text">
+               <string>Khách hàng xem và đánh giá phim như thế nào · số liệu tổng hợp, không hiển thị thông tin cá nhân</string>
+              </property>
+              <property name="role" stdset="0">
+               <string notr="true">muted</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+          <item>
+           <spacer name="horizontalSpacer">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>20</width>
+              <height>20</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+          <item>
+           <widget class="QLabel" name="labelAvatar">
+            <property name="minimumSize">
+             <size>
+              <width>32</width>
+              <height>32</height>
+             </size>
+            </property>
+            <property name="maximumSize">
+             <size>
+              <width>32</width>
+              <height>32</height>
+             </size>
+            </property>
+            <property name="text">
+             <string />
+            </property>
+            <property name="pixmap">
+             <pixmap>../images/ic_avatar_dark.png</pixmap>
+            </property>
+            <property name="scaledContents">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <layout class="QVBoxLayout" name="verticalLayoutAdmin">
+            <property name="spacing">
+             <number>0</number>
+            </property>
+            <property name="leftMargin">
+             <number>0</number>
+            </property>
+            <property name="topMargin">
+             <number>0</number>
+            </property>
+            <property name="rightMargin">
+             <number>0</number>
+            </property>
+            <property name="bottomMargin">
+             <number>0</number>
+            </property>
+            <item>
+             <widget class="QLabel" name="labelAdminName">
+              <property name="text">
+               <string>admin</string>
+              </property>
+              <property name="styleSheet">
+               <string notr="true">font-weight: 700;</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLabel" name="labelAdminRole">
+              <property name="text">
+               <string>Quản trị viên</string>
+              </property>
+              <property name="role" stdset="0">
+               <string notr="true">muted</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item>
+        <widget class="QWidget" name="widgetContent">
+         <layout class="QVBoxLayout" name="verticalLayoutContent" stretch="0,0,1">
+          <property name="spacing">
+           <number>12</number>
+          </property>
+          <property name="leftMargin">
+           <number>24</number>
+          </property>
+          <property name="topMargin">
+           <number>14</number>
+          </property>
+          <property name="rightMargin">
+           <number>24</number>
+          </property>
+          <property name="bottomMargin">
+           <number>10</number>
+          </property>
+          <item>
+           <widget class="QFrame" name="frameFilterBar">
+            <layout class="QHBoxLayout" name="horizontalLayoutFilter">
+             <property name="spacing">
+              <number>10</number>
+             </property>
+             <property name="leftMargin">
+              <number>16</number>
+             </property>
+             <property name="topMargin">
+              <number>10</number>
+             </property>
+             <property name="rightMargin">
+              <number>16</number>
+             </property>
+             <property name="bottomMargin">
+              <number>10</number>
+             </property>
+             <item>
+              <widget class="QLabel" name="labelFilterTitle">
+               <property name="text">
+                <string>Khoảng thời gian</string>
+               </property>
+               <property name="role" stdset="0">
+                <string notr="true">field</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QComboBox" name="comboBoxPeriod">
+               <property name="minimumSize">
+                <size>
+                 <width>170</width>
+                 <height>0</height>
+                </size>
+               </property>
+               <item>
+                <property name="text">
+                 <string>Toàn bộ thời gian</string>
+                </property>
+               </item>
+              </widget>
+             </item>
+             <item>
+              <widget class="QLabel" name="labelFrom">
+               <property name="text">
+                <string>Từ</string>
+               </property>
+               <property name="role" stdset="0">
+                <string notr="true">muted</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QDateEdit" name="dateEditFrom">
+               <property name="displayFormat">
+                <string>MM/yyyy</string>
+               </property>
+               <property name="calendarPopup">
+                <bool>true</bool>
+               </property>
+               <property name="minimumSize">
+                <size>
+                 <width>120</width>
+                 <height>0</height>
+                </size>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QLabel" name="labelTo">
+               <property name="text">
+                <string>đến</string>
+               </property>
+               <property name="role" stdset="0">
+                <string notr="true">muted</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QDateEdit" name="dateEditTo">
+               <property name="displayFormat">
+                <string>MM/yyyy</string>
+               </property>
+               <property name="calendarPopup">
+                <bool>true</bool>
+               </property>
+               <property name="minimumSize">
+                <size>
+                 <width>120</width>
+                 <height>0</height>
+                </size>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QPushButton" name="pushButtonApplyFilter">
+               <property name="text">
+                <string>Áp dụng</string>
+               </property>
+               <property name="cursor">
+                <cursorShape>PointingHandCursor</cursorShape>
+               </property>
+               <property name="icon">
+                <iconset>
+                 <normaloff>../images/ic_check.png</normaloff>
+                 ../images/ic_check.png
+                </iconset>
+               </property>
+               <property name="iconSize">
+                <size>
+                 <width>18</width>
+                 <height>18</height>
+                </size>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <spacer name="horizontalSpacer_2">
+               <property name="orientation">
+                <enum>Qt::Horizontal</enum>
+               </property>
+               <property name="sizeHint" stdset="0">
+                <size>
+                 <width>20</width>
+                 <height>20</height>
+                </size>
+               </property>
+              </spacer>
+             </item>
+             <item>
+              <widget class="QLabel" name="labelFilterInfo">
+               <property name="text">
+                <string />
+               </property>
+               <property name="role" stdset="0">
+                <string notr="true">muted</string>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </widget>
+          </item>
+          <item>
+           <layout class="QHBoxLayout" name="horizontalLayoutKpi">
+            <property name="spacing">
+             <number>14</number>
+            </property>
+            <property name="leftMargin">
+             <number>0</number>
+            </property>
+            <property name="topMargin">
+             <number>0</number>
+            </property>
+            <property name="rightMargin">
+             <number>0</number>
+            </property>
+            <property name="bottomMargin">
+             <number>0</number>
+            </property>
+            <item>
+             <widget class="QFrame" name="frameKpiUsers">
+              <property name="card" stdset="0">
+               <bool>true</bool>
+              </property>
+              <property name="minimumSize">
+               <size>
+                <width>0</width>
+                <height>84</height>
+               </size>
+              </property>
+              <layout class="QHBoxLayout" name="horizontalLayoutKpiUsers">
+               <property name="spacing">
+                <number>12</number>
+               </property>
+               <property name="leftMargin">
+                <number>14</number>
+               </property>
+               <property name="topMargin">
+                <number>10</number>
+               </property>
+               <property name="rightMargin">
+                <number>14</number>
+               </property>
+               <property name="bottomMargin">
+                <number>10</number>
+               </property>
+               <item>
+                <widget class="QLabel" name="labelKpiUsersIcon">
+                 <property name="minimumSize">
+                  <size>
+                   <width>46</width>
+                   <height>46</height>
+                  </size>
+                 </property>
+                 <property name="maximumSize">
+                  <size>
+                   <width>46</width>
+                   <height>46</height>
+                  </size>
+                 </property>
+                 <property name="text">
+                  <string />
+                 </property>
+                 <property name="pixmap">
+                  <pixmap>../images/ic_kpi_users.png</pixmap>
+                 </property>
+                 <property name="scaledContents">
+                  <bool>true</bool>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <layout class="QVBoxLayout" name="verticalLayoutKpiUsers">
+                 <property name="spacing">
+                  <number>0</number>
+                 </property>
+                 <property name="leftMargin">
+                  <number>0</number>
+                 </property>
+                 <property name="topMargin">
+                  <number>0</number>
+                 </property>
+                 <property name="rightMargin">
+                  <number>0</number>
+                 </property>
+                 <property name="bottomMargin">
+                  <number>0</number>
+                 </property>
+                 <item>
+                  <widget class="QLabel" name="labelKpiUsers">
+                   <property name="text">
+                    <string>—</string>
+                   </property>
+                   <property name="kpi" stdset="0">
+                    <string notr="true">value</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item>
+                  <widget class="QLabel" name="labelKpiUsersCaption">
+                   <property name="text">
+                    <string>KHÁCH HÀNG</string>
+                   </property>
+                   <property name="kpi" stdset="0">
+                    <string notr="true">caption</string>
+                   </property>
+                  </widget>
+                 </item>
+                </layout>
+               </item>
+               <item>
+                <spacer name="horizontalSpacer_3">
+                 <property name="orientation">
+                  <enum>Qt::Horizontal</enum>
+                 </property>
+                 <property name="sizeHint" stdset="0">
+                  <size>
+                   <width>20</width>
+                   <height>20</height>
+                  </size>
+                 </property>
+                </spacer>
+               </item>
+              </layout>
+             </widget>
+            </item>
+            <item>
+             <widget class="QFrame" name="frameKpiMovies">
+              <property name="card" stdset="0">
+               <bool>true</bool>
+              </property>
+              <property name="minimumSize">
+               <size>
+                <width>0</width>
+                <height>84</height>
+               </size>
+              </property>
+              <layout class="QHBoxLayout" name="horizontalLayoutKpiMovies">
+               <property name="spacing">
+                <number>12</number>
+               </property>
+               <property name="leftMargin">
+                <number>14</number>
+               </property>
+               <property name="topMargin">
+                <number>10</number>
+               </property>
+               <property name="rightMargin">
+                <number>14</number>
+               </property>
+               <property name="bottomMargin">
+                <number>10</number>
+               </property>
+               <item>
+                <widget class="QLabel" name="labelKpiMoviesIcon">
+                 <property name="minimumSize">
+                  <size>
+                   <width>46</width>
+                   <height>46</height>
+                  </size>
+                 </property>
+                 <property name="maximumSize">
+                  <size>
+                   <width>46</width>
+                   <height>46</height>
+                  </size>
+                 </property>
+                 <property name="text">
+                  <string />
+                 </property>
+                 <property name="pixmap">
+                  <pixmap>../images/ic_kpi_movies.png</pixmap>
+                 </property>
+                 <property name="scaledContents">
+                  <bool>true</bool>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <layout class="QVBoxLayout" name="verticalLayoutKpiMovies">
+                 <property name="spacing">
+                  <number>0</number>
+                 </property>
+                 <property name="leftMargin">
+                  <number>0</number>
+                 </property>
+                 <property name="topMargin">
+                  <number>0</number>
+                 </property>
+                 <property name="rightMargin">
+                  <number>0</number>
+                 </property>
+                 <property name="bottomMargin">
+                  <number>0</number>
+                 </property>
+                 <item>
+                  <widget class="QLabel" name="labelKpiMovies">
+                   <property name="text">
+                    <string>—</string>
+                   </property>
+                   <property name="kpi" stdset="0">
+                    <string notr="true">value</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item>
+                  <widget class="QLabel" name="labelKpiMoviesCaption">
+                   <property name="text">
+                    <string>PHIM ĐANG HIỂN THỊ</string>
+                   </property>
+                   <property name="kpi" stdset="0">
+                    <string notr="true">caption</string>
+                   </property>
+                  </widget>
+                 </item>
+                </layout>
+               </item>
+               <item>
+                <spacer name="horizontalSpacer_4">
+                 <property name="orientation">
+                  <enum>Qt::Horizontal</enum>
+                 </property>
+                 <property name="sizeHint" stdset="0">
+                  <size>
+                   <width>20</width>
+                   <height>20</height>
+                  </size>
+                 </property>
+                </spacer>
+               </item>
+              </layout>
+             </widget>
+            </item>
+            <item>
+             <widget class="QFrame" name="frameKpiRatings">
+              <property name="card" stdset="0">
+               <bool>true</bool>
+              </property>
+              <property name="minimumSize">
+               <size>
+                <width>0</width>
+                <height>84</height>
+               </size>
+              </property>
+              <layout class="QHBoxLayout" name="horizontalLayoutKpiRatings">
+               <property name="spacing">
+                <number>12</number>
+               </property>
+               <property name="leftMargin">
+                <number>14</number>
+               </property>
+               <property name="topMargin">
+                <number>10</number>
+               </property>
+               <property name="rightMargin">
+                <number>14</number>
+               </property>
+               <property name="bottomMargin">
+                <number>10</number>
+               </property>
+               <item>
+                <widget class="QLabel" name="labelKpiRatingsIcon">
+                 <property name="minimumSize">
+                  <size>
+                   <width>46</width>
+                   <height>46</height>
+                  </size>
+                 </property>
+                 <property name="maximumSize">
+                  <size>
+                   <width>46</width>
+                   <height>46</height>
+                  </size>
+                 </property>
+                 <property name="text">
+                  <string />
+                 </property>
+                 <property name="pixmap">
+                  <pixmap>../images/ic_kpi_ratings.png</pixmap>
+                 </property>
+                 <property name="scaledContents">
+                  <bool>true</bool>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <layout class="QVBoxLayout" name="verticalLayoutKpiRatings">
+                 <property name="spacing">
+                  <number>0</number>
+                 </property>
+                 <property name="leftMargin">
+                  <number>0</number>
+                 </property>
+                 <property name="topMargin">
+                  <number>0</number>
+                 </property>
+                 <property name="rightMargin">
+                  <number>0</number>
+                 </property>
+                 <property name="bottomMargin">
+                  <number>0</number>
+                 </property>
+                 <item>
+                  <widget class="QLabel" name="labelKpiRatings">
+                   <property name="text">
+                    <string>—</string>
+                   </property>
+                   <property name="kpi" stdset="0">
+                    <string notr="true">value</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item>
+                  <widget class="QLabel" name="labelKpiRatingsCaption">
+                   <property name="text">
+                    <string>LƯỢT ĐÁNH GIÁ</string>
+                   </property>
+                   <property name="kpi" stdset="0">
+                    <string notr="true">caption</string>
+                   </property>
+                  </widget>
+                 </item>
+                </layout>
+               </item>
+               <item>
+                <spacer name="horizontalSpacer_5">
+                 <property name="orientation">
+                  <enum>Qt::Horizontal</enum>
+                 </property>
+                 <property name="sizeHint" stdset="0">
+                  <size>
+                   <width>20</width>
+                   <height>20</height>
+                  </size>
+                 </property>
+                </spacer>
+               </item>
+              </layout>
+             </widget>
+            </item>
+            <item>
+             <widget class="QFrame" name="frameKpiAvg">
+              <property name="card" stdset="0">
+               <bool>true</bool>
+              </property>
+              <property name="minimumSize">
+               <size>
+                <width>0</width>
+                <height>84</height>
+               </size>
+              </property>
+              <layout class="QHBoxLayout" name="horizontalLayoutKpiAvg">
+               <property name="spacing">
+                <number>12</number>
+               </property>
+               <property name="leftMargin">
+                <number>14</number>
+               </property>
+               <property name="topMargin">
+                <number>10</number>
+               </property>
+               <property name="rightMargin">
+                <number>14</number>
+               </property>
+               <property name="bottomMargin">
+                <number>10</number>
+               </property>
+               <item>
+                <widget class="QLabel" name="labelKpiAvgIcon">
+                 <property name="minimumSize">
+                  <size>
+                   <width>46</width>
+                   <height>46</height>
+                  </size>
+                 </property>
+                 <property name="maximumSize">
+                  <size>
+                   <width>46</width>
+                   <height>46</height>
+                  </size>
+                 </property>
+                 <property name="text">
+                  <string />
+                 </property>
+                 <property name="pixmap">
+                  <pixmap>../images/ic_kpi_avg.png</pixmap>
+                 </property>
+                 <property name="scaledContents">
+                  <bool>true</bool>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <layout class="QVBoxLayout" name="verticalLayoutKpiAvg">
+                 <property name="spacing">
+                  <number>0</number>
+                 </property>
+                 <property name="leftMargin">
+                  <number>0</number>
+                 </property>
+                 <property name="topMargin">
+                  <number>0</number>
+                 </property>
+                 <property name="rightMargin">
+                  <number>0</number>
+                 </property>
+                 <property name="bottomMargin">
+                  <number>0</number>
+                 </property>
+                 <item>
+                  <widget class="QLabel" name="labelKpiAvg">
+                   <property name="text">
+                    <string>—</string>
+                   </property>
+                   <property name="kpi" stdset="0">
+                    <string notr="true">value</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item>
+                  <widget class="QLabel" name="labelKpiAvgCaption">
+                   <property name="text">
+                    <string>ĐIỂM TRUNG BÌNH</string>
+                   </property>
+                   <property name="kpi" stdset="0">
+                    <string notr="true">caption</string>
+                   </property>
+                  </widget>
+                 </item>
+                </layout>
+               </item>
+               <item>
+                <spacer name="horizontalSpacer_6">
+                 <property name="orientation">
+                  <enum>Qt::Horizontal</enum>
+                 </property>
+                 <property name="sizeHint" stdset="0">
+                  <size>
+                   <width>20</width>
+                   <height>20</height>
+                  </size>
+                 </property>
+                </spacer>
+               </item>
+              </layout>
+             </widget>
+            </item>
+            <item>
+             <widget class="QFrame" name="frameKpiSparsity">
+              <property name="card" stdset="0">
+               <bool>true</bool>
+              </property>
+              <property name="minimumSize">
+               <size>
+                <width>0</width>
+                <height>84</height>
+               </size>
+              </property>
+              <layout class="QHBoxLayout" name="horizontalLayoutKpiSparsity">
+               <property name="spacing">
+                <number>12</number>
+               </property>
+               <property name="leftMargin">
+                <number>14</number>
+               </property>
+               <property name="topMargin">
+                <number>10</number>
+               </property>
+               <property name="rightMargin">
+                <number>14</number>
+               </property>
+               <property name="bottomMargin">
+                <number>10</number>
+               </property>
+               <item>
+                <widget class="QLabel" name="labelKpiSparsityIcon">
+                 <property name="minimumSize">
+                  <size>
+                   <width>46</width>
+                   <height>46</height>
+                  </size>
+                 </property>
+                 <property name="maximumSize">
+                  <size>
+                   <width>46</width>
+                   <height>46</height>
+                  </size>
+                 </property>
+                 <property name="text">
+                  <string />
+                 </property>
+                 <property name="pixmap">
+                  <pixmap>../images/ic_kpi_sparsity.png</pixmap>
+                 </property>
+                 <property name="scaledContents">
+                  <bool>true</bool>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <layout class="QVBoxLayout" name="verticalLayoutKpiSparsity">
+                 <property name="spacing">
+                  <number>0</number>
+                 </property>
+                 <property name="leftMargin">
+                  <number>0</number>
+                 </property>
+                 <property name="topMargin">
+                  <number>0</number>
+                 </property>
+                 <property name="rightMargin">
+                  <number>0</number>
+                 </property>
+                 <property name="bottomMargin">
+                  <number>0</number>
+                 </property>
+                 <item>
+                  <widget class="QLabel" name="labelKpiSparsity">
+                   <property name="text">
+                    <string>—</string>
+                   </property>
+                   <property name="kpi" stdset="0">
+                    <string notr="true">value</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item>
+                  <widget class="QLabel" name="labelKpiSparsityCaption">
+                   <property name="text">
+                    <string>ĐỘ THƯA DỮ LIỆU</string>
+                   </property>
+                   <property name="kpi" stdset="0">
+                    <string notr="true">caption</string>
+                   </property>
+                  </widget>
+                 </item>
+                </layout>
+               </item>
+               <item>
+                <spacer name="horizontalSpacer_7">
+                 <property name="orientation">
+                  <enum>Qt::Horizontal</enum>
+                 </property>
+                 <property name="sizeHint" stdset="0">
+                  <size>
+                   <width>20</width>
+                   <height>20</height>
+                  </size>
+                 </property>
+                </spacer>
+               </item>
+              </layout>
+             </widget>
+            </item>
+           </layout>
+          </item>
+          <item>
+           <widget class="QTabWidget" name="tabWidgetDashboard">
+            <property name="currentIndex">
+             <number>0</number>
+            </property>
+            <widget class="QWidget" name="tabOverview">
+             <attribute name="title">
+              <string>Tổng quan</string>
+             </attribute>
+             <layout class="QVBoxLayout" name="verticalLayoutTabOverview">
+              <property name="leftMargin">
+               <number>0</number>
+              </property>
+              <property name="topMargin">
+               <number>12</number>
+              </property>
+              <property name="rightMargin">
+               <number>0</number>
+              </property>
+              <property name="bottomMargin">
+               <number>0</number>
+              </property>
+              <item>
+               <widget class="QScrollArea" name="scrollAreaOverview">
+                <property name="widgetResizable">
+                 <bool>true</bool>
+                </property>
+                <property name="frameShape">
+                 <enum>QFrame::NoFrame</enum>
+                </property>
+                <widget class="QWidget" name="scrollAreaOverviewContents">
+                 <property name="geometry">
+                  <rect>
+                   <x>0</x>
+                   <y>0</y>
+                   <width>1080</width>
+                   <height>640</height>
+                  </rect>
+                 </property>
+                 <layout class="QGridLayout" name="gridLayoutOverview" columnstretch="3,2">
+                  <property name="spacing">
+                   <number>14</number>
+                  </property>
+                  <property name="leftMargin">
+                   <number>0</number>
+                  </property>
+                  <property name="topMargin">
+                   <number>0</number>
+                  </property>
+                  <property name="rightMargin">
+                   <number>6</number>
+                  </property>
+                  <property name="bottomMargin">
+                   <number>0</number>
+                  </property>
+                  <item row="0" column="0">
+                   <widget class="QFrame" name="frameChartRating">
+                    <property name="card" stdset="0">
+                     <bool>true</bool>
+                    </property>
+                    <layout class="QVBoxLayout" name="verticalLayoutChartRating" stretch="0,0,1">
+                     <property name="spacing">
+                      <number>4</number>
+                     </property>
+                     <property name="leftMargin">
+                      <number>16</number>
+                     </property>
+                     <property name="topMargin">
+                      <number>12</number>
+                     </property>
+                     <property name="rightMargin">
+                      <number>16</number>
+                     </property>
+                     <property name="bottomMargin">
+                      <number>10</number>
+                     </property>
+                     <item>
+                      <widget class="QLabel" name="labelTitleRating">
+                       <property name="text">
+                        <string>Khách hàng chấm điểm phim thế nào?</string>
+                       </property>
+                       <property name="role" stdset="0">
+                        <string notr="true">cardTitle</string>
+                       </property>
+                      </widget>
+                     </item>
+                     <item>
+                      <widget class="QLabel" name="labelInsightRating">
+                       <property name="text">
+                        <string />
+                       </property>
+                       <property name="role" stdset="0">
+                        <string notr="true">insight</string>
+                       </property>
+                       <property name="wordWrap">
+                        <bool>true</bool>
+                       </property>
+                       <property name="textFormat">
+                        <enum>Qt::RichText</enum>
+                       </property>
+                      </widget>
+                     </item>
+                     <item>
+                      <layout class="QVBoxLayout" name="verticalLayoutPlotRating">
+                       <property name="leftMargin">
+                        <number>0</number>
+                       </property>
+                       <property name="topMargin">
+                        <number>0</number>
+                       </property>
+                       <property name="rightMargin">
+                        <number>0</number>
+                       </property>
+                       <property name="bottomMargin">
+                        <number>0</number>
+                       </property>
+                      </layout>
+                     </item>
+                    </layout>
+                   </widget>
+                  </item>
+                  <item row="0" column="1">
+                   <widget class="QFrame" name="frameHighlights">
+                    <layout class="QVBoxLayout" name="verticalLayoutHighlights">
+                     <property name="spacing">
+                      <number>8</number>
+                     </property>
+                     <property name="leftMargin">
+                      <number>18</number>
+                     </property>
+                     <property name="topMargin">
+                      <number>14</number>
+                     </property>
+                     <property name="rightMargin">
+                      <number>18</number>
+                     </property>
+                     <property name="bottomMargin">
+                      <number>14</number>
+                     </property>
+                     <item>
+                      <widget class="QLabel" name="labelHighlightsTitle">
+                       <property name="text">
+                        <string>Điểm nổi bật</string>
+                       </property>
+                       <property name="role" stdset="0">
+                        <string notr="true">cardTitle</string>
+                       </property>
+                      </widget>
+                     </item>
+                     <item>
+                      <widget class="QLabel" name="labelHighlights">
+                       <property name="text">
+                        <string />
+                       </property>
+                       <property name="wordWrap">
+                        <bool>true</bool>
+                       </property>
+                       <property name="textFormat">
+                        <enum>Qt::RichText</enum>
+                       </property>
+                       <property name="alignment">
+                        <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
+                       </property>
+                      </widget>
+                     </item>
+                     <item>
+                      <spacer name="verticalSpacer_4">
+                       <property name="orientation">
+                        <enum>Qt::Vertical</enum>
+                       </property>
+                       <property name="sizeHint" stdset="0">
+                        <size>
+                         <width>20</width>
+                         <height>20</height>
+                        </size>
+                       </property>
+                      </spacer>
+                     </item>
+                    </layout>
+                   </widget>
+                  </item>
+                  <item row="1" column="0" rowspan="1" colspan="2">
+                   <widget class="QFrame" name="frameChartTrend">
+                    <property name="card" stdset="0">
+                     <bool>true</bool>
+                    </property>
+                    <layout class="QVBoxLayout" name="verticalLayoutChartTrend" stretch="0,0,1">
+                     <property name="spacing">
+                      <number>4</number>
+                     </property>
+                     <property name="leftMargin">
+                      <number>16</number>
+                     </property>
+                     <property name="topMargin">
+                      <number>12</number>
+                     </property>
+                     <property name="rightMargin">
+                      <number>16</number>
+                     </property>
+                     <property name="bottomMargin">
+                      <number>10</number>
+                     </property>
+                     <item>
+                      <widget class="QLabel" name="labelTitleTrend">
+                       <property name="text">
+                        <string>Lượt đánh giá và điểm trung bình theo tháng</string>
+                       </property>
+                       <property name="role" stdset="0">
+                        <string notr="true">cardTitle</string>
+                       </property>
+                      </widget>
+                     </item>
+                     <item>
+                      <widget class="QLabel" name="labelInsightTrend">
+                       <property name="text">
+                        <string />
+                       </property>
+                       <property name="role" stdset="0">
+                        <string notr="true">insight</string>
+                       </property>
+                       <property name="wordWrap">
+                        <bool>true</bool>
+                       </property>
+                       <property name="textFormat">
+                        <enum>Qt::RichText</enum>
+                       </property>
+                      </widget>
+                     </item>
+                     <item>
+                      <layout class="QVBoxLayout" name="verticalLayoutPlotTrend">
+                       <property name="leftMargin">
+                        <number>0</number>
+                       </property>
+                       <property name="topMargin">
+                        <number>0</number>
+                       </property>
+                       <property name="rightMargin">
+                        <number>0</number>
+                       </property>
+                       <property name="bottomMargin">
+                        <number>0</number>
+                       </property>
+                      </layout>
+                     </item>
+                    </layout>
+                   </widget>
+                  </item>
+                 </layout>
+                </widget>
+               </widget>
+              </item>
+             </layout>
+            </widget>
+            <widget class="QWidget" name="tabCustomers">
+             <attribute name="title">
+              <string>Khách hàng</string>
+             </attribute>
+             <layout class="QVBoxLayout" name="verticalLayoutTabCustomers">
+              <property name="leftMargin">
+               <number>0</number>
+              </property>
+              <property name="topMargin">
+               <number>12</number>
+              </property>
+              <property name="rightMargin">
+               <number>0</number>
+              </property>
+              <property name="bottomMargin">
+               <number>0</number>
+              </property>
+              <item>
+               <widget class="QScrollArea" name="scrollAreaCustomers">
+                <property name="widgetResizable">
+                 <bool>true</bool>
+                </property>
+                <property name="frameShape">
+                 <enum>QFrame::NoFrame</enum>
+                </property>
+                <widget class="QWidget" name="scrollAreaCustomersContents">
+                 <property name="geometry">
+                  <rect>
+                   <x>0</x>
+                   <y>0</y>
+                   <width>1080</width>
+                   <height>640</height>
+                  </rect>
+                 </property>
+                 <layout class="QGridLayout" name="gridLayoutCustomers">
+                  <property name="spacing">
+                   <number>14</number>
+                  </property>
+                  <property name="leftMargin">
+                   <number>0</number>
+                  </property>
+                  <property name="topMargin">
+                   <number>0</number>
+                  </property>
+                  <property name="rightMargin">
+                   <number>6</number>
+                  </property>
+                  <property name="bottomMargin">
+                   <number>0</number>
+                  </property>
+                  <item row="0" column="0">
+                   <widget class="QFrame" name="frameChartAge">
+                    <property name="card" stdset="0">
+                     <bool>true</bool>
+                    </property>
+                    <layout class="QVBoxLayout" name="verticalLayoutChartAge" stretch="0,0,1">
+                     <property name="spacing">
+                      <number>4</number>
+                     </property>
+                     <property name="leftMargin">
+                      <number>16</number>
+                     </property>
+                     <property name="topMargin">
+                      <number>12</number>
+                     </property>
+                     <property name="rightMargin">
+                      <number>16</number>
+                     </property>
+                     <property name="bottomMargin">
+                      <number>10</number>
+                     </property>
+                     <item>
+                      <widget class="QLabel" name="labelTitleAge">
+                       <property name="text">
+                        <string>Nhóm tuổi nào đánh giá nhiều nhất?</string>
+                       </property>
+                       <property name="role" stdset="0">
+                        <string notr="true">cardTitle</string>
+                       </property>
+                      </widget>
+                     </item>
+                     <item>
+                      <widget class="QLabel" name="labelInsightAge">
+                       <property name="text">
+                        <string />
+                       </property>
+                       <property name="role" stdset="0">
+                        <string notr="true">insight</string>
+                       </property>
+                       <property name="wordWrap">
+                        <bool>true</bool>
+                       </property>
+                       <property name="textFormat">
+                        <enum>Qt::RichText</enum>
+                       </property>
+                      </widget>
+                     </item>
+                     <item>
+                      <layout class="QVBoxLayout" name="verticalLayoutPlotAge">
+                       <property name="leftMargin">
+                        <number>0</number>
+                       </property>
+                       <property name="topMargin">
+                        <number>0</number>
+                       </property>
+                       <property name="rightMargin">
+                        <number>0</number>
+                       </property>
+                       <property name="bottomMargin">
+                        <number>0</number>
+                       </property>
+                      </layout>
+                     </item>
+                    </layout>
+                   </widget>
+                  </item>
+                  <item row="0" column="1">
+                   <widget class="QFrame" name="frameChartGender">
+                    <property name="card" stdset="0">
+                     <bool>true</bool>
+                    </property>
+                    <layout class="QVBoxLayout" name="verticalLayoutChartGender" stretch="0,0,1">
+                     <property name="spacing">
+                      <number>4</number>
+                     </property>
+                     <property name="leftMargin">
+                      <number>16</number>
+                     </property>
+                     <property name="topMargin">
+                      <number>12</number>
+                     </property>
+                     <property name="rightMargin">
+                      <number>16</number>
+                     </property>
+                     <property name="bottomMargin">
+                      <number>10</number>
+                     </property>
+                     <item>
+                      <widget class="QLabel" name="labelTitleGender">
+                       <property name="text">
+                        <string>Nam và nữ đánh giá khác nhau ra sao?</string>
+                       </property>
+                       <property name="role" stdset="0">
+                        <string notr="true">cardTitle</string>
+                       </property>
+                      </widget>
+                     </item>
+                     <item>
+                      <widget class="QLabel" name="labelInsightGender">
+                       <property name="text">
+                        <string />
+                       </property>
+                       <property name="role" stdset="0">
+                        <string notr="true">insight</string>
+                       </property>
+                       <property name="wordWrap">
+                        <bool>true</bool>
+                       </property>
+                       <property name="textFormat">
+                        <enum>Qt::RichText</enum>
+                       </property>
+                      </widget>
+                     </item>
+                     <item>
+                      <layout class="QVBoxLayout" name="verticalLayoutPlotGender">
+                       <property name="leftMargin">
+                        <number>0</number>
+                       </property>
+                       <property name="topMargin">
+                        <number>0</number>
+                       </property>
+                       <property name="rightMargin">
+                        <number>0</number>
+                       </property>
+                       <property name="bottomMargin">
+                        <number>0</number>
+                       </property>
+                      </layout>
+                     </item>
+                    </layout>
+                   </widget>
+                  </item>
+                  <item row="1" column="0">
+                   <widget class="QFrame" name="frameChartOccupation">
+                    <property name="card" stdset="0">
+                     <bool>true</bool>
+                    </property>
+                    <layout class="QVBoxLayout" name="verticalLayoutChartOccupation" stretch="0,0,1">
+                     <property name="spacing">
+                      <number>4</number>
+                     </property>
+                     <property name="leftMargin">
+                      <number>16</number>
+                     </property>
+                     <property name="topMargin">
+                      <number>12</number>
+                     </property>
+                     <property name="rightMargin">
+                      <number>16</number>
+                     </property>
+                     <property name="bottomMargin">
+                      <number>10</number>
+                     </property>
+                     <item>
+                      <widget class="QLabel" name="labelTitleOccupation">
+                       <property name="text">
+                        <string>Top 8 nghề nghiệp tích cực nhất</string>
+                       </property>
+                       <property name="role" stdset="0">
+                        <string notr="true">cardTitle</string>
+                       </property>
+                      </widget>
+                     </item>
+                     <item>
+                      <widget class="QLabel" name="labelInsightOccupation">
+                       <property name="text">
+                        <string />
+                       </property>
+                       <property name="role" stdset="0">
+                        <string notr="true">insight</string>
+                       </property>
+                       <property name="wordWrap">
+                        <bool>true</bool>
+                       </property>
+                       <property name="textFormat">
+                        <enum>Qt::RichText</enum>
+                       </property>
+                      </widget>
+                     </item>
+                     <item>
+                      <layout class="QVBoxLayout" name="verticalLayoutPlotOccupation">
+                       <property name="leftMargin">
+                        <number>0</number>
+                       </property>
+                       <property name="topMargin">
+                        <number>0</number>
+                       </property>
+                       <property name="rightMargin">
+                        <number>0</number>
+                       </property>
+                       <property name="bottomMargin">
+                        <number>0</number>
+                       </property>
+                      </layout>
+                     </item>
+                    </layout>
+                   </widget>
+                  </item>
+                  <item row="1" column="1">
+                   <widget class="QFrame" name="frameChartUserActivity">
+                    <property name="card" stdset="0">
+                     <bool>true</bool>
+                    </property>
+                    <layout class="QVBoxLayout" name="verticalLayoutChartUserActivity" stretch="0,0,1">
+                     <property name="spacing">
+                      <number>4</number>
+                     </property>
+                     <property name="leftMargin">
+                      <number>16</number>
+                     </property>
+                     <property name="topMargin">
+                      <number>12</number>
+                     </property>
+                     <property name="rightMargin">
+                      <number>16</number>
+                     </property>
+                     <property name="bottomMargin">
+                      <number>10</number>
+                     </property>
+                     <item>
+                      <widget class="QLabel" name="labelTitleUserActivity">
+                       <property name="text">
+                        <string>Mức độ hoạt động của khách hàng</string>
+                       </property>
+                       <property name="role" stdset="0">
+                        <string notr="true">cardTitle</string>
+                       </property>
+                      </widget>
+                     </item>
+                     <item>
+                      <widget class="QLabel" name="labelInsightUserActivity">
+                       <property name="text">
+                        <string />
+                       </property>
+                       <property name="role" stdset="0">
+                        <string notr="true">insight</string>
+                       </property>
+                       <property name="wordWrap">
+                        <bool>true</bool>
+                       </property>
+                       <property name="textFormat">
+                        <enum>Qt::RichText</enum>
+                       </property>
+                      </widget>
+                     </item>
+                     <item>
+                      <layout class="QVBoxLayout" name="verticalLayoutPlotUserActivity">
+                       <property name="leftMargin">
+                        <number>0</number>
+                       </property>
+                       <property name="topMargin">
+                        <number>0</number>
+                       </property>
+                       <property name="rightMargin">
+                        <number>0</number>
+                       </property>
+                       <property name="bottomMargin">
+                        <number>0</number>
+                       </property>
+                      </layout>
+                     </item>
+                    </layout>
+                   </widget>
+                  </item>
+                 </layout>
+                </widget>
+               </widget>
+              </item>
+             </layout>
+            </widget>
+            <widget class="QWidget" name="tabMovies">
+             <attribute name="title">
+              <string>Phim và thể loại</string>
+             </attribute>
+             <layout class="QVBoxLayout" name="verticalLayoutTabMovies">
+              <property name="leftMargin">
+               <number>0</number>
+              </property>
+              <property name="topMargin">
+               <number>12</number>
+              </property>
+              <property name="rightMargin">
+               <number>0</number>
+              </property>
+              <property name="bottomMargin">
+               <number>0</number>
+              </property>
+              <item>
+               <widget class="QScrollArea" name="scrollAreaMovies">
+                <property name="widgetResizable">
+                 <bool>true</bool>
+                </property>
+                <property name="frameShape">
+                 <enum>QFrame::NoFrame</enum>
+                </property>
+                <widget class="QWidget" name="scrollAreaMoviesContents">
+                 <property name="geometry">
+                  <rect>
+                   <x>0</x>
+                   <y>0</y>
+                   <width>1080</width>
+                   <height>640</height>
+                  </rect>
+                 </property>
+                 <layout class="QGridLayout" name="gridLayoutMovies">
+                  <property name="spacing">
+                   <number>14</number>
+                  </property>
+                  <property name="leftMargin">
+                   <number>0</number>
+                  </property>
+                  <property name="topMargin">
+                   <number>0</number>
+                  </property>
+                  <property name="rightMargin">
+                   <number>6</number>
+                  </property>
+                  <property name="bottomMargin">
+                   <number>0</number>
+                  </property>
+                  <item row="0" column="0">
+                   <widget class="QFrame" name="frameChartGenre">
+                    <property name="card" stdset="0">
+                     <bool>true</bool>
+                    </property>
+                    <layout class="QVBoxLayout" name="verticalLayoutChartGenre" stretch="0,0,1">
+                     <property name="spacing">
+                      <number>4</number>
+                     </property>
+                     <property name="leftMargin">
+                      <number>16</number>
+                     </property>
+                     <property name="topMargin">
+                      <number>12</number>
+                     </property>
+                     <property name="rightMargin">
+                      <number>16</number>
+                     </property>
+                     <property name="bottomMargin">
+                      <number>10</number>
+                     </property>
+                     <item>
+                      <widget class="QLabel" name="labelTitleGenre">
+                       <property name="text">
+                        <string>Thể loại được xem và yêu thích nhất</string>
+                       </property>
+                       <property name="role" stdset="0">
+                        <string notr="true">cardTitle</string>
+                       </property>
+                      </widget>
+                     </item>
+                     <item>
+                      <widget class="QLabel" name="labelInsightGenre">
+                       <property name="text">
+                        <string />
+                       </property>
+                       <property name="role" stdset="0">
+                        <string notr="true">insight</string>
+                       </property>
+                       <property name="wordWrap">
+                        <bool>true</bool>
+                       </property>
+                       <property name="textFormat">
+                        <enum>Qt::RichText</enum>
+                       </property>
+                      </widget>
+                     </item>
+                     <item>
+                      <layout class="QVBoxLayout" name="verticalLayoutPlotGenre">
+                       <property name="leftMargin">
+                        <number>0</number>
+                       </property>
+                       <property name="topMargin">
+                        <number>0</number>
+                       </property>
+                       <property name="rightMargin">
+                        <number>0</number>
+                       </property>
+                       <property name="bottomMargin">
+                        <number>0</number>
+                       </property>
+                      </layout>
+                     </item>
+                    </layout>
+                   </widget>
+                  </item>
+                  <item row="0" column="1">
+                   <widget class="QFrame" name="frameChartFeatured">
+                    <property name="card" stdset="0">
+                     <bool>true</bool>
+                    </property>
+                    <layout class="QVBoxLayout" name="verticalLayoutChartFeatured" stretch="0,0,1">
+                     <property name="spacing">
+                      <number>4</number>
+                     </property>
+                     <property name="leftMargin">
+                      <number>16</number>
+                     </property>
+                     <property name="topMargin">
+                      <number>12</number>
+                     </property>
+                     <property name="rightMargin">
+                      <number>16</number>
+                     </property>
+                     <property name="bottomMargin">
+                      <number>10</number>
+                     </property>
+                     <item>
+                      <widget class="QLabel" name="labelTitleFeatured">
+                       <property name="text">
+                        <string>Phim nổi bật (điểm trung bình cao nhất)</string>
+                       </property>
+                       <property name="role" stdset="0">
+                        <string notr="true">cardTitle</string>
+                       </property>
+                      </widget>
+                     </item>
+                     <item>
+                      <widget class="QLabel" name="labelInsightFeatured">
+                       <property name="text">
+                        <string />
+                       </property>
+                       <property name="role" stdset="0">
+                        <string notr="true">insight</string>
+                       </property>
+                       <property name="wordWrap">
+                        <bool>true</bool>
+                       </property>
+                       <property name="textFormat">
+                        <enum>Qt::RichText</enum>
+                       </property>
+                      </widget>
+                     </item>
+                     <item>
+                      <layout class="QVBoxLayout" name="verticalLayoutPlotFeatured">
+                       <property name="leftMargin">
+                        <number>0</number>
+                       </property>
+                       <property name="topMargin">
+                        <number>0</number>
+                       </property>
+                       <property name="rightMargin">
+                        <number>0</number>
+                       </property>
+                       <property name="bottomMargin">
+                        <number>0</number>
+                       </property>
+                      </layout>
+                     </item>
+                    </layout>
+                   </widget>
+                  </item>
+                  <item row="1" column="0" rowspan="1" colspan="2">
+                   <widget class="QFrame" name="frameChartMovieActivity">
+                    <property name="card" stdset="0">
+                     <bool>true</bool>
+                    </property>
+                    <layout class="QVBoxLayout" name="verticalLayoutChartMovieActivity" stretch="0,0,1">
+                     <property name="spacing">
+                      <number>4</number>
+                     </property>
+                     <property name="leftMargin">
+                      <number>16</number>
+                     </property>
+                     <property name="topMargin">
+                      <number>12</number>
+                     </property>
+                     <property name="rightMargin">
+                      <number>16</number>
+                     </property>
+                     <property name="bottomMargin">
+                      <number>10</number>
+                     </property>
+                     <item>
+                      <widget class="QLabel" name="labelTitleMovieActivity">
+                       <property name="text">
+                        <string>Mức độ quan tâm của khách hàng tới từng phim</string>
+                       </property>
+                       <property name="role" stdset="0">
+                        <string notr="true">cardTitle</string>
+                       </property>
+                      </widget>
+                     </item>
+                     <item>
+                      <widget class="QLabel" name="labelInsightMovieActivity">
+                       <property name="text">
+                        <string />
+                       </property>
+                       <property name="role" stdset="0">
+                        <string notr="true">insight</string>
+                       </property>
+                       <property name="wordWrap">
+                        <bool>true</bool>
+                       </property>
+                       <property name="textFormat">
+                        <enum>Qt::RichText</enum>
+                       </property>
+                      </widget>
+                     </item>
+                     <item>
+                      <layout class="QVBoxLayout" name="verticalLayoutPlotMovieActivity">
+                       <property name="leftMargin">
+                        <number>0</number>
+                       </property>
+                       <property name="topMargin">
+                        <number>0</number>
+                       </property>
+                       <property name="rightMargin">
+                        <number>0</number>
+                       </property>
+                       <property name="bottomMargin">
+                        <number>0</number>
+                       </property>
+                      </layout>
+                     </item>
+                    </layout>
+                   </widget>
+                  </item>
+                 </layout>
+                </widget>
+               </widget>
+              </item>
+             </layout>
+            </widget>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+    </item>
+   </layout>
+  </widget>
+ </widget>
+ <resources />
+ <connections />
+</ui>
