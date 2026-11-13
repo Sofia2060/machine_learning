@@ -37,7 +37,7 @@ RATINGS_CSV = DATA_DIR / "cleaned_ratings.csv"
 # 2. CẤU HÌNH THÔNG SỐ KẾT NỐI MYSQL
 # ==============================================================================
 DB_USER = os.getenv("DB_USER", "root")
-DB_PASS = os.getenv("DB_PASS", "MATKHAUCUABAN")  # Thay đổi mật khẩu phù hợp với MySQL của bạn
+DB_PASS = os.getenv("DB_PASS", "@Obama123")  # Thay đổi mật khẩu phù hợp với MySQL của bạn
 DB_HOST = os.getenv("DB_HOST", "localhost")
 DB_PORT = os.getenv("DB_PORT", "3306")
 DB_NAME = os.getenv("DB_NAME", "movie_recommender_system")
