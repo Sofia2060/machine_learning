@@ -70,6 +70,24 @@ MOVIELENS_OCCUPATIONS = [
     (20, "writer"),
 ]
 
+# Giả lập danh sách Họ, Tên đệm, Tên phổ biến để tạo full_name ngẫu nhiên cho khách hàng
+LAST_NAMES = np.array([
+    "Nguyễn", "Trần", "Lê", "Phạm", "Hoàng", "Huỳnh", "Phan", "Vũ",
+    "Võ", "Đặng", "Bùi", "Đỗ", "Hồ", "Ngô", "Dương", "Lý"
+])
+
+MIDDLE_NAMES = np.array([
+    "Văn", "Thị", "Minh", "Hoàng", "Anh", "Quốc", "Thanh", "Ngọc",
+    "Đức", "Gia", "Bảo", "Hữu", "Phương", "Thùy", "Tuấn", "Khánh"
+])
+
+FIRST_NAMES = np.array([
+    "An", "Bình", "Cường", "Dũng", "Giang", "Hà", "Hải", "Hiếu",
+    "Hùng", "Huy", "Khanh", "Khoa", "Linh", "Long", "Mai", "Nam",
+    "Nga", "Ngân", "Nhung", "Phong", "Phúc", "Phương", "Quân", "Quỳnh",
+    "Sơn", "Tâm", "Thảo", "Thắng", "Trang", "Trung", "Tú", "Vy"
+])
+
 # Mẫu bình luận tích cực (rating >= 4) và trung bình/tiêu cực (rating < 4)
 POSITIVE_COMMENTS = np.array([
     "Phim cực kỳ xuất sắc, kịch bản lôi cuốn và giàu cảm xúc!",
@@ -159,6 +177,7 @@ def load_customers(engine):
        - username = user_{id}
        - email = user_{id}@gmail.com
        - password_hash = SHA256('123456')
+       - full_name = Tổ hợp ngẫu nhiên Họ + Tên đệm + Tên
        - is_active = True
        - Ánh xạ occupation thành occupation_id
     """
@@ -170,11 +189,20 @@ def load_customers(engine):
     df_users = pd.read_csv(USERS_CSV)
     fixed_pwd_hash = hashlib.sha256("123456".encode("utf-8")).hexdigest()
 
+    # Giả lập họ tên ngẫu nhiên bằng NumPy (cố định seed=42 để tái lập kết quả)
+    np.random.seed(42)
+    num_users = len(df_users)
+    last_n = np.random.choice(LAST_NAMES, size=num_users)
+    mid_n = np.random.choice(MIDDLE_NAMES, size=num_users)
+    first_n = np.random.choice(FIRST_NAMES, size=num_users)
+    full_names = [f"{l} {m} {f}" for l, m, f in zip(last_n, mid_n, first_n)]
+    
     df_customers = pd.DataFrame({
         "customer_id": df_users["user_id"],
         "username": df_users["user_id"].apply(lambda uid: f"user_{uid}"),
         "email": df_users["user_id"].apply(lambda uid: f"user_{uid}@gmail.com"),
         "password_hash": fixed_pwd_hash,
+        "full_name": full_names,
         "gender": df_users["gender_desc"] if "gender_desc" in df_users.columns else df_users["gender"],
         "age": df_users["age"].fillna(25).astype(int),
         "occupation_id": df_users["occupation"].astype(int),

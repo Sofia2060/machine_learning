@@ -13,6 +13,7 @@ CREATE TABLE customers (
     username VARCHAR(50) NOT NULL UNIQUE,
     email VARCHAR(100) NOT NULL UNIQUE,
     password_hash VARCHAR(255) NOT NULL,
+    full_name VARCHAR(100) NOT NULL,
     gender VARCHAR(10),
     age INT,
     occupation_id INT,
