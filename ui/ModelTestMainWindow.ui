@@ -381,16 +381,31 @@ QProgressBar#progressBarMatch::chunk { border-radius: 5px; background-color: #16
         </widget>
        </item>
        <item>
- <widget class="QPushButton" name="pushButtonNavModelTest">
-  <property name="text"><string>Thử nghiệm mô hình</string></property>
-  <property name="cursor"><cursorShape>PointingHandCursor</cursorShape></property>
-  <property name="icon"><iconset>
-<normaloff>../images/ic_model.png</normaloff>../images/ic_model.png</iconset></property>
-  <property name="iconSize"><size><width>20</width><height>20</height></size></property>
-  <property name="nav" stdset="0"><bool>true</bool></property>
-  
- <property name="active" stdset="0"><bool>true</bool></property></widget>
-</item><item>
+        <widget class="QPushButton" name="pushButtonNavModelTest">
+         <property name="text">
+          <string>Thử nghiệm mô hình</string>
+         </property>
+         <property name="cursor">
+          <cursorShape>PointingHandCursor</cursorShape>
+         </property>
+         <property name="icon">
+          <iconset>
+           <normaloff>../images/ic_model.png</normaloff>
+           ../images/ic_model.png
+          </iconset>
+         </property>
+         <property name="iconSize">
+          <size>
+           <width>20</width>
+           <height>20</height>
+          </size>
+         </property>
+         <property name="nav" stdset="0">
+          <bool>true</bool>
+         </property>
+        <property name="active" stdset="0"><bool>true</bool></property></widget>
+       </item>
+       <item>
         <spacer name="verticalSpacer_3">
          <property name="orientation">
           <enum>Qt::Vertical</enum>
@@ -600,8 +615,8 @@ QProgressBar#progressBarMatch::chunk { border-radius: 5px; background-color: #16
        </item>
        <item>
         <widget class="QWidget" name="widgetContent">
- <layout class="QVBoxLayout" name="verticalLayoutContent" stretch="0,0,0,1">
-  <property name="spacing"><number>12</number></property><property name="leftMargin"><number>24</number></property><property name="topMargin"><number>14</number></property><property name="rightMargin"><number>24</number></property><property name="bottomMargin"><number>18</number></property>
+ <layout class="QVBoxLayout" name="verticalLayoutContent" stretch="0,0,1">
+  <property name="spacing"><number>12</number></property><property name="leftMargin"><number>24</number></property><property name="topMargin"><number>14</number></property><property name="rightMargin"><number>24</number></property><property name="bottomMargin"><number>12</number></property>
   <item>
    <widget class="QFrame" name="frameInput">
     <property name="card" stdset="0"><bool>true</bool></property>
@@ -610,7 +625,7 @@ QProgressBar#progressBarMatch::chunk { border-radius: 5px; background-color: #16
      <item><widget class="QLabel" name="labelUserId"><property name="text"><string>Mã khách hàng (UserID)</string></property><property name="role" stdset="0"><string notr="true">field</string></property></widget></item>
      <item>
       <widget class="QLineEdit" name="lineEditUserId">
-       <property name="minimumSize"><size><width>170</width><height>0</height></size></property>
+       <property name="minimumSize"><size><width>150</width><height>0</height></size></property>
        <property name="maximumSize"><size><width>220</width><height>16777215</height></size></property>
        <property name="placeholderText"><string>Nhập UserID, vd: 1</string></property>
        <property name="clearButtonEnabled"><bool>true</bool></property>
@@ -626,7 +641,7 @@ QProgressBar#progressBarMatch::chunk { border-radius: 5px; background-color: #16
      <item>
       <spacer name="horizontalSpacerInput">
        <property name="orientation"><enum>Qt::Horizontal</enum></property>
-       <property name="sizeHint" stdset="0"><size><width>40</width><height>20</height></size></property>
+       <property name="sizeHint" stdset="0"><size><width>20</width><height>20</height></size></property>
       </spacer>
      </item>
      <item><widget class="QLabel" name="labelTopN"><property name="text"><string>Số phim gợi ý</string></property><property name="role" stdset="0"><string notr="true">field</string></property></widget></item>
@@ -644,45 +659,53 @@ QProgressBar#progressBarMatch::chunk { border-radius: 5px; background-color: #16
     </layout>
    </widget>
   </item>
-  <item><widget class="QLabel" name="labelTestNote"><property name="text"><string>Nhập UserID bất kỳ để xem mô hình đang dùng gợi ý gì cho khách hàng đó và đối chiếu với các phim họ đã đánh giá cao. Kết quả chỉ dùng để kiểm tra: không lưu vào lịch sử gợi ý và khách hàng không nhìn thấy.</string></property><property name="role" stdset="0"><string notr="true">info</string></property><property name="wordWrap"><bool>true</bool></property></widget></item>
+  <item><widget class="QLabel" name="labelTestNote"><property name="text"><string>Kết quả chỉ dùng để kiểm tra mô hình: không lưu vào lịch sử gợi ý và khách hàng không nhìn thấy.</string></property><property name="role" stdset="0"><string notr="true">info</string></property><property name="wordWrap"><bool>true</bool></property></widget></item>
   <item>
-   <widget class="QFrame" name="frameUserSummary">
-    <property name="card" stdset="0"><bool>true</bool></property>
-    <layout class="QHBoxLayout" name="horizontalLayoutUserSummary">
-     <property name="spacing"><number>14</number></property><property name="leftMargin"><number>18</number></property><property name="topMargin"><number>12</number></property><property name="rightMargin"><number>18</number></property><property name="bottomMargin"><number>12</number></property>
-     <item>
-      <layout class="QVBoxLayout" name="verticalLayoutUserInfo">
-       <property name="spacing"><number>4</number></property>
-       <item><widget class="QLabel" name="labelUserTitle"><property name="text"><string>Chưa chọn khách hàng</string></property><property name="role" stdset="0"><string notr="true">cardTitle</string></property></widget></item>
-       <item><widget class="QLabel" name="labelUserDetail"><property name="text"><string>Nhập UserID rồi bấm Chạy thử nghiệm.</string></property><property name="role" stdset="0"><string notr="true">insight</string></property><property name="wordWrap"><bool>true</bool></property></widget></item>
-      </layout>
-     </item>
-     <item>
-      <layout class="QVBoxLayout" name="verticalLayoutMatch">
-       <property name="spacing"><number>2</number></property>
-       <item><widget class="QLabel" name="labelMatchValue"><property name="text"><string>—</string></property><property name="kpi" stdset="0"><string notr="true">value</string></property><property name="alignment"><set>Qt::AlignRight|Qt::AlignVCenter</set></property></widget></item>
-       <item><widget class="QLabel" name="labelMatchCaption"><property name="text"><string>MỨC TRÙNG KHỚP THỂ LOẠI</string></property><property name="kpi" stdset="0"><string notr="true">caption</string></property><property name="alignment"><set>Qt::AlignRight|Qt::AlignVCenter</set></property></widget></item>
-      </layout>
-     </item>
-    </layout>
-   </widget>
-  </item>
-  <item>
-   <layout class="QHBoxLayout" name="horizontalLayoutResult" stretch="3,2">
-    <property name="spacing"><number>12</number></property>
-    <item>
-     <widget class="QFrame" name="frameTopN">
-      <property name="card" stdset="0"><bool>true</bool></property>
-      <layout class="QVBoxLayout" name="verticalLayoutTopN">
-       <property name="spacing"><number>8</number></property><property name="leftMargin"><number>18</number></property><property name="topMargin"><number>14</number></property><property name="rightMargin"><number>18</number></property><property name="bottomMargin"><number>16</number></property>
-       <item><widget class="QLabel" name="labelTopNTitle"><property name="text"><string>Top-N phim mô hình gợi ý</string></property><property name="role" stdset="0"><string notr="true">cardTitle</string></property></widget></item>
-       <item><widget class="QLabel" name="labelTopNSub"><property name="text"><string>Đã loại các phim khách hàng đã đánh giá và phim đang bị ẩn</string></property><property name="role" stdset="0"><string notr="true">insight</string></property><property name="wordWrap"><bool>true</bool></property></widget></item>
-       <item>
+   <widget class="QScrollArea" name="scrollAreaTest">
+    <property name="widgetResizable"><bool>true</bool></property>
+    <property name="frameShape"><enum>QFrame::NoFrame</enum></property>
+    <widget class="QWidget" name="scrollAreaTestContents">
+     <property name="styleSheet"><string notr="true">QWidget#scrollAreaTestContents { background: transparent; }</string></property>
+     <layout class="QVBoxLayout" name="verticalLayoutTestBody">
+      <property name="spacing"><number>12</number></property><property name="leftMargin"><number>0</number></property><property name="topMargin"><number>0</number></property><property name="rightMargin"><number>6</number></property><property name="bottomMargin"><number>4</number></property>
+      <item>
+       <widget class="QFrame" name="frameUserSummary">
+        <property name="card" stdset="0"><bool>true</bool></property>
+        <layout class="QHBoxLayout" name="horizontalLayoutUserSummary" stretch="1,0">
+         <property name="spacing"><number>14</number></property><property name="leftMargin"><number>18</number></property><property name="topMargin"><number>12</number></property><property name="rightMargin"><number>18</number></property><property name="bottomMargin"><number>12</number></property>
+         <item>
+          <layout class="QVBoxLayout" name="verticalLayoutUserInfo">
+           <property name="spacing"><number>4</number></property>
+           <item><widget class="QLabel" name="labelUserTitle"><property name="text"><string>Chưa chọn khách hàng</string></property><property name="role" stdset="0"><string notr="true">cardTitle</string></property><property name="wordWrap"><bool>true</bool></property></widget></item>
+           <item><widget class="QLabel" name="labelUserDetail"><property name="text"><string>Nhập UserID rồi bấm Chạy thử nghiệm.</string></property><property name="role" stdset="0"><string notr="true">insight</string></property><property name="wordWrap"><bool>true</bool></property></widget></item>
+          </layout>
+         </item>
+         <item>
+          <layout class="QVBoxLayout" name="verticalLayoutMatch">
+           <property name="spacing"><number>2</number></property>
+           <item><widget class="QLabel" name="labelMatchValue"><property name="text"><string>—</string></property><property name="kpi" stdset="0"><string notr="true">value</string></property><property name="alignment"><set>Qt::AlignRight|Qt::AlignVCenter</set></property></widget></item>
+           <item><widget class="QLabel" name="labelMatchCaption"><property name="text"><string>MỨC TRÙNG KHỚP THỂ LOẠI</string></property><property name="kpi" stdset="0"><string notr="true">caption</string></property><property name="alignment"><set>Qt::AlignRight|Qt::AlignVCenter</set></property></widget></item>
+          </layout>
+         </item>
+        </layout>
+       </widget>
+      </item>
+      <item>
+       <layout class="QHBoxLayout" name="horizontalLayoutResult" stretch="3,2">
+        <property name="spacing"><number>12</number></property>
+        <item>
+         <widget class="QFrame" name="frameTopN">
+          <property name="card" stdset="0"><bool>true</bool></property>
+          <layout class="QVBoxLayout" name="verticalLayoutTopN">
+           <property name="spacing"><number>8</number></property><property name="leftMargin"><number>18</number></property><property name="topMargin"><number>14</number></property><property name="rightMargin"><number>18</number></property><property name="bottomMargin"><number>16</number></property>
+           <item><widget class="QLabel" name="labelTopNTitle"><property name="text"><string>Top-N phim mô hình gợi ý</string></property><property name="role" stdset="0"><string notr="true">cardTitle</string></property></widget></item>
+           <item><widget class="QLabel" name="labelTopNSub"><property name="text"><string>Đã loại các phim khách hàng đã đánh giá và phim đang bị ẩn</string></property><property name="role" stdset="0"><string notr="true">insight</string></property><property name="wordWrap"><bool>true</bool></property></widget></item>
+           <item>
 <widget class="QTableWidget" name="tableWidgetTopN">
  <attribute name="horizontalHeaderStretchLastSection"><bool>true</bool></attribute>
  <attribute name="verticalHeaderVisible"><bool>false</bool></attribute>
  <attribute name="horizontalHeaderHighlightSections"><bool>false</bool></attribute>
- <property name="minimumSize"><size><width>0</width><height>330</height></size></property>
+ <property name="minimumSize"><size><width>0</width><height>420</height></size></property>
  <property name="alternatingRowColors"><bool>true</bool></property>
  <property name="selectionMode"><enum>QAbstractItemView::SingleSelection</enum></property>
  <property name="selectionBehavior"><enum>QAbstractItemView::SelectRows</enum></property>
@@ -690,35 +713,35 @@ QProgressBar#progressBarMatch::chunk { border-radius: 5px; background-color: #16
  <property name="showGrid"><bool>false</bool></property>
  <property name="wordWrap"><bool>false</bool></property>
 </widget></item>
-      </layout>
-     </widget>
-    </item>
-    <item>
-     <widget class="QFrame" name="frameCompare">
-      <property name="card" stdset="0"><bool>true</bool></property>
-      <layout class="QVBoxLayout" name="verticalLayoutCompare">
-       <property name="spacing"><number>8</number></property><property name="leftMargin"><number>18</number></property><property name="topMargin"><number>14</number></property><property name="rightMargin"><number>18</number></property><property name="bottomMargin"><number>16</number></property>
-       <item><widget class="QLabel" name="labelCompareTitle"><property name="text"><string>Đối chiếu thể loại</string></property><property name="role" stdset="0"><string notr="true">cardTitle</string></property></widget></item>
-       <item><widget class="QLabel" name="labelCompareInsight"><property name="text"><string /></property><property name="role" stdset="0"><string notr="true">insight</string></property><property name="wordWrap"><bool>true</bool></property></widget></item>
-       <item><layout class="QVBoxLayout" name="verticalLayoutPlotCompare" /></item>
-      </layout>
-     </widget>
-    </item>
-   </layout>
-  </item>
-  <item>
-   <widget class="QFrame" name="frameLiked">
-    <property name="card" stdset="0"><bool>true</bool></property>
-    <layout class="QVBoxLayout" name="verticalLayoutLiked">
-     <property name="spacing"><number>8</number></property><property name="leftMargin"><number>18</number></property><property name="topMargin"><number>14</number></property><property name="rightMargin"><number>18</number></property><property name="bottomMargin"><number>16</number></property>
-     <item><widget class="QLabel" name="labelLikedTitle"><property name="text"><string>Phim khách hàng đã đánh giá cao (từ 4 sao)</string></property><property name="role" stdset="0"><string notr="true">cardTitle</string></property></widget></item>
-     <item><widget class="QLabel" name="labelLikedSub"><property name="text"><string /></property><property name="role" stdset="0"><string notr="true">insight</string></property><property name="wordWrap"><bool>true</bool></property></widget></item>
-     <item>
+          </layout>
+         </widget>
+        </item>
+        <item>
+         <widget class="QFrame" name="frameCompare">
+          <property name="card" stdset="0"><bool>true</bool></property>
+          <layout class="QVBoxLayout" name="verticalLayoutCompare" stretch="0,0,1">
+           <property name="spacing"><number>8</number></property><property name="leftMargin"><number>18</number></property><property name="topMargin"><number>14</number></property><property name="rightMargin"><number>18</number></property><property name="bottomMargin"><number>16</number></property>
+           <item><widget class="QLabel" name="labelCompareTitle"><property name="text"><string>Đối chiếu thể loại</string></property><property name="role" stdset="0"><string notr="true">cardTitle</string></property></widget></item>
+           <item><widget class="QLabel" name="labelCompareInsight"><property name="text"><string /></property><property name="role" stdset="0"><string notr="true">insight</string></property><property name="wordWrap"><bool>true</bool></property></widget></item>
+           <item><layout class="QVBoxLayout" name="verticalLayoutPlotCompare" /></item>
+          </layout>
+         </widget>
+        </item>
+       </layout>
+      </item>
+      <item>
+       <widget class="QFrame" name="frameLiked">
+        <property name="card" stdset="0"><bool>true</bool></property>
+        <layout class="QVBoxLayout" name="verticalLayoutLiked">
+         <property name="spacing"><number>8</number></property><property name="leftMargin"><number>18</number></property><property name="topMargin"><number>14</number></property><property name="rightMargin"><number>18</number></property><property name="bottomMargin"><number>16</number></property>
+         <item><widget class="QLabel" name="labelLikedTitle"><property name="text"><string>Phim khách hàng đã đánh giá cao (từ 4 sao)</string></property><property name="role" stdset="0"><string notr="true">cardTitle</string></property></widget></item>
+         <item><widget class="QLabel" name="labelLikedSub"><property name="text"><string /></property><property name="role" stdset="0"><string notr="true">insight</string></property><property name="wordWrap"><bool>true</bool></property></widget></item>
+         <item>
 <widget class="QTableWidget" name="tableWidgetLiked">
  <attribute name="horizontalHeaderStretchLastSection"><bool>true</bool></attribute>
  <attribute name="verticalHeaderVisible"><bool>false</bool></attribute>
  <attribute name="horizontalHeaderHighlightSections"><bool>false</bool></attribute>
- <property name="minimumSize"><size><width>0</width><height>230</height></size></property>
+ <property name="minimumSize"><size><width>0</width><height>340</height></size></property>
  <property name="alternatingRowColors"><bool>true</bool></property>
  <property name="selectionMode"><enum>QAbstractItemView::SingleSelection</enum></property>
  <property name="selectionBehavior"><enum>QAbstractItemView::SelectRows</enum></property>
@@ -726,7 +749,11 @@ QProgressBar#progressBarMatch::chunk { border-radius: 5px; background-color: #16
  <property name="showGrid"><bool>false</bool></property>
  <property name="wordWrap"><bool>false</bool></property>
 </widget></item>
-    </layout>
+        </layout>
+       </widget>
+      </item>
+     </layout>
+    </widget>
    </widget>
   </item>
  </layout>

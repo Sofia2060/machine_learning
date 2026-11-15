@@ -14,13 +14,16 @@ from app.utils.SchemaUtil import SchemaUtil
 #   2. python src/database.py
 #   3. python app/setup_database.py   <- file này (run_app.py cũng tự gọi khi thấy còn thiếu)
 # Việc làm: thêm cột/bảng hỗ trợ (không đụng dữ liệu gốc), tính điểm TB từng phim, đăng ký mô hình NeuMF.
+# Đăng ký lại tệp mô hình hiện có (vd. vừa clone/pull bản mới nên mã băm khác bản đã đăng ký):
+#   python app/setup_database.py --register
 start=time.time()
+force_register="--register" in sys.argv
 print("Bổ sung cột/bảng phần mềm cần:")
 if not SchemaUtil.ensureSchema():
     exit()
 info=modelDAO.getActiveModel()
 model_path=ConfigUtil.rootPath(ConfigUtil.get("recommendation","model_path","models/main_model/neumf.npz"))
-if info is None:
+if info is None or force_register:
     if os.path.exists(model_path):
         print("Đăng ký mô hình",ConfigUtil.get("recommendation","model_path"),"...")
         print("   kết quả:",MovieRecommender.registerModel(model_path))
@@ -28,5 +31,9 @@ if info is None:
         print("Chưa có tệp mô hình",model_path,"- hãy chạy: python main.py export")
 else:
     print("Mô hình đang dùng:",info["model_name"],info["file_name"])
-print("Nạp thử mô hình:",MovieRecommender.loadModel(),MovieRecommender.last_error)
+loaded=MovieRecommender.loadModel(force=True)
+print("Nạp thử mô hình:",loaded,MovieRecommender.last_error)
+if not loaded and "mã băm" in MovieRecommender.last_error:
+    print("   -> Nếu tệp mô hình là bản chính thức của nhóm (vừa clone/pull lại), đăng ký lại bằng lệnh:")
+    print("      python app/setup_database.py --register")
 print(f"HOÀN TẤT ({time.time()-start:.0f} giây). Mở phần mềm: python run_app.py")

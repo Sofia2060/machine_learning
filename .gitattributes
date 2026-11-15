@@ -1,0 +1,2 @@
+# Giữ nguyên từng byte của tệp mô hình (không đổi ký tự xuống dòng) để mã băm SHA-256 giống nhau trên mọi máy
+models/** -text
