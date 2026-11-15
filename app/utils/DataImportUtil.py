@@ -54,11 +54,16 @@ class DataImportUtil:
     @staticmethod
     def ensureAdmin(conn,username,email,full_name,password):
         # Không tạo trùng tài khoản Admin mặc định khi chạy nạp nhiều lần (FR-23)
-        df=conn.queryDataset("select employee_id from employees where username=%s or email=%s",(username,email))
+        # Tài khoản Admin = 1 dòng ở bảng cha accounts (role='Admin') + 1 dòng ở bảng con employees
+        df=conn.queryDataset("select account_id from accounts where username=%s or email=%s",(username,email))
         if df is not None and len(df)>0:
             return False
-        sql="insert into employees (username,email,password_hash,full_name) values (%s,%s,%s,%s)"
-        return conn.executeNonQuery(sql,(username,email,SecurityUtil.hashPassword(password),full_name))>0
+        sql="insert into accounts (username,email,password_hash,full_name,role) values (%s,%s,%s,%s,'Admin')"
+        if conn.executeNonQuery(sql,(username,email,SecurityUtil.hashPassword(password),full_name))<=0:
+            return False
+        df=conn.queryDataset("select account_id from accounts where username=%s",(username,))
+        return conn.executeNonQuery("insert into employees (account_id) values (%s)",
+                                    (int(df.iloc[0]["account_id"]),))>0
     # ---------------------------------------------------------------- genres
     @staticmethod
     def ensureGenres(conn):
@@ -124,8 +129,10 @@ class DataImportUtil:
         result=ImportResult("users.dat")
         conn=Connector()
         conn.connect()
-        df=conn.queryDataset("select customer_id, username, email from customers")
+        df=conn.queryDataset("select customer_id from customers")
         existing=set(int(x) for x in df["customer_id"])
+        # Tên đăng nhập / email là duy nhất trên toàn bảng accounts (cả Admin và User)
+        df=conn.queryDataset("select username, email from accounts")
         used_names=set(df["username"])
         used_emails=set(df["email"])
         lines=DataImportUtil.readLines(path)
@@ -170,18 +177,38 @@ class DataImportUtil:
         # Mỗi tài khoản có salt riêng nên phải băm từng mật khẩu; băm song song để nạp nhanh hơn
         with ThreadPoolExecutor(max_workers=max(2,os.cpu_count() or 2)) as executor:
             hashes=list(executor.map(lambda r: SecurityUtil.hashPassword(DataImportUtil.DEFAULT_PASSWORD),valid))
-        # MovieLens không có họ tên mà cột full_name bắt buộc (NOT NULL) -> đặt tên mặc định theo mã khách hàng
-        rows=[(r[0],(r[1],r[2],r[3],hashes[k],f"Khách hàng {r[1]}",r[4],r[5],r[6],r[7]))
-              for (k,r) in enumerate(valid)]
-        sql="insert into customers (customer_id,username,email,password_hash,full_name,gender,age,occupation_id,zip_code) " \
-            "values (%s,%s,%s,%s,%s,%s,%s,%s,%s)"
-        for start in range(0,len(rows),DataImportUtil.BATCH):
+        # Mỗi khách hàng = 1 dòng ở bảng cha accounts (role='Customer') + 1 dòng ở bảng con customers.
+        # MovieLens không có họ tên mà accounts.full_name bắt buộc (NOT NULL) -> đặt tên mặc định theo mã khách hàng
+        sql_account="insert into accounts (username,email,password_hash,full_name,role) values (%s,%s,%s,%s,'Customer')"
+        sql_customer="insert into customers (customer_id,account_id,gender,age,occupation_id,zip_code) " \
+                     "values (%s,%s,%s,%s,%s,%s)"
+        for start in range(0,len(valid),DataImportUtil.BATCH):
             if stop is not None and stop():
                 result.interrupted=True
                 break
-            DataImportUtil.insertRows(conn,sql,rows[start:start+DataImportUtil.BATCH],result)
+            batch=valid[start:start+DataImportUtil.BATCH]
+            # Bước 1: bảng cha accounts (lỗi ghi được tính vào kết quả, dòng lỗi không sang bước 2)
+            account_result=ImportResult(result.name)
+            DataImportUtil.insertRows(conn,sql_account,
+                                      [(r[0],(r[2],r[3],hashes[start+k],f"Khách hàng {r[1]}")) for (k,r) in enumerate(batch)],
+                                      account_result)
+            for (reason,(count,line_no)) in account_result.reasons.items():
+                for _ in range(count):
+                    result.addError(reason,line_no)
+            # Bước 2: lấy account_id vừa cấp rồi ghi bảng con customers
+            names=[r[2] for r in batch]
+            marks=",".join(["%s"]*len(names))
+            df=conn.queryDataset(f"select account_id, username from accounts where username in ({marks})",names)
+            account_ids={} if df is None else dict(zip(df["username"],df["account_id"]))
+            rows=[(r[0],(r[1],int(account_ids[r[2]]),r[4],r[5],r[6],r[7])) for r in batch if r[2] in account_ids]
+            before=result.error
+            DataImportUtil.insertRows(conn,sql_customer,rows,result)
+            if result.error>before:
+                # khách hàng không ghi được -> xóa tài khoản vừa tạo để không còn tài khoản mồ côi
+                conn.executeNonQuery(f"delete a from accounts a left join customers c on c.account_id=a.account_id "
+                                     f"where c.customer_id is null and a.role='Customer' and a.username in ({marks})",names)
             if progress is not None:
-                progress(min(start+DataImportUtil.BATCH,len(rows)),len(rows))
+                progress(min(start+DataImportUtil.BATCH,len(valid)),len(valid))
         conn.disconnect()
         return result
     # ---------------------------------------------------------------- ratings

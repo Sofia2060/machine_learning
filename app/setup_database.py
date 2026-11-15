@@ -13,7 +13,7 @@ from app.utils.SchemaUtil import SchemaUtil
 #   1. mysql -u root -p < mysql/mrs_schema.sql
 #   2. python src/database.py
 #   3. python app/setup_database.py   <- file này (run_app.py cũng tự gọi khi thấy còn thiếu)
-# Việc làm: thêm cột/bảng hỗ trợ (không đụng dữ liệu gốc), tính điểm TB từng phim, đăng ký mô hình NeuMF.
+# Việc làm: kiểm tra đủ 13 bảng (bổ sung nếu CSDL tạo từ schema cũ hơn), tính điểm TB từng phim, đăng ký mô hình NeuMF.
 # Đăng ký lại tệp mô hình hiện có (vd. vừa clone/pull bản mới nên mã băm khác bản đã đăng ký):
 #   python app/setup_database.py --register
 start=time.time()

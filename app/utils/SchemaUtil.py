@@ -2,15 +2,12 @@ from app.connectors.connector import Connector
 
 
 class SchemaUtil:
-    # CSDL movie_recommender_system do mysql/mrs_schema.sql + src/database.py tạo (8 bảng theo ERD).
-    # Phần mềm cần thêm một số cột/bảng hỗ trợ cho các yêu cầu FR/NFR. SchemaUtil chỉ THÊM những gì còn thiếu,
-    # không đổi tên, không xóa, không sửa dữ liệu sẵn có của 8 bảng gốc; chạy lại nhiều lần vẫn an toàn.
+    # CSDL movie_recommender_system do mysql/mrs_schema.sql (13 bảng theo ERD) + src/database.py tạo.
+    # Bảng cha accounts giữ thông tin đăng nhập; customers / employees là bảng con 1-1 qua account_id.
+    # SchemaUtil chỉ kiểm tra và THÊM những gì còn thiếu (CSDL tạo từ bản schema cũ hơn), không sửa dữ liệu sẵn có;
+    # chạy lại nhiều lần vẫn an toàn.
+    REQUIRED_TABLES = ("accounts","customers","employees","movies","genres","movie_genres","ratings","recommendations")
     COLUMNS = [
-        ("customers", "full_name", "VARCHAR(100) NULL"),                              # FR-01, FR-05 họ tên
-        ("customers", "failed_login_count", "INT NOT NULL DEFAULT 0"),                # NFR-19 khóa tạm 15 phút
-        ("customers", "locked_until", "DATETIME NULL"),
-        ("employees", "failed_login_count", "INT NOT NULL DEFAULT 0"),
-        ("employees", "locked_until", "DATETIME NULL"),
         ("movies", "avg_rating", "DECIMAL(4,3) NULL"),                                # NFR-04 số liệu tính sẵn
         ("movies", "rating_count", "INT NOT NULL DEFAULT 0"),
         ("ratings", "is_valid", "TINYINT(1) NOT NULL DEFAULT 1"),                    # FR-22 đánh dấu không hợp lệ
@@ -26,42 +23,51 @@ class SchemaUtil:
         ("customers", "idx_customers_demo", "(gender, age)"),
     ]
     TABLES = {
+        # Giống hệt định nghĩa trong mysql/mrs_schema.sql (dùng khi CSDL được tạo từ bản schema cũ chưa có bảng)
         "customer_genres": """create table customer_genres (
             customer_id INT NOT NULL,
             genre_id INT NOT NULL,
             PRIMARY KEY (customer_id, genre_id),
-            FOREIGN KEY (customer_id) REFERENCES customers(customer_id) ON DELETE CASCADE,
-            FOREIGN KEY (genre_id) REFERENCES genres(genre_id) ON DELETE CASCADE)""",
+            CONSTRAINT fk_customer_genres_customer FOREIGN KEY (customer_id)
+                REFERENCES customers(customer_id) ON DELETE CASCADE,
+            CONSTRAINT fk_customer_genres_genre FOREIGN KEY (genre_id)
+                REFERENCES genres(genre_id) ON DELETE CASCADE)""",
         "otp_codes": """create table otp_codes (
-            otp_id INT AUTO_INCREMENT PRIMARY KEY,
-            email VARCHAR(100) NOT NULL,
+            otp_id INT PRIMARY KEY AUTO_INCREMENT,
+            account_id INT NOT NULL,
             otp_code CHAR(6) NOT NULL,
             expired_at DATETIME NOT NULL,
-            is_used TINYINT(1) NOT NULL DEFAULT 0,
+            is_used BOOLEAN NOT NULL DEFAULT FALSE,
             wrong_count INT NOT NULL DEFAULT 0,
             created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-            KEY idx_otp_email (email, is_used))""",
+            KEY idx_otp_account (account_id, is_used),
+            CONSTRAINT chk_otp_wrong_count CHECK (wrong_count >= 0),
+            CONSTRAINT fk_otp_codes_account FOREIGN KEY (account_id)
+                REFERENCES accounts(account_id) ON DELETE CASCADE)""",
         "admin_logs": """create table admin_logs (
-            log_id INT AUTO_INCREMENT PRIMARY KEY,
+            log_id INT PRIMARY KEY AUTO_INCREMENT,
             employee_id INT NOT NULL,
             action VARCHAR(50) NOT NULL,
             target VARCHAR(255) NOT NULL,
             result VARCHAR(255) NOT NULL,
             created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
             KEY idx_logs_time (created_at),
-            FOREIGN KEY (employee_id) REFERENCES employees(employee_id))""",
+            CONSTRAINT fk_admin_logs_employee FOREIGN KEY (employee_id)
+                REFERENCES employees(employee_id) ON DELETE CASCADE)""",
         "model_registry": """create table model_registry (
-            model_id INT AUTO_INCREMENT PRIMARY KEY,
+            model_id INT PRIMARY KEY AUTO_INCREMENT,
             model_name VARCHAR(50) NOT NULL,
             file_name VARCHAR(255) NOT NULL,
             file_hash CHAR(64) NOT NULL,
-            n_users INT NULL,
-            n_items INT NULL,
-            n_ratings INT NULL,
-            exported_at DATETIME NULL,
-            is_active TINYINT(1) NOT NULL DEFAULT 0,
-            employee_id INT NULL,
-            registered_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP)""",
+            n_users INT DEFAULT NULL,
+            n_items INT DEFAULT NULL,
+            n_ratings INT DEFAULT NULL,
+            exported_at DATETIME DEFAULT NULL,
+            is_active BOOLEAN NOT NULL DEFAULT FALSE,
+            employee_id INT DEFAULT NULL,
+            registered_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            CONSTRAINT fk_model_registry_employee FOREIGN KEY (employee_id)
+                REFERENCES employees(employee_id) ON DELETE SET NULL)""",
     }
     SAMPLE_MODEL_NAME = "Dữ liệu mẫu"
 
@@ -76,7 +82,7 @@ class SchemaUtil:
         cols=conn.queryDataset("select table_name, column_name from information_schema.columns where table_schema=%s",(db,))
         existing=set() if cols is None else set(zip(cols.iloc[:,0].str.lower(),cols.iloc[:,1].str.lower()))
         tables=set(t for (t,c) in existing)
-        missing=[f"bảng {t}" for t in ("customers","movies","ratings","recommendations") if t not in tables]
+        missing=[f"bảng {t}" for t in SchemaUtil.REQUIRED_TABLES if t not in tables]
         if missing:
             conn.disconnect()
             return missing
@@ -84,6 +90,9 @@ class SchemaUtil:
         missing+=[f"bảng {t}" for t in SchemaUtil.TABLES if t not in tables]
         # Bảng đã đủ (vd. tạo sẵn bằng mrs_schema.sql) nhưng chưa có mô hình đang hoạt động -> vẫn chạy setup để đăng ký mô hình
         # Cột calibration (quy đổi điểm sang số sao) của phiên bản cũ không còn dùng -> chạy setup để xóa
+        # otp_codes của bản cũ gắn theo email -> bản mới gắn theo account_id (khóa ngoại tới accounts)
+        if "otp_codes" in tables and ("otp_codes","account_id") not in existing:
+            missing.append("bảng otp_codes chưa liên kết accounts")
         if ("model_registry","calibration") in existing:
             missing.append("cột model_registry.calibration không còn dùng")
         if "model_registry" in tables:
@@ -112,11 +121,16 @@ class SchemaUtil:
             df=conn.queryDataset("select count(*) as n from information_schema.tables where table_schema=%s and table_name=%s",
                                  (db,table))
             return df is not None and int(df.iloc[0]["n"])>0
-        for table in ("customers","employees","movies","genres","movie_genres","ratings","recommendations"):
+        for table in SchemaUtil.REQUIRED_TABLES:
             if not tableExists(table):
-                log(f"CSDL {db} chưa có bảng {table}. Hãy chạy mysql/mrs_schema.sql rồi python src/database.py trước.")
+                log(f"CSDL {db} chưa có bảng {table} (CSDL tạo từ bản schema cũ hoặc chưa tạo). "
+                    f"Hãy chạy lại mysql/mrs_schema.sql rồi python src/database.py.")
                 conn.disconnect()
                 return False
+        if tableExists("otp_codes") and not columnExists("otp_codes","account_id"):
+            # Mã OTP chỉ là dữ liệu tạm (hết hạn sau 5 phút) nên tạo lại bảng theo cấu trúc mới là an toàn
+            conn.executeNonQuery("drop table otp_codes")
+            log("   - tạo lại bảng otp_codes theo cấu trúc mới (liên kết accounts.account_id)")
         for (table,column,definition) in SchemaUtil.COLUMNS:
             if not columnExists(table,column):
                 conn.executeNonQuery(f"alter table {table} add column {column} {definition}")

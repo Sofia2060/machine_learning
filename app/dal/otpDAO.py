@@ -3,40 +3,41 @@ from app.utils.ConfigUtil import ConfigUtil
 
 
 class otpDAO:
-    # NFR-18: OTP 6 số, hết hạn sau 5 phút, dùng 1 lần, sai 5 lần thì khóa luồng xác minh
+    # NFR-18: OTP 6 số, hết hạn sau 5 phút, dùng 1 lần, sai 5 lần thì khóa luồng xác minh.
+    # Mỗi mã gắn với một tài khoản qua khóa ngoại otp_codes.account_id -> accounts.account_id (Admin hoặc User)
     MAX_WRONG = int(ConfigUtil.get("security","otp_max_wrong",5))
     EXPIRE_MINUTES = int(ConfigUtil.get("security","otp_expire_minutes",5))
 
     @staticmethod
-    def createOTP(email,otp):
+    def createOTP(account_id,otp):
         conn = Connector()
         conn.connect()
-        # Vô hiệu các mã cũ chưa dùng của email này
-        conn.executeNonQuery("update otp_codes set is_used=1 where email=%s AND is_used=0", (email,))
-        sql = "insert into otp_codes (email,otp_code,expired_at) " \
+        # Vô hiệu các mã cũ chưa dùng của tài khoản này
+        conn.executeNonQuery("update otp_codes set is_used=1 where account_id=%s AND is_used=0", (account_id,))
+        sql = "insert into otp_codes (account_id,otp_code,expired_at) " \
               f"values (%s,%s,date_add(now(), interval {otpDAO.EXPIRE_MINUTES} minute))"
-        ret = conn.executeNonQuery(sql, (email, otp))
+        ret = conn.executeNonQuery(sql, (account_id, otp))
         conn.disconnect()
         return ret>0
     @staticmethod
-    def getRemainingSeconds(email):
+    def getRemainingSeconds(account_id):
         # Số giây còn lại của mã OTP mới nhất (đồng hồ đếm ngược trên giao diện)
         conn = Connector()
         conn.connect()
         df = conn.queryDataset("select greatest(timestampdiff(second, now(), expired_at),0) as s from otp_codes "
-                               "where email=%s AND is_used=0 order by otp_id desc limit 1", (email,))
+                               "where account_id=%s AND is_used=0 order by otp_id desc limit 1", (account_id,))
         conn.disconnect()
         if df is None or len(df)==0:
             return 0
         return int(df.iloc[0]["s"])
     @staticmethod
-    def verifyOTP(email,otp):
+    def verifyOTP(account_id,otp):
         # Trả về (True/False, thông báo)
         conn = Connector()
         conn.connect()
         sql = "select otp_id, otp_code, wrong_count, (expired_at<now()) as is_expired from otp_codes " \
-              "where email=%s AND is_used=0 order by otp_id desc limit 1"
-        df = conn.queryDataset(sql, (email,))
+              "where account_id=%s AND is_used=0 order by otp_id desc limit 1"
+        df = conn.queryDataset(sql, (account_id,))
         if df is None or len(df)==0:
             conn.disconnect()
             return False,"Mã OTP không còn hiệu lực. Vui lòng bấm \"Gửi lại mã\"."

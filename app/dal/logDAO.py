@@ -26,8 +26,8 @@ class logDAO:
     def getLogs(action=None,limit=200):
         conn = Connector()
         conn.connect()
-        sql = "select l.created_at, e.username, l.action, l.target, l.result from admin_logs l " \
-              "join employees e on e.employee_id=l.employee_id "
+        sql = "select l.created_at, a.username, l.action, l.target, l.result from admin_logs l " \
+              "join employees e on e.employee_id=l.employee_id join accounts a on a.account_id=e.account_id "
         val = []
         if action is not None:
             sql += "where l.action=%s "

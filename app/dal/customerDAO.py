@@ -4,8 +4,11 @@ from app.utils.SecurityUtil import SecurityUtil
 
 
 class customerDAO:
+    # Khách hàng = bảng con customers (nhân khẩu học) + bảng cha accounts (đăng nhập, họ tên, trạng thái), nối 1-1 qua account_id
     NOT_PROVIDED = "__not_provided__"
-    COLUMNS = "customer_id, username, email, full_name, gender, age, occupation_id as occupation, zip_code, is_active, created_at"
+    FROM = "customers c join accounts a on a.account_id=c.account_id"
+    COLUMNS = "c.customer_id, c.account_id, a.username, a.email, a.full_name, c.gender, c.age, " \
+              "c.occupation_id as occupation, c.zip_code, a.is_active, a.created_at"
 
     @staticmethod
     def convertToCustomer(row):
@@ -21,12 +24,13 @@ class customerDAO:
         cus.zip_code=row["zip_code"]
         cus.is_active=int(row["is_active"])
         cus.created_at=row["created_at"]
+        cus.account_id=int(row["account_id"])
         return cus
     @staticmethod
     def getById(customer_id):
         conn = Connector()
         conn.connect()
-        df = conn.queryDataset(f"select {customerDAO.COLUMNS} from customers where customer_id=%s", (customer_id,))
+        df = conn.queryDataset(f"select {customerDAO.COLUMNS} from {customerDAO.FROM} where c.customer_id=%s", (customer_id,))
         conn.disconnect()
         if df is None or len(df)==0:
             return None
@@ -36,7 +40,7 @@ class customerDAO:
         # Dùng để chấm dứt phiên đang mở khi Admin khóa tài khoản (FR-21)
         conn = Connector()
         conn.connect()
-        df = conn.queryDataset("select is_active from customers where customer_id=%s", (customer_id,))
+        df = conn.queryDataset(f"select a.is_active from {customerDAO.FROM} where c.customer_id=%s", (customer_id,))
         conn.disconnect()
         if df is None:
             return None          # mất kết nối CSDL: không kết luận
@@ -45,16 +49,22 @@ class customerDAO:
     def register(cus,password):
         conn = Connector()
         conn.connect()
-        # customer_id trong mrs_schema.sql không tự tăng -> cấp mã kế tiếp (lớn nhất + 1) ngay trong câu lệnh
-        sql = "insert into customers (customer_id,username,email,password_hash,full_name,gender,age,occupation_id) " \
-              "select coalesce(max(customer_id),0)+1,%s,%s,%s,%s,%s,%s,%s from customers"
-        val = (cus.username, cus.email, SecurityUtil.hashPassword(password), cus.full_name,
-               cus.gender, cus.age, cus.occupation)
-        ret = conn.executeNonQuery(sql, val)
+        # Bước 1: bảng cha accounts (thông tin đăng nhập, role='Customer')
+        sql = "insert into accounts (username,email,password_hash,full_name,role) values (%s,%s,%s,%s,'Customer')"
+        if conn.executeNonQuery(sql, (cus.username, cus.email, SecurityUtil.hashPassword(password), cus.full_name))<=0:
+            conn.disconnect()
+            return None
+        df = conn.queryDataset("select account_id from accounts where username=%s", (cus.username,))
+        account_id = int(df.iloc[0]["account_id"])
+        # Bước 2: bảng con customers. customer_id không tự tăng -> cấp mã kế tiếp (lớn nhất + 1) ngay trong câu lệnh
+        sql = "insert into customers (customer_id,account_id,gender,age,occupation_id) " \
+              "select coalesce(max(customer_id),0)+1,%s,%s,%s,%s from customers"
         new_id = None
-        if ret>0:
-            df = conn.queryDataset("select customer_id from customers where username=%s", (cus.username,))
+        if conn.executeNonQuery(sql, (account_id, cus.gender, cus.age, cus.occupation))>0:
+            df = conn.queryDataset("select customer_id from customers where account_id=%s", (account_id,))
             new_id = int(df.iloc[0]["customer_id"])
+        else:
+            conn.executeNonQuery("delete from accounts where account_id=%s", (account_id,))
         conn.disconnect()
         return new_id
     @staticmethod
@@ -62,7 +72,8 @@ class customerDAO:
         # FR-05: email và tên đăng nhập không được đổi
         conn = Connector()
         conn.connect()
-        sql = "update customers set full_name=%s, gender=%s, age=%s, occupation_id=%s where customer_id=%s"
+        sql = f"update {customerDAO.FROM} set a.full_name=%s, c.gender=%s, c.age=%s, c.occupation_id=%s " \
+              "where c.customer_id=%s"
         ret = conn.executeNonQuery(sql, (cus.full_name, cus.gender, cus.age, cus.occupation, cus.customer_id))
         conn.disconnect()
         return ret>=0
@@ -71,8 +82,8 @@ class customerDAO:
         # FR-21: Admin sửa thông tin quản lý (không xem/sửa mật khẩu gốc)
         conn = Connector()
         conn.connect()
-        sql = "update customers set full_name=%s, email=%s, gender=%s, age=%s, occupation_id=%s, zip_code=%s " \
-              "where customer_id=%s"
+        sql = f"update {customerDAO.FROM} set a.full_name=%s, a.email=%s, c.gender=%s, c.age=%s, " \
+              "c.occupation_id=%s, c.zip_code=%s where c.customer_id=%s"
         ret = conn.executeNonQuery(sql, (cus.full_name, cus.email, cus.gender, cus.age, cus.occupation,
                                          cus.zip_code, cus.customer_id))
         conn.disconnect()
@@ -81,7 +92,8 @@ class customerDAO:
     def setPassword(customer_id,password):
         conn = Connector()
         conn.connect()
-        sql = "update customers set password_hash=%s, failed_login_count=0, locked_until=null where customer_id=%s"
+        sql = f"update {customerDAO.FROM} set a.password_hash=%s, a.failed_login_count=0, a.locked_until=null " \
+              "where c.customer_id=%s"
         ret = conn.executeNonQuery(sql, (SecurityUtil.hashPassword(password), customer_id))
         conn.disconnect()
         return ret>0
@@ -89,14 +101,15 @@ class customerDAO:
     def checkPassword(customer_id,password):
         conn = Connector()
         conn.connect()
-        df = conn.queryDataset("select password_hash from customers where customer_id=%s", (customer_id,))
+        df = conn.queryDataset(f"select a.password_hash from {customerDAO.FROM} where c.customer_id=%s", (customer_id,))
         conn.disconnect()
         return df is not None and len(df)>0 and SecurityUtil.checkPassword(password, df.iloc[0]["password_hash"])
     @staticmethod
     def setActive(customer_id,is_active):
         conn = Connector()
         conn.connect()
-        sql = "update customers set is_active=%s, failed_login_count=0, locked_until=null where customer_id=%s"
+        sql = f"update {customerDAO.FROM} set a.is_active=%s, a.failed_login_count=0, a.locked_until=null " \
+              "where c.customer_id=%s"
         ret = conn.executeNonQuery(sql, (is_active, customer_id))
         conn.disconnect()
         return ret>0
@@ -105,9 +118,9 @@ class customerDAO:
         conn = Connector()
         conn.connect()
         (where,val) = customerDAO.buildFilter(keyword,status,gender,age,occupation)
-        sql = f"select c.customer_id, c.username, c.full_name, c.email, c.gender, c.age, c.occupation_id as occupation, c.is_active, " \
-              f"c.created_at, (select count(*) from ratings r where r.customer_id=c.customer_id) as rating_count " \
-              f"from customers c {where} order by c.customer_id limit %s offset %s"
+        sql = f"select c.customer_id, a.username, a.full_name, a.email, c.gender, c.age, c.occupation_id as occupation, " \
+              f"a.is_active, a.created_at, (select count(*) from ratings r where r.customer_id=c.customer_id) as rating_count " \
+              f"from {customerDAO.FROM} {where} order by c.customer_id limit %s offset %s"
         df = conn.queryDataset(sql, val+[limit, offset])
         conn.disconnect()
         return df
@@ -116,7 +129,7 @@ class customerDAO:
         conn = Connector()
         conn.connect()
         (where,val) = customerDAO.buildFilter(keyword,status,gender,age,occupation)
-        df = conn.queryDataset(f"select count(*) as n from customers c {where}", val)
+        df = conn.queryDataset(f"select count(*) as n from {customerDAO.FROM} {where}", val)
         conn.disconnect()
         return 0 if df is None else int(df.iloc[0]["n"])
     @staticmethod
@@ -128,13 +141,13 @@ class customerDAO:
         keyword=keyword.strip()
         if keyword!="":
             if keyword.isdigit():
-                conds.append("(c.customer_id=%s OR c.username like %s)")
+                conds.append("(c.customer_id=%s OR a.username like %s)")
                 val+=[int(keyword), f"%{keyword}%"]
             else:
-                conds.append("(c.username like %s OR c.full_name like %s OR c.email like %s)")
+                conds.append("(a.username like %s OR a.full_name like %s OR a.email like %s)")
                 val+=[f"%{keyword}%"]*3
         if status is not None:
-            conds.append("c.is_active=%s")
+            conds.append("a.is_active=%s")
             val.append(status)
         for (column,value) in (("gender",gender),("age",age),("occupation_id",occupation)):
             if value is None:

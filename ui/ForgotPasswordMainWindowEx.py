@@ -36,7 +36,6 @@ class ForgotPasswordMainWindowEx(Ui_MainWindow):
         self.msgBox.exec()
     def process_sendOTP(self):
         from app.utils.SecurityUtil import SecurityUtil
-        from app.dal.otpDAO import otpDAO
 
         email=self.lineEditEmail.text().strip().lower()
         if not SecurityUtil.isValidEmail(email):
@@ -56,7 +55,7 @@ class ForgotPasswordMainWindowEx(Ui_MainWindow):
         self.lineEditOTP.clear()
         self.lineEditOTP.setFocus()
         self.labelOTPStatus.setText(f"<span style='color:#15803D'>{message}</span>")
-        self.remaining=otpDAO.getRemainingSeconds(email)
+        self.remaining=AuthService.getOTPRemainingSeconds(email)
         self.updateCountdown()
         self.timer.start(1000)
         if demo_otp is not None:

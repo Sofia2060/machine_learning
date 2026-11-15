@@ -27,7 +27,8 @@ class AuthService:
             return LoginResult(False,"Không kết nối được cơ sở dữ liệu. Vui lòng kiểm tra MySQL và config.json.")
         if row is None:
             return LoginResult(False,"Tên đăng nhập/email hoặc mật khẩu không đúng.")
-        account_id=int(row["account_id"])
+        account_id=int(row["account_id"])        # khóa của bảng accounts (dùng cho đăng nhập / mật khẩu)
+        entity_id=int(row["entity_id"])          # employee_id hoặc customer_id (dùng cho nghiệp vụ)
         if int(row["is_active"])==0:
             return LoginResult(False,"Tài khoản đã bị khóa. Vui lòng liên hệ quản trị viên.")
         if int(row["is_locked"])==1:
@@ -35,20 +36,20 @@ class AuthService:
             return LoginResult(False,f"Bạn đã nhập sai {max_fail} lần liên tiếp. Tài khoản tạm khóa, "
                                      f"vui lòng thử lại sau {minutes} phút.")
         if not SecurityUtil.checkPassword(password,row["password_hash"]):
-            count=accountDAO.registerFailed(role,account_id,max_fail,lock_minutes)
+            count=accountDAO.registerFailed(account_id,max_fail,lock_minutes)
             if count>=max_fail:
                 return LoginResult(False,f"Bạn đã nhập sai {max_fail} lần liên tiếp. "
                                          f"Tài khoản tạm khóa {lock_minutes} phút.")
             return LoginResult(False,f"Tên đăng nhập/email hoặc mật khẩu không đúng "
                                      f"(còn {max_fail-count} lần thử trước khi bị khóa tạm).")
-        accountDAO.resetFailed(role,account_id)
+        accountDAO.resetFailed(account_id)
         if SecurityUtil.isLegacyHash(row["password_hash"]):
             # NFR-17: mật khẩu SHA-256 cũ được băm lại bằng PBKDF2 có salt ngay khi đăng nhập đúng
-            accountDAO.setPasswordHash(role,account_id,SecurityUtil.hashPassword(password))
+            accountDAO.setPasswordHash(account_id,SecurityUtil.hashPassword(password))
         if role=="admin":
-            account=Employee(account_id,row["username"],row["email"],row["full_name"],int(row["is_active"]))
+            account=Employee(entity_id,row["username"],row["email"],row["full_name"],int(row["is_active"]))
         else:
-            account=Customer(account_id,row["username"],row["email"],row["full_name"],row["gender"],
+            account=Customer(entity_id,row["username"],row["email"],row["full_name"],row["gender"],
                              None if row["age"] is None or row["age"]!=row["age"] else int(row["age"]),
                              None if row["occupation_id"] is None or row["occupation_id"]!=row["occupation_id"]
                              else int(row["occupation_id"]),row["zip_code"],int(row["is_active"]),row["created_at"])
@@ -63,7 +64,7 @@ class AuthService:
         if row is None:
             return (False,"Email này chưa được đăng ký trong hệ thống.",None)
         otp=SecurityUtil.generateOTP()
-        if not otpDAO.createOTP(email,otp):
+        if not otpDAO.createOTP(int(row["account_id"]),otp):
             return (False,"Không tạo được mã OTP, vui lòng thử lại.",None)
         if EmailUtil.isConfigured():
             if EmailUtil.sendOTP(email,otp):
@@ -72,11 +73,19 @@ class AuthService:
         return (True,"Chế độ demo (chưa cấu hình email): mã OTP được hiển thị trên màn hình.",otp)
     @staticmethod
     def verifyOTP(email,otp):
-        return otpDAO.verifyOTP(email,otp)
+        (role,row)=accountDAO.findByEmail(email)
+        if row is None:
+            return (False,"Email này chưa được đăng ký trong hệ thống.")
+        return otpDAO.verifyOTP(int(row["account_id"]),otp)
+    @staticmethod
+    def getOTPRemainingSeconds(email):
+        # Số giây còn lại của mã OTP mới nhất (đồng hồ đếm ngược trên giao diện Quên mật khẩu)
+        (role,row)=accountDAO.findByEmail(email)
+        return 0 if row is None else otpDAO.getRemainingSeconds(int(row["account_id"]))
     @staticmethod
     def resetPassword(email,password):
         # Chỉ gọi sau khi OTP đã được xác minh ở bước trước
         (role,row)=accountDAO.findByEmail(email)
         if row is None:
             return False
-        return accountDAO.setPasswordHash(role,int(row["account_id"]),SecurityUtil.hashPassword(password))
+        return accountDAO.setPasswordHash(int(row["account_id"]),SecurityUtil.hashPassword(password))

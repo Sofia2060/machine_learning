@@ -2,47 +2,58 @@ from app.connectors.connector import Connector
 
 
 class accountDAO:
-    # Truy xuất dữ liệu đăng nhập dùng chung cho 2 bảng tài khoản: employees (Admin) và customers (User)
-    TABLES = {"admin": ("employees", "employee_id"), "user": ("customers", "customer_id")}
+    # Truy xuất dữ liệu đăng nhập dùng chung cho Admin và User.
+    # Thông tin đăng nhập nằm ở bảng cha accounts (role = 'Admin' / 'Customer'); bảng con employees / customers
+    # liên kết 1-1 qua account_id. Mọi thao tác đăng nhập, khóa tạm, đổi mật khẩu đều làm trên bảng accounts.
+    ROLES = {"Admin": "admin", "Customer": "user"}
 
     @staticmethod
     def findAccount(login):
-        # Tìm theo tên đăng nhập hoặc email ở cả 2 bảng; trả về (role, dòng dữ liệu) hoặc (None, None)
+        # Tìm theo tên đăng nhập hoặc email; trả về (role, dòng dữ liệu) hoặc (None, None).
+        # Dòng dữ liệu có: account_id (bảng accounts), entity_id (employee_id hoặc customer_id) và thông tin hồ sơ
         conn = Connector()
         conn.connect()
         if not conn.isConnected():
             return ("error", None)
-        for (role,(table,key)) in accountDAO.TABLES.items():
-            sql = f"select *, {key} as account_id, (locked_until is not null and locked_until>now()) as is_locked, " \
-                  f"timestampdiff(second, now(), locked_until) as locked_seconds " \
-                  f"from {table} where username=%s OR email=%s"
-            df = conn.queryDataset(sql, (login, login))
-            if df is not None and len(df)>0:
-                conn.disconnect()
-                return (role, df.iloc[0])
+        sql = "select a.account_id, a.username, a.email, a.password_hash, a.full_name, a.role, a.is_active, " \
+              "a.created_at, (a.locked_until is not null and a.locked_until>now()) as is_locked, " \
+              "timestampdiff(second, now(), a.locked_until) as locked_seconds, " \
+              "e.employee_id, c.customer_id, c.gender, c.age, c.occupation_id, c.zip_code " \
+              "from accounts a left join employees e on e.account_id=a.account_id " \
+              "left join customers c on c.account_id=a.account_id " \
+              "where a.username=%s OR a.email=%s"
+        df = conn.queryDataset(sql, (login, login))
         conn.disconnect()
-        return (None, None)
+        if df is None or len(df)==0:
+            return (None, None)
+        row = df.iloc[0].copy()
+        role = accountDAO.ROLES.get(row["role"])
+        entity = row["employee_id"] if role=="admin" else row["customer_id"]
+        if role is None or entity is None or entity!=entity:
+            # tài khoản chưa gắn với nhân viên / khách hàng nào -> coi như không tồn tại
+            return (None, None)
+        row["entity_id"] = int(entity)
+        return (role, row)
     @staticmethod
-    def registerFailed(role,account_id,max_fail,lock_minutes):
+    def registerFailed(account_id,max_fail,lock_minutes):
         # NFR-19: cộng số lần sai; đủ max_fail lần thì khóa tạm lock_minutes phút. Trả về số lần sai hiện tại
-        (table,key) = accountDAO.TABLES[role]
         conn = Connector()
         conn.connect()
-        conn.executeNonQuery(f"update {table} set failed_login_count=failed_login_count+1 where {key}=%s", (account_id,))
-        df = conn.queryDataset(f"select failed_login_count from {table} where {key}=%s", (account_id,))
+        conn.executeNonQuery("update accounts set failed_login_count=failed_login_count+1 where account_id=%s",
+                             (account_id,))
+        df = conn.queryDataset("select failed_login_count from accounts where account_id=%s", (account_id,))
         count = int(df.iloc[0]["failed_login_count"])
         if count>=max_fail:
-            conn.executeNonQuery(f"update {table} set failed_login_count=0, "
-                                 f"locked_until=date_add(now(), interval %s minute) where {key}=%s",
+            conn.executeNonQuery("update accounts set failed_login_count=0, "
+                                 "locked_until=date_add(now(), interval %s minute) where account_id=%s",
                                  (lock_minutes, account_id))
         conn.disconnect()
         return count
     @staticmethod
-    def resetFailed(role,account_id):
-        (table,key) = accountDAO.TABLES[role]
+    def resetFailed(account_id):
         conn = Connector()
         conn.connect()
-        conn.executeNonQuery(f"update {table} set failed_login_count=0, locked_until=null where {key}=%s",
+        conn.executeNonQuery("update accounts set failed_login_count=0, locked_until=null where account_id=%s",
                              (account_id,))
         conn.disconnect()
     @staticmethod
@@ -53,18 +64,18 @@ class accountDAO:
         return accountDAO.exists("email", email, exclude_customer_id)
     @staticmethod
     def exists(column,value,exclude_customer_id=None):
-        # Tên đăng nhập và email là duy nhất trên toàn hệ thống (cả Admin và User)
+        # Tên đăng nhập và email là duy nhất trên toàn hệ thống (cột UNIQUE của bảng accounts, cả Admin và User)
         conn = Connector()
         conn.connect()
-        df1 = conn.queryDataset(f"select employee_id from employees where {column}=%s", (value,))
-        sql = f"select customer_id from customers where {column}=%s"
+        sql = f"select a.account_id from accounts a left join customers c on c.account_id=a.account_id " \
+              f"where a.{column}=%s"
         val = [value]
         if exclude_customer_id is not None:
-            sql += " and customer_id<>%s"
+            sql += " and (c.customer_id is null or c.customer_id<>%s)"
             val.append(exclude_customer_id)
-        df2 = conn.queryDataset(sql, val)
+        df = conn.queryDataset(sql, val)
         conn.disconnect()
-        return (df1 is not None and len(df1)>0) or (df2 is not None and len(df2)>0)
+        return df is not None and len(df)>0
     @staticmethod
     def findByEmail(email):
         (role,row) = accountDAO.findAccount(email)
@@ -72,11 +83,10 @@ class accountDAO:
             return (None, None)
         return (role, row)
     @staticmethod
-    def setPasswordHash(role,account_id,password_hash):
-        (table,key) = accountDAO.TABLES[role]
+    def setPasswordHash(account_id,password_hash):
         conn = Connector()
         conn.connect()
-        ret = conn.executeNonQuery(f"update {table} set password_hash=%s, failed_login_count=0, locked_until=null "
-                                   f"where {key}=%s", (password_hash, account_id))
+        ret = conn.executeNonQuery("update accounts set password_hash=%s, failed_login_count=0, locked_until=null "
+                                   "where account_id=%s", (password_hash, account_id))
         conn.disconnect()
         return ret>0

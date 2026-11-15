@@ -107,8 +107,9 @@ class ratingDAO:
         conn = Connector()
         conn.connect()
         (where,val) = ratingDAO.buildFilter(customer_id,movie_keyword,score,validity)
-        sql = "select r.rating_id, r.customer_id, c.username, r.movie_id, m.title, r.rating_score, r.comment_text, " \
+        sql = "select r.rating_id, r.customer_id, a.username, r.movie_id, m.title, r.rating_score, r.comment_text, " \
               "r.rating_time, r.is_valid from ratings r join customers c on c.customer_id=r.customer_id " \
+              "join accounts a on a.account_id=c.account_id " \
               f"join movies m on m.movie_id=r.movie_id {where} " \
               "order by r.rating_time desc, r.rating_id desc limit %s offset %s"
         df = conn.queryDataset(sql, val+[limit, offset])

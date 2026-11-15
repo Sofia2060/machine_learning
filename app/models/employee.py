@@ -1,5 +1,5 @@
 class Employee:
-    # Nhân viên quản trị (Admin) - bảng employees
+    # Nhân viên quản trị (Admin) - bảng employees (bảng con) + accounts (bảng cha, role='Admin')
     def __init__(self,employee_id=None,username=None,email=None,full_name=None,is_active=1):
         self.employee_id = employee_id
         self.username = username

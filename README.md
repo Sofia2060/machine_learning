@@ -49,7 +49,7 @@ movie-recommender-system/
 |   |-- evaluation/metrics.py
 |   `-- models/              # baseline, knn_cf, mf, content_based, neural
 |-- mysql/
-|   `-- mrs_schema.sql       # tạo CSDL movie_recommender_system (8 bảng)
+|   `-- mrs_schema.sql       # tạo CSDL movie_recommender_system (13 bảng, bảng cha accounts)
 |-- ui/                      # phần mềm CineMatch: 10 màn hình + hộp thoại chi tiết phim (.ui, .py do pyuic6 sinh, Ex.py)
 |-- images/                  # icon, banner cho giao diện (.ui tham chiếu ../images/)
 |-- app/                     # phần xử lý của phần mềm
@@ -246,7 +246,7 @@ copy app\config\config.example.json app\config\config.json   # 3. sửa mục "d
 python run_app.py                                         # 4. mở phần mềm
 ```
 - `src/database.py` đọc mật khẩu MySQL từ biến môi trường `DB_PASS` (hoặc sửa trực tiếp trong file).
-- Lần đầu mở, phần mềm tự bổ sung các cột/bảng hỗ trợ (khóa tạm đăng nhập, đánh giá không hợp lệ, điểm trung bình tính sẵn, OTP, nhật ký quản trị, phiên bản mô hình) và đăng ký mô hình `models/main_model/neumf.npz`. Không sửa hay xóa dữ liệu của 8 bảng gốc. Có thể chạy riêng bước này: `python app/setup_database.py`.
+- Lần đầu mở, phần mềm kiểm tra CSDL (đủ 13 bảng theo `mysql/mrs_schema.sql`), tính điểm trung bình từng phim và đăng ký mô hình `models/main_model/neumf.npz`. Có thể chạy riêng bước này: `python app/setup_database.py` (thêm `--register` để đăng ký lại tệp mô hình). CSDL tạo từ bản schema cũ (chưa có bảng `accounts`) cần tạo lại bằng `mysql/mrs_schema.sql` rồi `python src/database.py`.
 - Tài khoản: `admin` / `123456` (quản trị), `user_1` … `user_6040` / `123456` (khách hàng), hoặc tự đăng ký. Mật khẩu SHA-256 của dữ liệu mẫu được băm lại bằng PBKDF2 có salt ở lần đăng nhập đúng đầu tiên.
 - Chạy thử từng màn hình: các file trong `test/` (vd `python test/test_user.py`, `python test/test_admin_dashboard.py`).
 - Sửa giao diện: mở file `.ui` trong `ui/` bằng Qt Designer, rồi chạy `pyuic6 XxxMainWindow.ui -o XxxMainWindow.py` trong thư mục `ui`.
