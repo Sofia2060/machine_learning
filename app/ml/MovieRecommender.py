@@ -26,7 +26,6 @@ class MovieRecommender:
     model = None            # NeuMFRecommender đang dùng
     model_name = None
     model_info = None       # dòng model_registry đang hoạt động
-    calibration = None      # bảng quy đổi điểm xếp hạng -> sao
     last_error = ""
 
     # ======================= NẠP MÔ HÌNH =======================
@@ -63,17 +62,12 @@ class MovieRecommender:
                                             f"Từ chối nạp mô hình."
                 return False
             model=NeuMFRecommender(path)
-            calibration=json.loads(info["calibration"])
         except Exception as e:
             MovieRecommender.last_error=f"Không nạp được mô hình {info['file_name']}: {e}"
             return False
-        calibration["xs"]=np.array(calibration["xs"])
-        calibration["ys"]=np.array(calibration["ys"])
-        calibration["offsets"]={int(k): float(v) for (k,v) in calibration["offsets"].items()}
         MovieRecommender.model=model
         MovieRecommender.model_name=info["model_name"]
         MovieRecommender.model_info=info
-        MovieRecommender.calibration=calibration
         MovieRecommender.foldin_cache={}
         MovieRecommender.last_error=""
         return True
@@ -98,11 +92,11 @@ class MovieRecommender:
     def isKnownMovie(movie_id):
         return MovieRecommender.isReady() and int(movie_id) in MovieRecommender.model.movie_index
     # ======================= ĐIỂM CỦA MỘT KHÁCH HÀNG =======================
-    foldin_cache = {}       # customer_id -> (chữ ký các đánh giá, điểm mọi phim, độ lệch chấm điểm)
+    foldin_cache = {}       # customer_id -> (chữ ký các đánh giá, điểm NeuMF của mọi phim)
 
     @staticmethod
     def userScores(customer_id):
-        # Trả về (điểm NeuMF của mọi phim theo thứ tự model.movie_ids, độ lệch chấm điểm) hoặc None nếu chưa đủ dữ liệu.
+        # Trả về điểm NeuMF (logit) của mọi phim theo thứ tự model.movie_ids, hoặc None nếu chưa đủ dữ liệu.
         # - Khách hàng có trong mô hình: dùng vector đã huấn luyện.
         # - Khách hàng mới: fold-in của src/inference.py (giữ nguyên trọng số mô hình, chỉ học vector của khách từ các
         #   phim họ chấm >= 4 sao) -> gợi ý cá nhân hóa ngay, không cần huấn luyện lại (FR-15).
@@ -110,41 +104,25 @@ class MovieRecommender:
             return None
         model=MovieRecommender.model
         customer_id=int(customer_id)
-        cal=MovieRecommender.calibration
         if model.is_personalized(customer_id):
-            return (model.scores(customer_id),cal["offsets"].get(customer_id,0.0))
+            return model.scores(customer_id)
         ratings=ratingDAO.getValidRatingPairs(customer_id)
         signature=tuple(sorted(ratings))
         cached=MovieRecommender.foldin_cache.get(customer_id)
         if cached is not None and cached[0]==signature:
             return cached[1]
         vec=model.fold_in(ratings) if len(ratings)>0 else None
-        if vec is None:
-            result=None
-        else:
-            scores=model._forward(*vec)[0]
-            # Độ lệch chấm điểm của khách mới: cùng công thức với lúc đăng ký mô hình (phần dư TB có co ngót)
-            idx=[model.movie_index[m] for (m,r) in ratings if m in model.movie_index]
-            actual=np.array([float(r) for (m,r) in ratings if m in model.movie_index])
-            residual=actual-np.interp(scores[idx],cal["xs"],cal["ys"])
-            result=(scores,float(residual.sum()/(len(residual)+cal.get("shrink",10))))
+        result=None if vec is None else model._forward(*vec)[0]
         MovieRecommender.foldin_cache[customer_id]=(signature,result)
         return result
     @staticmethod
     def isPersonalized(customer_id):
         return MovieRecommender.userScores(customer_id) is not None
-    # ======================= QUY ĐỔI ĐIỂM =======================
-    @staticmethod
-    def toStars(scores,offset=0.0):
-        # Điểm NeuMF là điểm xếp hạng (logit). Quy đổi sang thang 1-5 sao bằng bảng điểm TB thực tế theo từng
-        # khoảng điểm xếp hạng, cộng độ lệch chấm điểm của người dùng; kẹp về [1;5] và làm tròn 1 chữ số (NFR-11)
-        cal=MovieRecommender.calibration
-        stars=np.interp(scores,cal["xs"],cal["ys"])+offset
-        return np.round(np.clip(stars,1.0,5.0),1)
+    # ======================= ĐỘ PHÙ HỢP =======================
     @staticmethod
     def toCompatibility(scores):
-        # Độ tương thích dự báo (%): NeuMF huấn luyện bằng BCE nên sigmoid(điểm) là xác suất mô hình dự đoán
-        # người dùng sẽ chọn xem và đánh giá phim -> hiển thị dưới dạng % phù hợp
+        # Độ phù hợp (%): NeuMF huấn luyện bằng BCE với phản hồi dương là các phim được chấm từ 4 sao, nên
+        # sigmoid(điểm) là xác suất mô hình dự đoán người dùng sẽ thích phim -> hiển thị dưới dạng % phù hợp
         z=np.clip(np.asarray(scores,dtype=np.float64),-30.0,30.0)
         return np.round(100.0/(1.0+np.exp(-z)),1)
     @staticmethod
@@ -152,31 +130,20 @@ class MovieRecommender:
         # % phù hợp của một phim với người dùng; None nếu chưa đủ dữ liệu dự báo
         if not MovieRecommender.isKnownMovie(movie_id):
             return None
-        result=MovieRecommender.userScores(customer_id)
-        if result is None:
+        scores=MovieRecommender.userScores(customer_id)
+        if scores is None:
             return None
-        score=result[0][MovieRecommender.model.movie_index[int(movie_id)]]
-        return float(MovieRecommender.toCompatibility([score])[0])
-    @staticmethod
-    def predictRating(customer_id,movie_id):
-        # FR-13: điểm dự báo 1-5 cho phim chưa đánh giá; None nếu không đủ dữ liệu dự báo
-        if not MovieRecommender.isKnownMovie(movie_id):
-            return None
-        result=MovieRecommender.userScores(customer_id)
-        if result is None:
-            return None
-        (scores,offset)=result
         score=scores[MovieRecommender.model.movie_index[int(movie_id)]]
-        return float(MovieRecommender.toStars(np.array([score]),offset)[0])
+        return float(MovieRecommender.toCompatibility([score])[0])
     # ======================= GỢI Ý TOP-N =======================
     @staticmethod
     def recommendTopN(customer_id,n=10,save=True):
         # FR-14: Top-N phim có điểm cao nhất, loại phim đã đánh giá (lấy từ MySQL, kể cả vừa chấm) và phim bị ẩn.
+        # Kết quả là danh sách xếp hạng kèm độ phù hợp (%), không dự báo số sao.
         # Trả về None nếu chưa cá nhân hóa được -> giao diện dùng danh sách phổ biến thay thế
-        result=MovieRecommender.userScores(customer_id)
-        if result is None:
+        scores=MovieRecommender.userScores(customer_id)
+        if scores is None:
             return None
-        (scores,offset)=result
         model=MovieRecommender.model
         s=np.array(scores,dtype=np.float64)
         seen=set(ratingDAO.getRatedMovieIds(customer_id))|movieDAO.getHiddenMovieIds()
@@ -184,15 +151,14 @@ class MovieRecommender:
         s[drop]=-np.inf
         order=[j for j in np.argsort(-s,kind="stable")[:n] if np.isfinite(s[j])]
         if len(order)==0:
-            return pd.DataFrame(columns=["rank_no","movie_id","predicted_rating","compatibility"])
+            return pd.DataFrame(columns=["rank_no","movie_id","compatibility"])
         movie_ids=[int(model.movie_ids[j]) for j in order]
-        stars=MovieRecommender.toStars(s[order],offset)
-        df=pd.DataFrame({"rank_no":range(1,len(order)+1),"movie_id":movie_ids,"predicted_rating":stars,
+        df=pd.DataFrame({"rank_no":range(1,len(order)+1),"movie_id":movie_ids,
                          "compatibility":MovieRecommender.toCompatibility(s[order])})
         df_movies=movieDAO.getMoviesByIds(movie_ids)
         df=df.merge(df_movies,on="movie_id",how="inner").sort_values("rank_no").reset_index(drop=True)
         if save:
-            recommendationDAO.saveList(customer_id,[(r.movie_id,r.predicted_rating,r.rank_no) for r in df.itertuples()],
+            recommendationDAO.saveList(customer_id,[(r.movie_id,r.compatibility,r.rank_no) for r in df.itertuples()],
                                        MovieRecommender.model_name)
         return df
     @staticmethod
@@ -207,44 +173,13 @@ class MovieRecommender:
         return df,genre_ids
     # ======================= ĐĂNG KÝ MÔ HÌNH =======================
     @staticmethod
-    def buildCalibration(model,df_ratings,n_bins=40,shrink=10):
-        # Quy đổi điểm xếp hạng -> sao: chia điểm thành n_bins khoảng theo phân vị, lấy điểm TB thực tế mỗi khoảng
-        # (ép đơn điệu tăng); độ lệch người dùng = phần dư trung bình có co ngót (shrink) về 0
-        users=[]
-        scores=[]
-        for (u,g) in df_ratings.groupby("user_id"):
-            if not model.is_personalized(int(u)):
-                continue
-            idx=[model.movie_index.get(int(m),-1) for m in g["movie_id"]]
-            keep=[k for k in range(len(idx)) if idx[k]>=0]
-            if len(keep)==0:
-                continue
-            s=model.scores(int(u))
-            scores.append(s[[idx[k] for k in keep]])
-            users.append(g.iloc[keep])
-        S=np.concatenate(scores)
-        df=pd.concat(users,ignore_index=True)
-        R=df["rating"].to_numpy(dtype=float)
-        q=np.quantile(S,np.linspace(0,1,n_bins+1))
-        b=np.clip(np.searchsorted(q,S,side="right")-1,0,n_bins-1)
-        xs=np.array([np.median(S[b==k]) for k in range(n_bins) if (b==k).any()])
-        ys=np.maximum.accumulate(np.array([R[b==k].mean() for k in range(n_bins) if (b==k).any()]))
-        residual=R-np.interp(S,xs,ys)
-        df["residual"]=residual
-        grouped=df.groupby("user_id")["residual"]
-        offsets=(grouped.sum()/(grouped.count()+shrink)).round(4)
-        return {"xs":[round(float(x),5) for x in xs],"ys":[round(float(y),5) for y in ys],"shrink":shrink,
-                "offsets":{str(int(k)): float(v) for (k,v) in offsets.items()}}
-    @staticmethod
     def registerModel(npz_path,employee_id=None,activate=True):
-        # Đăng ký tệp mô hình đã xuất: tính mã băm, bảng quy đổi sao rồi ghi vào model_registry
-        model=NeuMFRecommender(npz_path)
+        # Đăng ký tệp mô hình đã xuất: nạp thử để chắc tệp đọc được, tính mã băm rồi ghi vào model_registry
+        NeuMFRecommender(npz_path)
         meta=json.load(open(MovieRecommender.metaPath(npz_path),encoding="utf-8"))
-        df_ratings=ratingDAO.getValidRatings()
-        calibration=MovieRecommender.buildCalibration(model,df_ratings)
         relative=os.path.relpath(os.path.abspath(npz_path),folder_root).replace("\\","/")
         ret=modelDAO.registerModel(meta.get("model","NeuMF"),relative,MovieRecommender.modelHash(npz_path),
-                                   json.dumps(calibration),meta.get("n_users"),meta.get("n_items"),
+                                   meta.get("n_users"),meta.get("n_items"),
                                    meta.get("n_ratings"),meta.get("created_at"),employee_id,activate)
         return ret
     @staticmethod

@@ -1,4 +1,5 @@
-"""Bộ máy gợi ý dùng cho ứng dụng: danh mục mô hình, huấn luyện / lưu / nạp lại, gợi ý Top-N và dự đoán rating."""
+"""Bộ máy gợi ý dùng cho ứng dụng: danh mục mô hình, huấn luyện / lưu / nạp lại, gợi ý Top-N và mức độ phù hợp user - phim."""
+import math
 import pickle
 
 import pandas as pd
@@ -97,12 +98,26 @@ def recommend(model, user_id: int, k: int = 10) -> pd.DataFrame:
     return model.recommend(user_id, k=k)
 
 
-def predict_rating(model, user_id: int, movie_id: int) -> float:
+def predict_score(model, user_id: int, movie_id: int) -> float:
+    """Điểm mô hình cho một cặp (user, phim): mô hình explicit trả điểm thang 1-5, mô hình implicit trả điểm xếp hạng."""
     if user_id not in model.user2idx:
         raise KeyError(f"UserID {user_id} không có trong dữ liệu")
     if movie_id not in model.item2idx:
         raise KeyError(f"MovieID {movie_id} không có trong dữ liệu")
     return float(model.predict(pd.DataFrame({"user_id": [user_id], "movie_id": [movie_id]}))[0])
+
+
+def describe_match(model, user_id: int, movie_id: int) -> str:
+    """Mức độ phù hợp của user với một phim, diễn giải đúng theo loại đầu ra của mô hình:
+    - NeuMF (huấn luyện BCE, phản hồi dương = rating >= 4): sigmoid(điểm) = xác suất user thích phim (%);
+    - mô hình explicit (BiasedMF, ItemKNN, ContentBased): điểm dự đoán thang 1-5, chỉ dùng để so sánh ở chương 4;
+    - mô hình implicit khác (Popularity, ImplicitALS, BPR-MF): điểm xếp hạng, chỉ có ý nghĩa khi so sánh giữa các phim."""
+    value = predict_score(model, user_id, movie_id)
+    if model.name.startswith("NeuMF"):
+        return f"Độ phù hợp (xác suất thích phim): {100.0 / (1.0 + math.exp(-max(min(value, 30.0), -30.0))):.1f}%"
+    if model.predicts_rating:
+        return f"Điểm dự đoán thang 1-5 (mô hình so sánh): {value:.3f}"
+    return f"Điểm xếp hạng (không phải thang 1-5): {value:.3f}"
 
 
 def user_history(exp: Experiment, user_id: int, n: int = 10) -> pd.DataFrame:

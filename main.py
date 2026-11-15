@@ -6,7 +6,7 @@ Cách dùng (chạy từ bất kỳ thư mục nào, mọi đường dẫn tính
     python main.py info                              # thống kê dữ liệu và danh sách mô hình
     python main.py recommend --user 1 -k 10          # gợi ý Top-10 cho user 1 (mô hình mặc định: neumf)
     python main.py recommend --user 1 --model biased_mf --retrain
-    python main.py predict --user 1 --movie 1193     # dự đoán rating
+    python main.py predict --user 1 --movie 1193     # dự đoán mức độ phù hợp user - phim
     python main.py search "matrix"                   # tìm MovieID theo tên phim
     python main.py evaluate --family baseline        # đánh giá một nhóm mô hình -> outputs/metrics/<family>.csv
     python main.py evaluate --family all
@@ -81,9 +81,8 @@ def cmd_predict(exp, args):
     check_ids(exp, user=args.user, movie=args.movie)
     model = rs.get_model(args.model, exp, retrain=args.retrain)
     title = exp.movies.set_index("movie_id")["title"].get(args.movie, "?")
-    score = rs.predict_rating(model, args.user, args.movie)
-    kind = "rating dự đoán" if model.predicts_rating else "điểm xếp hạng (không phải thang 1-5)"
-    print(f"User {args.user} - '{title}': {kind} = {score:.3f}  ({model.name})")
+    match_text = rs.describe_match(model, args.user, args.movie)
+    print(f"User {args.user} - '{title}': {match_text}  ({model.name})")
 
 
 def cmd_search(exp, args):
@@ -127,7 +126,7 @@ def interactive(exp):
     model_key = rs.DEFAULT_MODEL
     model = None
     menu = ("\n=== HỆ THỐNG GỢI Ý PHIM (mô hình: {}) ===\n"
-            "1. Gợi ý phim cho user\n2. Dự đoán rating\n3. Tìm phim theo tên\n"
+            "1. Gợi ý phim cho user\n2. Dự đoán mức độ phù hợp user - phim\n3. Tìm phim theo tên\n"
             "4. Đổi mô hình\n5. Thông tin dữ liệu\n0. Thoát")
     while True:
         print(menu.format(model_key))
@@ -147,8 +146,7 @@ def interactive(exp):
                 uid, mid = int(input("UserID: ")), int(input("MovieID: "))
                 check_ids(exp, user=uid, movie=mid)
                 model = model or rs.get_model(model_key, exp)
-                kind = "Rating dự đoán" if model.predicts_rating else "Điểm xếp hạng (không phải thang 1-5)"
-                print(f"{kind}: {rs.predict_rating(model, uid, mid):.3f}")
+                print(rs.describe_match(model, uid, mid))
             elif choice == "3":
                 cmd_search(exp, argparse.Namespace(query=input("Từ khóa: "), n=15))
             elif choice == "4":
@@ -184,7 +182,7 @@ def build_parser():
     r.add_argument("--history", type=int, default=5, help="số phim đã xem hiển thị kèm (0 = ẩn)")
     add_model_args(r)
 
-    pr = sub.add_parser("predict", help="dự đoán rating của user cho một phim")
+    pr = sub.add_parser("predict", help="dự đoán mức độ phù hợp của user với một phim")
     pr.add_argument("--user", type=int, required=True)
     pr.add_argument("--movie", type=int, required=True)
     add_model_args(pr)

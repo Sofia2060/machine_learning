@@ -70,6 +70,15 @@ class ratingDAO:
         df = conn.queryDataset("select movie_id from ratings where customer_id=%s", (customer_id,))
         conn.disconnect()
         return [] if df is None else [int(x) for x in df["movie_id"]]
+    @staticmethod
+    def getRandomCustomerId(min_ratings=20):
+        # FR-26: chọn ngẫu nhiên một khách hàng có đủ đánh giá hợp lệ để Admin thử nghiệm mô hình
+        conn = Connector()
+        conn.connect()
+        df = conn.queryDataset("select customer_id from ratings where is_valid=1 group by customer_id "
+                               "having count(*)>=%s order by rand() limit 1", (min_ratings,))
+        conn.disconnect()
+        return None if df is None or len(df)==0 else int(df.iloc[0]["customer_id"])
     # ---------------- Quản lý đánh giá của Admin (FR-22) ----------------
     @staticmethod
     def buildFilter(customer_id=None,movie_keyword="",score=None,validity=None):

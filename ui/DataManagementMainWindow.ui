@@ -384,6 +384,31 @@ QProgressBar#progressBarMatch::chunk { border-radius: 5px; background-color: #16
         </widget>
        </item>
        <item>
+        <widget class="QPushButton" name="pushButtonNavModelTest">
+         <property name="text">
+          <string>Thử nghiệm mô hình</string>
+         </property>
+         <property name="cursor">
+          <cursorShape>PointingHandCursor</cursorShape>
+         </property>
+         <property name="icon">
+          <iconset>
+           <normaloff>../images/ic_model.png</normaloff>
+           ../images/ic_model.png
+          </iconset>
+         </property>
+         <property name="iconSize">
+          <size>
+           <width>20</width>
+           <height>20</height>
+          </size>
+         </property>
+         <property name="nav" stdset="0">
+          <bool>true</bool>
+         </property>
+        </widget>
+       </item>
+       <item>
         <spacer name="verticalSpacer_3">
          <property name="orientation">
           <enum>Qt::Vertical</enum>

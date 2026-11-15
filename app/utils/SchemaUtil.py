@@ -55,7 +55,6 @@ class SchemaUtil:
             model_name VARCHAR(50) NOT NULL,
             file_name VARCHAR(255) NOT NULL,
             file_hash CHAR(64) NOT NULL,
-            calibration LONGTEXT NOT NULL,
             n_users INT NULL,
             n_items INT NULL,
             n_ratings INT NULL,
@@ -75,14 +74,23 @@ class SchemaUtil:
             return None
         db=conn.queryDataset("select database() as db").iloc[0]["db"]
         cols=conn.queryDataset("select table_name, column_name from information_schema.columns where table_schema=%s",(db,))
-        conn.disconnect()
         existing=set() if cols is None else set(zip(cols.iloc[:,0].str.lower(),cols.iloc[:,1].str.lower()))
         tables=set(t for (t,c) in existing)
         missing=[f"bảng {t}" for t in ("customers","movies","ratings","recommendations") if t not in tables]
         if missing:
+            conn.disconnect()
             return missing
         missing+=[f"{t}.{c}" for (t,c,d) in SchemaUtil.COLUMNS if (t,c) not in existing]
         missing+=[f"bảng {t}" for t in SchemaUtil.TABLES if t not in tables]
+        # Bảng đã đủ (vd. tạo sẵn bằng mrs_schema.sql) nhưng chưa có mô hình đang hoạt động -> vẫn chạy setup để đăng ký mô hình
+        # Cột calibration (quy đổi điểm sang số sao) của phiên bản cũ không còn dùng -> chạy setup để xóa
+        if ("model_registry","calibration") in existing:
+            missing.append("cột model_registry.calibration không còn dùng")
+        if "model_registry" in tables:
+            df=conn.queryDataset("select count(*) as n from model_registry where is_active=1")
+            if df is None or int(df.iloc[0]["n"])==0:
+                missing.append("mô hình gợi ý chưa được đăng ký")
+        conn.disconnect()
         return missing
     @staticmethod
     def ensureSchema(log=print):
@@ -117,6 +125,10 @@ class SchemaUtil:
             if not tableExists(table):
                 conn.executeNonQuery(sql)
                 log(f"   + tạo bảng {table}")
+        if columnExists("model_registry","calibration"):
+            # Phiên bản cũ lưu bảng quy đổi điểm -> số sao; nay hệ thống chỉ gợi ý Top-N kèm độ phù hợp (%) nên bỏ cột
+            conn.executeNonQuery("alter table model_registry drop column calibration")
+            log("   - xóa cột model_registry.calibration (không còn quy đổi sang số sao)")
         for (table,index,columns) in SchemaUtil.INDEXES:
             if not indexExists(table,index):
                 log(f"   + tạo chỉ mục {index} (bảng {table}) ...")

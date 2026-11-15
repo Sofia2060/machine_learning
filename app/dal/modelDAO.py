@@ -37,15 +37,15 @@ class modelDAO:
         conn.disconnect()
         return df
     @staticmethod
-    def registerModel(model_name,file_name,file_hash,calibration,n_users,n_items,n_ratings,exported_at,
+    def registerModel(model_name,file_name,file_hash,n_users,n_items,n_ratings,exported_at,
                       employee_id=None,activate=True):
         conn = Connector()
         conn.connect()
         if activate:
             conn.executeNonQuery("update model_registry set is_active=0")
-        sql = "insert into model_registry (model_name,file_name,file_hash,calibration,n_users,n_items,n_ratings," \
-              "exported_at,is_active,employee_id) values (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)"
-        ret = conn.executeNonQuery(sql, (model_name, file_name, file_hash, calibration, n_users, n_items, n_ratings,
+        sql = "insert into model_registry (model_name,file_name,file_hash,n_users,n_items,n_ratings," \
+              "exported_at,is_active,employee_id) values (%s,%s,%s,%s,%s,%s,%s,%s,%s)"
+        ret = conn.executeNonQuery(sql, (model_name, file_name, file_hash, n_users, n_items, n_ratings,
                                          exported_at, 1 if activate else 0, employee_id))
         conn.disconnect()
         return ret>0

@@ -406,13 +406,14 @@ def seed_sample_recommendations(engine, valid_customers, valid_movies):
     rec_records = []
     for c_id in sample_customers:
         selected_movies = np.random.choice(movie_pool, size=10, replace=False)
-        scores = np.sort(np.random.uniform(3.8, 5.0, size=10))[::-1]
+        # predicted_score = độ phù hợp dự báo (%) của phim trong danh sách Top-N, giảm dần theo thứ hạng
+        match_scores = np.sort(np.random.uniform(60.0, 95.0, size=10))[::-1]
 
-        for rank, (m_id, score) in enumerate(zip(selected_movies, scores), start=1):
+        for rank, (m_id, match) in enumerate(zip(selected_movies, match_scores), start=1):
             rec_records.append({
                 "customer_id": c_id,
                 "movie_id": m_id,
-                "predicted_score": round(float(score), 2),
+                "predicted_score": round(float(match), 1),
                 "rank_position": rank
             })
 

@@ -5,10 +5,10 @@ class recommendationDAO:
     # ---------------- Lưu lịch sử gợi ý (FR-16) ----------------
     @staticmethod
     def getLastList(customer_id):
-        # Danh sách gợi ý gần nhất của khách hàng: [(movie_id, rank, điểm)] theo thứ hạng
+        # Danh sách gợi ý gần nhất của khách hàng: [(movie_id, thứ hạng, độ phù hợp %)] theo thứ hạng
         conn = Connector()
         conn.connect()
-        sql = "select movie_id, rank_position, predicted_score as predicted_rating, model_name from recommendations " \
+        sql = "select movie_id, rank_position, predicted_score as compatibility, model_name from recommendations " \
               "where customer_id=%s and created_at=(select max(created_at) from recommendations where customer_id=%s) " \
               "order by rank_position"
         df = conn.queryDataset(sql, (customer_id, customer_id))
@@ -16,11 +16,12 @@ class recommendationDAO:
         return df
     @staticmethod
     def saveList(customer_id,items,model_name):
-        # items: [(movie_id, điểm dự báo, thứ hạng)]. Chỉ lưu khi khác lần trước về phim, thứ tự hoặc điểm
+        # items: [(movie_id, độ phù hợp %, thứ hạng)]. Chỉ lưu khi khác lần trước về phim, thứ tự hoặc độ phù hợp.
+        # Cột predicted_score lưu độ phù hợp dự báo (%) của phim trong danh sách Top-N, không phải số sao
         last = recommendationDAO.getLastList(customer_id)
         if last is not None and len(last)==len(items) and len(items)>0:
             same = all(int(last.iloc[k]["movie_id"])==int(items[k][0]) and
-                       round(float(last.iloc[k]["predicted_rating"]),1)==round(float(items[k][1]),1) and
+                       round(float(last.iloc[k]["compatibility"]),1)==round(float(items[k][1]),1) and
                        last.iloc[k]["model_name"]==model_name for k in range(len(items)))
             if same:
                 return False
@@ -55,7 +56,7 @@ class recommendationDAO:
         conn.connect()
         (where,val) = recommendationDAO.buildFilter(date_from,date_to,model_name)
         sql = "select count(distinct r.customer_id, r.created_at) as lists, count(distinct r.customer_id) as customers, " \
-              "count(*) as appearances, count(distinct r.movie_id) as movies, avg(r.predicted_score) as avg_score " \
+              "count(*) as appearances, count(distinct r.movie_id) as movies, avg(r.predicted_score) as avg_compatibility " \
               f"from recommendations r {where}"
         df = conn.queryDataset(sql, val)
         # Gợi ý "trúng": phim được gợi ý mà khách hàng đánh giá sau thời điểm gợi ý

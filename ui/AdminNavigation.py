@@ -11,6 +11,7 @@ class AdminNavigation:
         self.pushButtonNavDashboard.clicked.connect(self.showDashboardUI)
         self.pushButtonNavRecommend.clicked.connect(self.showRecommendationStatsUI)
         self.pushButtonNavData.clicked.connect(self.showDataManagementUI)
+        self.pushButtonNavModelTest.clicked.connect(self.showModelTestUI)
         self.pushButtonLogout.clicked.connect(self.process_logout)
     def setLoginUser(self,us):
         # FR-06: kiểm tra quyền ở tầng xử lý, không chỉ ẩn màn hình
@@ -49,6 +50,11 @@ class AdminNavigation:
         if isinstance(self, DataManagementMainWindowEx):
             return
         self.openAdminWindow(DataManagementMainWindowEx())
+    def showModelTestUI(self):
+        from ui.ModelTestMainWindowEx import ModelTestMainWindowEx
+        if isinstance(self, ModelTestMainWindowEx):
+            return
+        self.openAdminWindow(ModelTestMainWindowEx())
     def confirm(self,title,text):
         # NFR-25: hộp xác nhận trước thao tác xóa / khóa
         ret=QMessageBox.question(self.MainWindow,title,text,QMessageBox.StandardButton.Yes|QMessageBox.StandardButton.No,

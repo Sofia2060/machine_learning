@@ -50,7 +50,7 @@ class BaseRecommender:
         return self._scores
 
     def predict(self, df: pd.DataFrame) -> np.ndarray:
-        """Dự đoán rating cho từng dòng (user_id, movie_id) của df, kẹp về [1, 5]."""
+        """Điểm của mô hình cho từng dòng (user_id, movie_id): mô hình explicit kẹp về thang [1, 5], mô hình implicit trả điểm xếp hạng."""
         s = self.score_matrix()
         u = df["user_id"].map(self.user2idx).to_numpy()
         i = df["movie_id"].map(self.item2idx).to_numpy()

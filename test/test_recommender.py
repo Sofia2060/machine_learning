@@ -12,8 +12,8 @@ from app.ml.MovieRecommender import MovieRecommender
 
 ret=MovieRecommender.loadModel()
 print("Đã nạp mô hình:",ret,MovieRecommender.model_name,MovieRecommender.last_error)
-print("Dự báo user 1 - phim 2571 (The Matrix) =",MovieRecommender.predictRating(1,2571),"sao")
+print("Độ phù hợp của user 1 với phim 2571 (The Matrix) =",MovieRecommender.compatibility(1,2571),"%")
 df=MovieRecommender.recommendTopN(1,10,save=False)
-print(df[["rank_no","movie_id","title","predicted_rating"]])
+print(df[["rank_no","movie_id","title","compatibility"]])
 print("User 6041 (đăng ký mới) có trong mô hình?",MovieRecommender.isKnownUser(6041))
 print("User 6041 đã cá nhân hóa được (fold-in từ các phim chấm >= 4 sao)?",MovieRecommender.isPersonalized(6041))

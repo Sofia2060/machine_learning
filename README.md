@@ -50,7 +50,7 @@ movie-recommender-system/
 |   `-- models/              # baseline, knn_cf, mf, content_based, neural
 |-- mysql/
 |   `-- mrs_schema.sql       # tạo CSDL movie_recommender_system (8 bảng)
-|-- ui/                      # phần mềm CineMatch: 9 màn hình + hộp thoại chi tiết phim (.ui, .py do pyuic6 sinh, Ex.py)
+|-- ui/                      # phần mềm CineMatch: 10 màn hình + hộp thoại chi tiết phim (.ui, .py do pyuic6 sinh, Ex.py)
 |-- images/                  # icon, banner cho giao diện (.ui tham chiếu ../images/)
 |-- app/                     # phần xử lý của phần mềm
 |   |-- config/              # config.example.json (sao chép thành config.json, sửa mật khẩu MySQL)
@@ -192,7 +192,7 @@ python main.py                                  # menu tương tác
 python main.py info                             # thống kê dữ liệu, danh sách mô hình
 python main.py recommend --user 1 -k 10         # gợi ý Top-10 (mặc định mô hình neumf)
 python main.py recommend --user 1 --model biased_mf --retrain
-python main.py predict --user 1 --movie 2571    # dự đoán rating
+python main.py predict --user 1 --movie 2571    # dự đoán mức độ phù hợp user - phim
 python main.py search "matrix"                  # tìm MovieID theo tên
 python main.py evaluate --family all            # đánh giá mọi nhóm mô hình -> outputs/metrics/
 python main.py export                          # xuất NeuMF cho phần mềm -> models/main_model/neumf.npz + neumf_meta.json

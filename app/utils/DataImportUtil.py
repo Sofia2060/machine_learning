@@ -170,7 +170,8 @@ class DataImportUtil:
         # Mỗi tài khoản có salt riêng nên phải băm từng mật khẩu; băm song song để nạp nhanh hơn
         with ThreadPoolExecutor(max_workers=max(2,os.cpu_count() or 2)) as executor:
             hashes=list(executor.map(lambda r: SecurityUtil.hashPassword(DataImportUtil.DEFAULT_PASSWORD),valid))
-        rows=[(r[0],(r[1],r[2],r[3],hashes[k],None,r[4],r[5],r[6],r[7]))
+        # MovieLens không có họ tên mà cột full_name bắt buộc (NOT NULL) -> đặt tên mặc định theo mã khách hàng
+        rows=[(r[0],(r[1],r[2],r[3],hashes[k],f"Khách hàng {r[1]}",r[4],r[5],r[6],r[7]))
               for (k,r) in enumerate(valid)]
         sql="insert into customers (customer_id,username,email,password_hash,full_name,gender,age,occupation_id,zip_code) " \
             "values (%s,%s,%s,%s,%s,%s,%s,%s,%s)"
