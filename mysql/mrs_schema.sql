@@ -1,116 +1,137 @@
 CREATE DATABASE IF NOT EXISTS movie_recommender_system CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 USE movie_recommender_system;
 
--- 1. Bảng Danh mục Nghề nghiệp
-CREATE TABLE occupations (
-    occupation_id INT PRIMARY KEY,
-    occupation_name VARCHAR(100) NOT NULL
-);
-
--- 2. Bảng Khách hàng
-CREATE TABLE customers (
-    customer_id INT PRIMARY KEY,
+-- 1. Bảng Tài khoản Hệ thống (Thực thể cha / Supertype)
+CREATE TABLE accounts (
+    account_id INT PRIMARY KEY AUTO_INCREMENT,
     username VARCHAR(50) NOT NULL UNIQUE,
     email VARCHAR(100) NOT NULL UNIQUE,
     password_hash VARCHAR(255) NOT NULL,
     full_name VARCHAR(100) NOT NULL,
+    role VARCHAR(20) NOT NULL DEFAULT 'Customer',
+    is_active BOOLEAN NOT NULL DEFAULT TRUE,
+    failed_login_count INT NOT NULL DEFAULT 0,
+    locked_until DATETIME DEFAULT NULL,
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT chk_accounts_role CHECK (role IN ('Customer', 'Admin')),
+    CONSTRAINT chk_accounts_failed_login CHECK (failed_login_count >= 0)
+);
+
+-- 2. Bảng Danh mục Nghề nghiệp (21 ngành nghề chuẩn MovieLens: ID 0 - 20)
+CREATE TABLE occupations (
+    occupation_id INT PRIMARY KEY,
+    occupation_name VARCHAR(100) NOT NULL UNIQUE
+);
+
+-- 3. Bảng Khách hàng (Thực thể con / Subtype 1:1 với accounts)
+CREATE TABLE customers (
+    customer_id INT PRIMARY KEY,
+    account_id INT NOT NULL UNIQUE,
     gender VARCHAR(10) DEFAULT NULL,
     age INT DEFAULT NULL,
     occupation_id INT DEFAULT NULL,
     zip_code VARCHAR(20) DEFAULT NULL,
-    is_active BOOLEAN DEFAULT TRUE,
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    failed_login_count INT NOT NULL DEFAULT 0,
-    locked_until DATETIME DEFAULT NULL,
     KEY idx_customers_demo (gender, age),
-    FOREIGN KEY (occupation_id) REFERENCES occupations(occupation_id) ON DELETE SET NULL
+    CONSTRAINT chk_customers_age CHECK (age IS NULL OR (age BETWEEN 1 AND 120)),
+    CONSTRAINT fk_customers_account FOREIGN KEY (account_id)
+        REFERENCES accounts(account_id) ON DELETE CASCADE,
+    CONSTRAINT fk_customers_occupation FOREIGN KEY (occupation_id)
+        REFERENCES occupations(occupation_id) ON DELETE SET NULL
 );
 
--- 3. Bảng Nhân viên Quản trị (Admin)
+-- 4. Bảng Nhân viên Quản trị (Thực thể con / Subtype 1:1 với accounts)
 CREATE TABLE employees (
     employee_id INT PRIMARY KEY AUTO_INCREMENT,
-    username VARCHAR(50) NOT NULL UNIQUE,
-    email VARCHAR(100) NOT NULL UNIQUE,
-    password_hash VARCHAR(255) NOT NULL,
-    full_name VARCHAR(100) NOT NULL,
-    is_active BOOLEAN DEFAULT TRUE,
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    failed_login_count INT NOT NULL DEFAULT 0,
-    locked_until DATETIME DEFAULT NULL
+    account_id INT NOT NULL UNIQUE,
+    CONSTRAINT fk_employees_account FOREIGN KEY (account_id)
+        REFERENCES accounts(account_id) ON DELETE CASCADE
 );
 
--- 4. Bảng Phim
+-- 5. Bảng Phim
 CREATE TABLE movies (
     movie_id INT PRIMARY KEY,
     title VARCHAR(255) NOT NULL,
     release_year INT DEFAULT NULL,
-    duration_minutes INT DEFAULT 120,
-    is_hidden BOOLEAN DEFAULT FALSE,
+    duration_minutes INT NOT NULL DEFAULT 120,
+    is_hidden BOOLEAN NOT NULL DEFAULT FALSE,
     employee_id INT DEFAULT NULL,
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     avg_rating DECIMAL(4,3) DEFAULT NULL,
     rating_count INT NOT NULL DEFAULT 0,
     KEY idx_movies_stats (is_hidden, rating_count),
     KEY idx_movies_year (release_year),
-    FOREIGN KEY (employee_id) REFERENCES employees(employee_id) ON DELETE SET NULL
+    CONSTRAINT chk_movies_duration CHECK (duration_minutes > 0),
+    CONSTRAINT chk_movies_rating_count CHECK (rating_count >= 0),
+    CONSTRAINT fk_movies_employee FOREIGN KEY (employee_id)
+        REFERENCES employees(employee_id) ON DELETE SET NULL
 );
 
--- 5. Bảng Thể loại Phim
+-- 6. Bảng Thể loại Phim
 CREATE TABLE genres (
     genre_id INT PRIMARY KEY AUTO_INCREMENT,
     genre_name VARCHAR(50) NOT NULL UNIQUE
 );
 
--- 6. Bảng Phim - Thể loại
+-- 7. Bảng Phim - Thể loại (Quan hệ N - M)
 CREATE TABLE movie_genres (
     movie_id INT NOT NULL,
     genre_id INT NOT NULL,
     PRIMARY KEY (movie_id, genre_id),
-    FOREIGN KEY (movie_id) REFERENCES movies(movie_id) ON DELETE CASCADE,
-    FOREIGN KEY (genre_id) REFERENCES genres(genre_id) ON DELETE CASCADE
+    CONSTRAINT fk_movie_genres_movie FOREIGN KEY (movie_id)
+        REFERENCES movies(movie_id) ON DELETE CASCADE,
+    CONSTRAINT fk_movie_genres_genre FOREIGN KEY (genre_id)
+        REFERENCES genres(genre_id) ON DELETE CASCADE
 );
 
--- 7. Bảng Khách hàng - Thể loại yêu thích
+-- 8. Bảng Khách hàng - Thể loại yêu thích (Quan hệ N - M)
 CREATE TABLE customer_genres (
     customer_id INT NOT NULL,
     genre_id INT NOT NULL,
     PRIMARY KEY (customer_id, genre_id),
-    FOREIGN KEY (customer_id) REFERENCES customers(customer_id) ON DELETE CASCADE,
-    FOREIGN KEY (genre_id) REFERENCES genres(genre_id) ON DELETE CASCADE
+    CONSTRAINT fk_customer_genres_customer FOREIGN KEY (customer_id)
+        REFERENCES customers(customer_id) ON DELETE CASCADE,
+    CONSTRAINT fk_customer_genres_genre FOREIGN KEY (genre_id)
+        REFERENCES genres(genre_id) ON DELETE CASCADE
 );
 
--- 8. Bảng Đánh giá & Bình luận
+-- 9. Bảng Đánh giá & Bình luận
 CREATE TABLE ratings (
     rating_id INT PRIMARY KEY AUTO_INCREMENT,
     customer_id INT NOT NULL,
     movie_id INT NOT NULL,
     rating_score FLOAT NOT NULL,
     comment_text TEXT,
-    rating_time DATETIME DEFAULT CURRENT_TIMESTAMP,
+    rating_time DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     is_valid BOOLEAN NOT NULL DEFAULT TRUE,
     UNIQUE KEY unique_customer_movie (customer_id, movie_id),
     KEY idx_ratings_stats (is_valid, rating_time, rating_score, customer_id, movie_id),
     KEY idx_ratings_movie (movie_id, is_valid, rating_score),
-    FOREIGN KEY (customer_id) REFERENCES customers(customer_id) ON DELETE CASCADE,
-    FOREIGN KEY (movie_id) REFERENCES movies(movie_id) ON DELETE CASCADE
+    CONSTRAINT chk_ratings_score CHECK (rating_score BETWEEN 1.0 AND 5.0),
+    CONSTRAINT fk_ratings_customer FOREIGN KEY (customer_id)
+        REFERENCES customers(customer_id) ON DELETE CASCADE,
+    CONSTRAINT fk_ratings_movie FOREIGN KEY (movie_id)
+        REFERENCES movies(movie_id) ON DELETE CASCADE
 );
 
--- 9. Bảng Kết quả Gợi ý Phim AI
+-- 10. Bảng Kết quả Gợi ý Phim AI
 CREATE TABLE recommendations (
     rec_id INT PRIMARY KEY AUTO_INCREMENT,
     customer_id INT NOT NULL,
     movie_id INT NOT NULL,
     predicted_score FLOAT NOT NULL,
     rank_position INT NOT NULL,
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    model_name VARCHAR(30) DEFAULT NULL,
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    model_name VARCHAR(50) DEFAULT NULL,
     KEY idx_rec_customer (customer_id, created_at),
     KEY idx_rec_time (created_at),
-    FOREIGN KEY (customer_id) REFERENCES customers(customer_id) ON DELETE CASCADE,
-    FOREIGN KEY (movie_id) REFERENCES movies(movie_id) ON DELETE CASCADE
+    CONSTRAINT chk_rec_rank CHECK (rank_position >= 1),
+    CONSTRAINT fk_rec_customer FOREIGN KEY (customer_id)
+        REFERENCES customers(customer_id) ON DELETE CASCADE,
+    CONSTRAINT fk_rec_movie FOREIGN KEY (movie_id)
+        REFERENCES movies(movie_id) ON DELETE CASCADE
 );
 
--- 10. Bảng Nhật ký Quản trị (Admin Logs)
+-- 11. Bảng Nhật ký Quản trị (Admin Logs)
 CREATE TABLE admin_logs (
     log_id INT PRIMARY KEY AUTO_INCREMENT,
     employee_id INT NOT NULL,
@@ -119,33 +140,38 @@ CREATE TABLE admin_logs (
     result VARCHAR(255) NOT NULL,
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     KEY idx_logs_time (created_at),
-    FOREIGN KEY (employee_id) REFERENCES employees(employee_id)
+    CONSTRAINT fk_admin_logs_employee FOREIGN KEY (employee_id)
+        REFERENCES employees(employee_id) ON DELETE CASCADE
 );
 
--- 11. Bảng Quản lý Mô hình AI (Model Registry)
+-- 12. Bảng Quản lý Mô hình AI (Model Registry)
 CREATE TABLE model_registry (
     model_id INT PRIMARY KEY AUTO_INCREMENT,
     model_name VARCHAR(50) NOT NULL,
     file_name VARCHAR(255) NOT NULL,
     file_hash CHAR(64) NOT NULL,
-    calibration LONGTEXT NOT NULL,
     n_users INT DEFAULT NULL,
     n_items INT DEFAULT NULL,
     n_ratings INT DEFAULT NULL,
     exported_at DATETIME DEFAULT NULL,
     is_active BOOLEAN NOT NULL DEFAULT FALSE,
     employee_id INT DEFAULT NULL,
-    registered_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+    registered_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT fk_model_registry_employee FOREIGN KEY (employee_id)
+        REFERENCES employees(employee_id) ON DELETE SET NULL
 );
 
--- 12. Bảng Mã xác thực OTP
+-- 13. Bảng Mã xác thực OTP (Quên mật khẩu & Đặt lại mật khẩu)
 CREATE TABLE otp_codes (
     otp_id INT PRIMARY KEY AUTO_INCREMENT,
-    email VARCHAR(100) NOT NULL,
+    account_id INT NOT NULL,
     otp_code CHAR(6) NOT NULL,
     expired_at DATETIME NOT NULL,
     is_used BOOLEAN NOT NULL DEFAULT FALSE,
     wrong_count INT NOT NULL DEFAULT 0,
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    KEY idx_otp_email (email, is_used)
+    KEY idx_otp_account (account_id, is_used),
+    CONSTRAINT chk_otp_wrong_count CHECK (wrong_count >= 0),
+    CONSTRAINT fk_otp_codes_account FOREIGN KEY (account_id)
+        REFERENCES accounts(account_id) ON DELETE CASCADE
 );

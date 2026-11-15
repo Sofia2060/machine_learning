@@ -1,10 +1,10 @@
 """
 Script ETL (Extract - Transform - Load) nạp dữ liệu vào CSDL MySQL movie_recommender_system.
 
-Thứ tự nạp dữ liệu tuân thủ nghiêm ngặt các ràng buộc khóa ngoại (Foreign Keys):
+Thứ tự nạp dữ liệu tuân thủ nghiêm ngặt các ràng buộc khóa ngoại (Foreign Keys - Mô hình Cha/Con):
   1. occupations     : Danh mục 21 ngành nghề chuẩn MovieLens (ID 0-20)
-  2. customers       : 6,040 khách hàng (giả lập username, email, password_hash, map occupation -> occupation_id)
-  3. employees       : 1 tài khoản Admin mặc định (admin@moviesystem.com)
+  2. accounts & customers : Nạp tài khoản vào bảng cha 'accounts' (role='Customer'), lấy account_id nạp vào 'customers'
+  3. accounts & employees : Tạo tài khoản Admin mặc định trong 'accounts' (role='Admin'), liên kết sang 'employees'
   4. movies          : 3,883 bộ phim (thời lượng ngẫu nhiên 90-180 phút, gán employee_id=1, is_hidden=False)
   5. genres          : Danh mục thể loại phim trích xuất từ chuỗi genres (Action|Comedy)
   6. movie_genres    : Bảng trung gian liên kết Phim - Thể loại
@@ -133,17 +133,22 @@ def test_connection(engine):
 
 def clean_existing_data(engine):
     """
-    Xóa sạch dữ liệu cũ theo đúng thứ tự an toàn Foreign Keys để sẵn sàng nạp mới.
+    Xóa sạch dữ liệu cũ trên toàn bộ 13 bảng và reset AUTO_INCREMENT về 1.
     Sử dụng FOREIGN_KEY_CHECKS = 0 để tránh lỗi ràng buộc khi truncate bảng.
     """
     tables_to_clear = [
+        "otp_codes",
+        "model_registry",
+        "admin_logs",
         "recommendations",
         "ratings",
+        "customer_genres",
         "movie_genres",
         "genres",
         "movies",
         "employees",
         "customers",
+        "accounts",
         "occupations"
     ]
     with engine.begin() as conn:
@@ -151,7 +156,7 @@ def clean_existing_data(engine):
         for tbl in tables_to_clear:
             conn.execute(text(f"TRUNCATE TABLE `{tbl}`;"))
         conn.execute(text("SET FOREIGN_KEY_CHECKS = 1;"))
-    print("Đã dọn dẹp sạch dữ liệu cũ trên tất cả 8 bảng.\n")
+    print(f"Đã dọn dẹp sạch dữ liệu cũ trên tất cả {len(tables_to_clear)} bảng.\n")
 
 
 def load_occupations(engine):
@@ -173,13 +178,9 @@ def load_occupations(engine):
 
 def load_customers(engine):
     """
-    2) customers: Giả lập các cột còn thiếu trên DataFrame:
-       - username = user_{id}
-       - email = user_{id}@gmail.com
-       - password_hash = SHA256('123456')
-       - full_name = Tổ hợp ngẫu nhiên Họ + Tên đệm + Tên
-       - is_active = True
-       - Ánh xạ occupation thành occupation_id
+    2) accounts & customers (Mô hình Cha - Con 1:1):
+       - Bước 2a: Nạp thông tin đăng nhập vào bảng cha 'accounts' (role='Customer')
+       - Bước 2b: Lấy account_id vừa sinh ra và nạp đặc trưng nhân khẩu học vào bảng con 'customers'
     """
     start_time = time.time()
 
@@ -196,49 +197,79 @@ def load_customers(engine):
     mid_n = np.random.choice(MIDDLE_NAMES, size=num_users)
     first_n = np.random.choice(FIRST_NAMES, size=num_users)
     full_names = [f"{l} {m} {f}" for l, m, f in zip(last_n, mid_n, first_n)]
-    
-    df_customers = pd.DataFrame({
-        "customer_id": df_users["user_id"],
-        "username": df_users["user_id"].apply(lambda uid: f"user_{uid}"),
+
+    usernames = df_users["user_id"].apply(lambda uid: f"user_{uid}")
+
+    # Bước 2a: Nạp vào bảng cha 'accounts'
+    df_accounts = pd.DataFrame({
+        "username": usernames,
         "email": df_users["user_id"].apply(lambda uid: f"user_{uid}@gmail.com"),
         "password_hash": fixed_pwd_hash,
         "full_name": full_names,
+        "role": "Customer",
+        "is_active": True
+    })
+    df_accounts.to_sql("accounts", con=engine, if_exists="append", index=False, chunksize=5000)
+
+    # Truy vấn ánh xạ username -> account_id vừa được MySQL tự động cấp
+    with engine.connect() as conn:
+        rows = conn.execute(
+            text("SELECT account_id, username FROM accounts WHERE role = 'Customer';")
+        ).fetchall()
+    username_to_account_id = {row[1]: row[0] for row in rows}
+
+    # Bước 2b: Nạp vào bảng con 'customers'
+    df_customers = pd.DataFrame({
+        "customer_id": df_users["user_id"],
+        "account_id": usernames.map(username_to_account_id).astype(int),
         "gender": df_users["gender_desc"] if "gender_desc" in df_users.columns else df_users["gender"],
         "age": df_users["age"].fillna(25).astype(int),
         "occupation_id": df_users["occupation"].astype(int),
-        "zip_code": df_users["zip_code"].astype(str).fillna("00000"),
-        "is_active": True
+        "zip_code": df_users["zip_code"].astype(str).fillna("00000")
     })
-
     df_customers.to_sql("customers", con=engine, if_exists="append", index=False, chunksize=5000)
 
     elapsed = time.time() - start_time
-    print(f"Đã nạp thành công {len(df_customers):,} khách hàng vào 'customers' ({elapsed:.2f}s).\n")
+    print(f"Đã nạp thành công {len(df_customers):,} khách hàng vào 'accounts' & 'customers' ({elapsed:.2f}s).\n")
     return df_customers
 
 
 def load_employees(engine):
     """
-    3) employees: Tạo 1 tài khoản Admin mặc định:
-       - username = 'admin'
-       - email = 'admin@moviesystem.com'
+    3) accounts & employees (Mô hình Cha - Con 1:1):
+       - Tạo 1 tài khoản Admin mặc định trong 'accounts' (role='Admin')
+       - Liên kết account_id sang bảng con 'employees' (employee_id=1)
     """
     start_time = time.time()
 
     admin_pwd_hash = hashlib.sha256("123456".encode("utf-8")).hexdigest()
-    df_employees = pd.DataFrame([{
-        "employee_id": 1,
+
+    # Nạp vào bảng cha 'accounts'
+    df_admin_account = pd.DataFrame([{
         "username": "admin",
         "email": "admin@moviesystem.com",
         "password_hash": admin_pwd_hash,
         "full_name": "System Administrator",
+        "role": "Admin",
         "is_active": True
     }])
+    df_admin_account.to_sql("accounts", con=engine, if_exists="append", index=False)
 
+    # Lấy account_id của admin vừa tạo
+    with engine.connect() as conn:
+        admin_account_id = conn.execute(
+            text("SELECT account_id FROM accounts WHERE username = 'admin';")
+        ).scalar()
+
+    # Nạp vào bảng con 'employees'
+    df_employees = pd.DataFrame([{
+        "employee_id": 1,
+        "account_id": int(admin_account_id)
+    }])
     df_employees.to_sql("employees", con=engine, if_exists="append", index=False)
 
     elapsed = time.time() - start_time
-    print(f"Đã tạo tài khoản quản trị mặc định 'admin' vào 'employees' ({elapsed:.2f}s).\n")
+    print(f"Đã tạo tài khoản quản trị mặc định 'admin' vào 'accounts' & 'employees' ({elapsed:.2f}s).\n")
     return df_employees
 
 
@@ -286,7 +317,6 @@ def load_genres_and_movie_genres(engine, df_movies_raw):
     """
     start_time = time.time()
 
-    # Trích xuất danh mục thể loại duy nhất
     unique_genres = set()
     for genre_str in df_movies_raw["genres"].dropna():
         for g in str(genre_str).split("|"):
@@ -302,7 +332,6 @@ def load_genres_and_movie_genres(engine, df_movies_raw):
     df_genres.to_sql("genres", con=engine, if_exists="append", index=False)
     print(f"Đã nạp {len(df_genres)} thể loại phim duy nhất vào 'genres'.")
 
-    # Tạo bảng trung gian movie_genres
     genre_name_to_id = dict(zip(df_genres["genre_name"], df_genres["genre_id"]))
     movie_genres_records = []
 
@@ -330,10 +359,8 @@ def load_ratings(engine, valid_customers, valid_movies):
     """
     6) ratings: Đọc cleaned_ratings.csv:
        - Chuyển Unix timestamp thành DATETIME
-       - Giả lập comment_text ngẫu nhiên dựa vào mức điểm:
-         + rating >= 4: câu tích cực
-         + rating < 4: câu trung bình / tiêu cực
-       - Nạp 1.000.209 dòng bằng pandas.to_sql() với chunksize=10000 để tối ưu RAM và tốc độ
+       - Giả lập comment_text ngẫu nhiên dựa vào mức điểm
+       - Nạp 1.000.209 dòng bằng pandas.to_sql() với chunksize=10000
     """
     start_time = time.time()
 
@@ -344,7 +371,6 @@ def load_ratings(engine, valid_customers, valid_movies):
     total_raw_ratings = len(df_ratings)
     print(f"Tổng số dòng ratings đọc từ CSV: {total_raw_ratings:,}")
 
-    # Vectorized comment generation theo mức điểm đánh giá để tối ưu tốc độ xử lý
     np.random.seed(42)
     is_positive = df_ratings["rating"] >= 4.0
     num_pos = int(is_positive.sum())
@@ -354,7 +380,6 @@ def load_ratings(engine, valid_customers, valid_movies):
     generated_comments[is_positive] = np.random.choice(POSITIVE_COMMENTS, size=num_pos)
     generated_comments[~is_positive] = np.random.choice(NEUTRAL_NEGATIVE_COMMENTS, size=num_neg)
 
-    # Chuyển đổi Unix timestamp thành DATETIME
     if "timestamp" in df_ratings.columns:
         rating_time_series = pd.to_datetime(df_ratings["timestamp"], unit="s")
     else:
@@ -368,7 +393,6 @@ def load_ratings(engine, valid_customers, valid_movies):
         "rating_time": rating_time_series
     })
 
-    # Đảm bảo toàn vẹn dữ liệu: chỉ giữ các bản ghi có customer_id và movie_id hợp lệ
     cust_set = set(valid_customers["customer_id"])
     mov_set = set(valid_movies["movie_id"])
     initial_count = len(df_ratings_db)
@@ -379,7 +403,6 @@ def load_ratings(engine, valid_customers, valid_movies):
     if len(df_ratings_db) < initial_count:
         print(f"Đã lọc bỏ {initial_count - len(df_ratings_db):,} dòng ratings không hợp lệ khóa ngoại.")
 
-    # Nạp theo từng khối (chunksize=10000) vào MySQL để tối ưu bộ nhớ RAM và tốc độ
     df_ratings_db.to_sql(
         "ratings",
         con=engine,
@@ -395,7 +418,7 @@ def load_ratings(engine, valid_customers, valid_movies):
 
 def seed_sample_recommendations(engine, valid_customers, valid_movies):
     """
-    8) recommendations: Khởi tạo dữ liệu mẫu Top 10 phim gợi ý AI cho một số khách hàng đầu tiên.
+    7) recommendations: Khởi tạo dữ liệu mẫu Top 10 phim gợi ý AI cho một số khách hàng đầu tiên.
     """
     start_time = time.time()
 
@@ -406,7 +429,6 @@ def seed_sample_recommendations(engine, valid_customers, valid_movies):
     rec_records = []
     for c_id in sample_customers:
         selected_movies = np.random.choice(movie_pool, size=10, replace=False)
-        # predicted_score = độ phù hợp dự báo (%) của phim trong danh sách Top-N, giảm dần theo thứ hạng
         match_scores = np.sort(np.random.uniform(60.0, 95.0, size=10))[::-1]
 
         for rank, (m_id, match) in enumerate(zip(selected_movies, match_scores), start=1):
@@ -439,10 +461,10 @@ def main():
         # Bước 3: Nạp 21 danh mục nghề nghiệp chuẩn MovieLens (occupations)
         load_occupations(engine)
 
-        # Bước 4: Nạp khách hàng (customers)
+        # Bước 4: Nạp khách hàng (accounts + customers)
         df_customers = load_customers(engine)
 
-        # Bước 5: Nạp tài khoản nhân viên / admin mặc định (employees)
+        # Bước 5: Nạp tài khoản nhân viên / admin mặc định (accounts + employees)
         load_employees(engine)
 
         # Bước 6: Nạp danh sách phim (movies)
@@ -458,7 +480,7 @@ def main():
         seed_sample_recommendations(engine, df_customers, df_movies)
 
         total_elapsed = time.time() - total_start_time
-        print(f"HOÀN THÀNH QUY TRÌNH ETL NẠP DỮ LIỆU THÀNH CÔNG VÀO 8 BẢNG!")
+        print(f"HOÀN THÀNH QUY TRÌNH ETL NẠP DỮ LIỆU THÀNH CÔNG TRONG {total_elapsed:.2f}s!")
 
     except SQLAlchemyError as db_err:
         print("\n" + "!" * 70)
