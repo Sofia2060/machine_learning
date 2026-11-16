@@ -60,7 +60,8 @@ movie-recommender-system/
 |   |-- services/            # đăng nhập, khóa tạm, OTP
 |   |-- ml/                  # nạp NeuMF, Top-N, độ tương thích, kích hoạt/huấn luyện lại mô hình
 |   |-- utils/               # cấu hình, bảo mật, bảng, biểu đồ, poster, bổ sung CSDL
-|   `-- setup_database.py    # bổ sung cột/bảng phần mềm cần + đăng ký mô hình
+|   |-- setup_database.py    # bổ sung cột/bảng phần mềm cần + đăng ký mô hình
+|   `-- download_posters.py  # tải sẵn poster phim từ TMDB vào posters/ (tùy chọn), ghi tmdb_map.csv
 |-- test/                    # file chạy thử từng màn hình
 |-- run_app.py               # mở phần mềm
 |-- main.py                  # ứng dụng chính
@@ -244,9 +245,16 @@ mysql -u root -p < mysql/mrs_schema.sql                   # 1. tạo CSDL movie_
 python src/database.py                                    # 2. nạp dữ liệu (cần data/processed/cleaned_*.csv từ notebook 01)
 copy app\config\config.example.json app\config\config.json   # 3. sửa mục "database" (mật khẩu MySQL); macOS/Linux dùng cp
 python run_app.py                                         # 4. mở phần mềm
+python app/download_posters.py                            # 5. (tùy chọn) tải sẵn poster phim, xem mục "Poster phim" bên dưới
 ```
 - `src/database.py` đọc mật khẩu MySQL từ biến môi trường `DB_PASS` (hoặc sửa trực tiếp trong file).
 - Lần đầu mở, phần mềm kiểm tra CSDL (đủ 13 bảng theo `mysql/mrs_schema.sql`), tính điểm trung bình từng phim và đăng ký mô hình `models/main_model/neumf.npz`. Có thể chạy riêng bước này: `python app/setup_database.py` (thêm `--register` để đăng ký lại tệp mô hình). CSDL tạo từ bản schema cũ (chưa có bảng `accounts`) cần tạo lại bằng `mysql/mrs_schema.sql` rồi `python src/database.py`.
 - Tài khoản: `admin` / `123456` (quản trị), `user_1` … `user_6040` / `123456` (khách hàng), hoặc tự đăng ký. Mật khẩu SHA-256 của dữ liệu mẫu được băm lại bằng PBKDF2 có salt ở lần đăng nhập đúng đầu tiên.
+- **Poster phim** (tùy chọn): phần mềm đọc poster từ `posters/<movie_id>.jpg`; phim chưa có file thì hiện ảnh bìa tự vẽ theo thể loại. Thư mục `posters/` không nằm trong git (khoảng 170 MB), mỗi máy tự tải một lần:
+  1. Đăng ký khóa API miễn phí tại https://www.themoviedb.org/settings/api, dán vào `app/config/config.json` mục `tmdb` > `api_key` (hoặc đặt biến môi trường `TMDB_API_KEY`, hoặc truyền `--key`). Khóa v3 (tối đa 40 ký tự) và token v4 đều dùng được.
+  2. `python app/download_posters.py` tải poster cho mọi phim trong `data/processed/cleaned_movies.csv` (4 luồng, khoảng 25 phút; chạy lại sẽ bỏ qua phim đã có và tiếp tục phần còn dang dở). Nếu `api.themoviedb.org` bị chặn (một số mạng ở Việt Nam), thêm `--api-url https://api.tmdb.org/3`.
+  3. Một phim có thể trùng tên với nhiều phim khác trên TMDB, nên script chấm điểm từng ứng viên (năm phát hành, độ giống tên, số lượt bình chọn) thay vì lấy kết quả đầu tiên. Kết quả ghép từng phim nằm trong `posters/tmdb_map.csv` (cột `status`: `ok`, `review` là ghép được nhưng nên xem lại, `rejected` là bị loại nên không tải ảnh). Phim không có poster hợp lệ ghi trong `posters/not_found.txt`.
+  4. Các tùy chọn khác: `--no-images` (chỉ ghép và ghi `poster_path`, không tải ảnh), `--retry-missing` (tìm lại các phim đã ghi là không có poster), `--force` (tìm và chấm điểm lại tất cả), `--limit N` (thử với N phim), `--size` (cỡ ảnh: `w92`, `w154`, `w185`, `w342`, `w500`, `w780`, `original`; mặc định `w342`, cùng cỡ phần mềm dùng), `--workers N`. Xem đầu file `app/download_posters.py` để biết chi tiết.
+  - Không tải sẵn cũng được: nếu có khóa API trong `config.json`, phần mềm tự tải poster của từng phim ở lần đầu hiển thị (cách này dùng kết quả tìm đầu tiên nên có thể ghép nhầm phim trùng tên). Khóa API không được đưa lên git (`config.json` đã nằm trong `.gitignore`). Dữ liệu từ TMDB cần ghi nguồn khi phát hành phần mềm: "This product uses the TMDB API but is not endorsed or certified by TMDB."
 - Chạy thử từng màn hình: các file trong `test/` (vd `python test/test_user.py`, `python test/test_admin_dashboard.py`).
 - Sửa giao diện: mở file `.ui` trong `ui/` bằng Qt Designer, rồi chạy `pyuic6 XxxMainWindow.ui -o XxxMainWindow.py` trong thư mục `ui`.
